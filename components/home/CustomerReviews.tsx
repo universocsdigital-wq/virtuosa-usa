@@ -19,7 +19,7 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
         aria-hidden
       >
         <Image
-          src="/SVG/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg"
+          src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg"
           alt=""
           fill
           className="object-contain"

@@ -28,7 +28,7 @@ export function Footer() {
       <footer className="relative overflow-hidden" style={{ backgroundColor: "#4F2107" }} aria-label="Rodapé">
         <div className="absolute inset-0 texture-linen opacity-30" aria-hidden />
         <div className="absolute bottom-[-8%] right-[4%] h-[360px] w-[360px] opacity-[0.055] lg:h-[480px] lg:w-[480px]" aria-hidden>
-          <img src="/SVG/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
+          <img src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
         </div>
 
         <div className="container-virtuosa relative py-12 lg:py-14">

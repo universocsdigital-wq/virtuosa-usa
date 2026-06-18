@@ -16,7 +16,7 @@ export function HeroSection() {
           />
 
           <div className="absolute left-[-120px] top-1/2 h-[420px] w-[420px] -translate-y-1/2 opacity-[0.095] lg:h-[520px] lg:w-[520px]" aria-hidden>
-            <Image src="/SVG/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" fill className="object-contain" />
+            <Image src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" fill className="object-contain" />
           </div>
 
           <div className="relative z-10 max-w-[540px]">

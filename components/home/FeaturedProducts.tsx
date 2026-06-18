@@ -11,7 +11,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   return (
     <section id="colecao" aria-label="Coleção Virtuosa USA" className="section relative overflow-hidden" style={{ backgroundColor: "#170B07" }}>
       <div className="absolute bottom-[-16%] right-[-8%] h-[480px] w-[480px] opacity-[0.055]" aria-hidden>
-        <Image src="/SVG/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" fill className="object-contain" />
+        <Image src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" fill className="object-contain" />
       </div>
 
       <div className="container-virtuosa relative">

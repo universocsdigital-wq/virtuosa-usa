@@ -10,10 +10,10 @@ export function NewsletterSection() {
     >
       <div className="absolute inset-0 texture-linen opacity-42" aria-hidden />
       <div className="absolute left-[-7%] top-1/2 h-[360px] w-[360px] -translate-y-1/2 opacity-[0.065] lg:h-[460px] lg:w-[460px]" aria-hidden>
-        <img src="/SVG/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
+        <img src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
       </div>
       <div className="absolute right-[-4%] top-[12%] h-[220px] w-[220px] opacity-[0.045] lg:h-[300px] lg:w-[300px]" aria-hidden>
-        <img src="/SVG/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
+        <img src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
       </div>
 
       <div className="container-virtuosa relative">

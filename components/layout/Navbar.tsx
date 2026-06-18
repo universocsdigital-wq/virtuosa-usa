@@ -119,7 +119,7 @@ export function Navbar() {
             </ul>
 
             <div className="absolute -bottom-16 -right-14 h-48 w-48 opacity-[0.08]" aria-hidden>
-              <img src="/SVG/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
+              <img src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
             </div>
           </nav>
         </div>

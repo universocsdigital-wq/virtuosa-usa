@@ -5,7 +5,7 @@ export function ManifestoSection() {
   return (
     <section id="manifesto" aria-label="A Mulher Virtuosa" className="section-warm texture-linen relative overflow-hidden bg-virtuosa-warm-beige py-18 lg:py-24">
       <div className="absolute right-[-10%] top-1/2 h-[560px] w-[560px] -translate-y-1/2 opacity-[0.038] lg:h-[680px] lg:w-[680px]" aria-hidden>
-        <Image src="/SVG/MONOGRAMA/Monograma sem circulo fundo marrom.svg" alt="" fill className="object-contain" />
+        <Image src="/svg/MONOGRAMA/Monograma sem circulo fundo marrom.svg" alt="" fill className="object-contain" />
       </div>
 
       <div className="container-virtuosa relative">

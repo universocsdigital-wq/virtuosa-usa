@@ -13,7 +13,7 @@ export function OwnerStory() {
             <div
               className="absolute inset-0 opacity-[0.075]"
               style={{
-                backgroundImage: "url('/SVG/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg')",
+                backgroundImage: "url('/svg/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg')",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
                 backgroundSize: "52%",

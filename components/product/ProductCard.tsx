@@ -22,7 +22,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <div
             className="absolute left-1/2 top-1/2 h-[42%] w-[42%] -translate-x-1/2 -translate-y-1/2 opacity-[0.11]"
             style={{
-              backgroundImage: "url('/SVG/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg')",
+              backgroundImage: "url('/svg/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg')",
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
               backgroundSize: "contain",

@@ -23,7 +23,7 @@ export function BestSellers({ products }: BestSellersProps) {
   return (
     <section id="best-sellers" aria-label="Mais Amadas" className="section relative overflow-hidden bg-virtuosa-champagne">
       <div className="absolute left-[-7%] top-1/2 h-[420px] w-[420px] -translate-y-1/2 opacity-[0.028]" aria-hidden>
-        <Image src="/SVG/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg" alt="" fill className="object-contain" />
+        <Image src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg" alt="" fill className="object-contain" />
       </div>
 
       <div className="container-virtuosa relative">
