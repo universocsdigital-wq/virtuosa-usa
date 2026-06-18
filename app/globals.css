@@ -1,0 +1,648 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* â”€â”€â”€ GOOGLE FONTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+/* â”€â”€â”€ CSS CUSTOM PROPERTIES â€” VIRTUOSA DESIGN TOKENS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+:root {
+  /* Tipografia */
+  --font-playfair:   'Playfair Display', Georgia, serif;
+  --font-montserrat: 'Montserrat', system-ui, sans-serif;
+
+  /* Paleta Virtuosa — identidade oficial */
+  --color-warm-beige:       #F7F1E8;
+  --color-cream:            #F7F1E8;
+  --color-off-white:        #F7F1E8;
+  --color-champagne:        #E8D9C6;
+  --color-espresso:         #2A1712;
+  --color-deep-brown:       #3A2A24;
+  --color-antique-gold:     #C6A36A;
+  --color-camel:            #B38A62;
+  --color-light-brown:      #6F5547;
+  --color-very-light-brown: #D4C4B0;
+  --color-medium-gray:      #999999;
+
+  /* EspaÃ§amentos */
+  --spacing-section-desktop: 80px;
+  --spacing-section-mobile:  60px;
+  --spacing-card:            20px;
+  --spacing-btn-x:           32px;
+  --spacing-btn-y:           16px;
+  --gap-cards-desktop:       30px;
+  --gap-cards-mobile:        20px;
+
+  /* Bordas */
+  --radius-btn:  4px;
+  --radius-card: 2px;
+
+  /* TransiÃ§Ãµes */
+  --transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* â”€â”€â”€ BASE STYLES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@layer base {
+  * {
+    border-color: var(--color-very-light-brown);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-warm-beige);
+    color: var(--color-deep-brown);
+    font-family: var(--font-montserrat);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Headings usam sempre serif */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-playfair);
+    color: var(--color-deep-brown);
+    line-height: 1.2;
+  }
+
+  h1 { font-size: clamp(2rem, 5vw, 4rem); }
+  h2 { font-size: clamp(1.75rem, 4vw, 3rem); }
+  h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Foco acessÃ­vel com cor da marca */
+  :focus-visible {
+    outline: 2px solid var(--color-antique-gold);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* â”€â”€â”€ COMPONENTES GLOBAIS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@layer components {
+
+  /* Container principal */
+  .container-virtuosa {
+    @apply max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10;
+  }
+
+  /* SeÃ§Ã£o padrÃ£o */
+  .section {
+    @apply py-[64px] lg:py-[88px];
+  }
+
+  /* TÃ­tulo de seÃ§Ã£o */
+  .section-title {
+    font-family: var(--font-playfair);
+    color: var(--color-deep-brown);
+    font-size: clamp(1.875rem, 3.5vw, 2.875rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    @apply text-center mb-3;
+  }
+
+  /* SubtÃ­tulo de seÃ§Ã£o â€” eyebrow */
+  .section-subtitle {
+    font-family: var(--font-montserrat);
+    color: var(--color-antique-gold);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    @apply text-center mb-3 uppercase block;
+  }
+
+  /* Linha decorativa dourada */
+  .gold-divider {
+    @apply block w-9 h-px bg-[#C9A961] mx-auto mt-4 mb-0;
+  }
+
+  /* â”€â”€ BOTÃ•ES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+  /* BotÃ£o primÃ¡rio â€” Dourado (CTA principal: Adicionar ao Carrinho, Descobrir ColeÃ§Ã£o) */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--color-antique-gold);
+    color: #ffffff;
+    font-family: var(--font-montserrat);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    border-radius: var(--radius-btn);
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition), transform var(--transition-fast);
+  }
+
+  .btn-primary:hover {
+    background-color: #b8893e;
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  /* BotÃ£o secundÃ¡rio â€” Contorno marrom (Explorar, Conhecer a Marca) */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: transparent;
+    color: var(--color-deep-brown);
+    font-family: var(--font-montserrat);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border-radius: var(--radius-btn);
+    border: 1px solid var(--color-deep-brown);
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-deep-brown);
+    color: #ffffff;
+  }
+
+  /* BotÃ£o ghost â€” texto apenas (links de navegaÃ§Ã£o) */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    background-color: transparent;
+    color: var(--color-light-brown);
+    font-family: var(--font-montserrat);
+    font-size: 0.875rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+
+  .btn-ghost:hover {
+    color: var(--color-deep-brown);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* BotÃ£o hero branco â€” CTA sobre o hero */
+  .btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-antique-gold);
+    color: #ffffff;
+    font-family: var(--font-montserrat);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 16px 40px;
+    border-radius: var(--radius-btn);
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition), transform var(--transition-fast);
+  }
+
+  .btn-hero-primary:hover {
+    background-color: #b8893e;
+    transform: translateY(-1px);
+  }
+
+  .btn-hero-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: #ffffff;
+    font-family: var(--font-montserrat);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 16px 40px;
+    border-radius: var(--radius-btn);
+    border: 1px solid rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: background-color var(--transition), border-color var(--transition);
+  }
+
+  .btn-hero-secondary:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-color: #ffffff;
+  }
+
+  /* â”€â”€ CARDS DE PRODUTO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .product-card {
+    @apply relative bg-[#F9F7F4] overflow-hidden cursor-pointer;
+    transition: box-shadow var(--transition), transform var(--transition);
+    border-radius: var(--radius-card);
+  }
+
+  .product-card:hover {
+    box-shadow: 0 8px 32px rgba(92, 61, 46, 0.16);
+    transform: translateY(-2px);
+  }
+
+  .product-card:hover .product-card__image img {
+    transform: scale(1.04);
+  }
+
+  .product-card__image {
+    @apply relative overflow-hidden aspect-[4/5];
+  }
+
+  .product-card__image img {
+    @apply w-full h-full object-cover;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .product-card__body {
+    @apply p-[20px];
+  }
+
+  .product-card__name {
+    font-family: var(--font-playfair);
+    color: var(--color-deep-brown);
+    @apply text-body-lg font-normal mb-1;
+  }
+
+  .product-card__price {
+    font-family: var(--font-montserrat);
+    color: var(--color-deep-brown);
+    @apply text-body-lg font-semibold mb-2;
+  }
+
+  .product-card__rating {
+    @apply flex items-center gap-1 mb-3;
+  }
+
+  .product-card__cta {
+    @apply w-full btn-primary py-3 text-xs;
+  }
+
+  /* Badge Best Seller */
+  .badge-best-seller {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background-color: var(--color-antique-gold);
+    color: #ffffff;
+    font-family: var(--font-montserrat);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    z-index: 1;
+  }
+
+  /* â”€â”€ CATEGORY CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .category-card {
+    @apply relative overflow-hidden cursor-pointer;
+    aspect-ratio: 3 / 2;
+    border-radius: var(--radius-card);
+  }
+
+  .category-card:hover .category-card__image img {
+    transform: scale(1.06);
+  }
+
+  .category-card__image {
+    @apply absolute inset-0;
+  }
+
+  .category-card__image img {
+    @apply w-full h-full object-cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .category-card__overlay {
+    @apply absolute inset-0 flex flex-col items-center justify-end pb-8;
+    background: linear-gradient(to top, rgba(92, 61, 46, 0.65) 0%, transparent 60%);
+  }
+
+  .category-card__label {
+    font-family: var(--font-playfair);
+    color: #ffffff;
+    @apply text-subtitle font-normal mb-3 tracking-wide;
+  }
+
+  /* â”€â”€ STAR RATING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .star-filled { color: var(--color-antique-gold); }
+  .star-empty  { color: var(--color-very-light-brown); }
+
+  /* â”€â”€ TRUST BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .trust-item {
+    @apply flex flex-col items-center text-center gap-2 p-4;
+  }
+
+  .trust-item__icon {
+    color: var(--color-antique-gold);
+    @apply w-6 h-6 mb-1;
+  }
+
+  .trust-item__title {
+    font-family: var(--font-montserrat);
+    color: var(--color-deep-brown);
+    @apply text-body-sm font-semibold uppercase tracking-wider;
+  }
+
+  .trust-item__desc {
+    font-family: var(--font-montserrat);
+    color: var(--color-light-brown);
+    @apply text-caption;
+  }
+
+  /* â”€â”€ INPUT DE EMAIL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .input-email {
+    background-color: #ffffff;
+    color: var(--color-deep-brown);
+    font-family: var(--font-montserrat);
+    font-size: 0.875rem;
+    border: 1px solid var(--color-very-light-brown);
+    border-radius: var(--radius-btn);
+    padding: 14px 20px;
+    outline: none;
+    transition: border-color var(--transition-fast);
+    width: 100%;
+  }
+
+  .input-email::placeholder {
+    color: var(--color-very-light-brown);
+  }
+
+  .input-email:focus {
+    border-color: var(--color-antique-gold);
+  }
+
+  /* â”€â”€ NAVBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .nav-link {
+    font-family: var(--font-montserrat);
+    color: var(--color-deep-brown);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color var(--transition-fast);
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--color-antique-gold);
+    transform: scaleX(0);
+    transition: transform var(--transition-fast);
+    transform-origin: left;
+  }
+
+  .nav-link:hover {
+    color: var(--color-antique-gold);
+  }
+
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* â”€â”€ REVIEW CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .review-card {
+    background-color: #FDFAF6;
+    @apply p-8 rounded-sm;
+  }
+
+  .review-card__text {
+    font-family: var(--font-playfair);
+    color: var(--color-deep-brown);
+    @apply text-body-lg italic mb-4;
+  }
+
+  .review-card__author {
+    font-family: var(--font-montserrat);
+    color: var(--color-light-brown);
+    @apply text-caption font-medium uppercase tracking-wider;
+  }
+
+  .verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-antique-gold);
+    font-family: var(--font-montserrat);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+}
+
+/* â”€â”€â”€ UTILITÃRIOS GLOBAIS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
+
+  /* Skeleton loader */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-very-light-brown) 25%,
+      var(--color-warm-beige) 50%,
+      var(--color-very-light-brown) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
+
+  /* Overlay padrÃ£o */
+  .overlay-dark {
+    background: linear-gradient(
+      to top,
+      rgba(92, 61, 46, 0.7) 0%,
+      rgba(92, 61, 46, 0.3) 50%,
+      transparent 100%
+    );
+  }
+
+  /* Scroll suave no mobile */
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scroll-snap-item {
+    scroll-snap-align: start;
+  }
+}
+
+/* â”€â”€â”€ SCROLLBAR PERSONALIZADA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-very-light-brown);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-light-brown);
+}
+
+/* â”€â”€â”€ SELEÃ‡ÃƒO DE TEXTO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+::selection {
+  background-color: var(--color-antique-gold);
+  color: #ffffff;
+}
+
+/* --- ANIMACOES CUSTOMIZADAS --- */
+@keyframes scrollLine {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(200%); opacity: 0; }
+}
+
+/* ── BRAND SYSTEM VIRTUOSA ──────────────────────────────────────────────── */
+
+/* Ornamento divisor com diamante */
+.brand-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--color-antique-gold);
+}
+.brand-divider::before,
+.brand-divider::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+/* Textura papel premium — gradiente sutil aquecido */
+.section-warm {
+  background-image:
+    radial-gradient(ellipse at 15% 85%, rgba(198,163,106,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(198,163,106,0.04) 0%, transparent 55%);
+}
+
+/* Linha linho — textura de fundo suave */
+.texture-linen {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px, transparent 3px,
+      rgba(180,150,110,0.011) 3px, rgba(180,150,110,0.011) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px, transparent 5px,
+      rgba(180,150,110,0.007) 5px, rgba(180,150,110,0.007) 6px
+    );
+}
+
+.editorial-product-placeholder {
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.22), transparent 26%),
+    linear-gradient(145deg, rgba(247,241,232,0.82) 0%, rgba(232,217,198,0.58) 44%, rgba(179,138,98,0.40) 100%);
+}
+
+.editorial-product-placeholder::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(42,23,18,0.14), transparent 27%, transparent 70%, rgba(42,23,18,0.20)),
+    radial-gradient(ellipse at 50% 70%, rgba(42,23,18,0.28), transparent 52%);
+}
+
+.editorial-product-placeholder::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: 52%;
+  height: 72%;
+  transform: translateX(-50%);
+  clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+  background: linear-gradient(150deg, rgba(255,252,246,0.82), rgba(232,217,198,0.50) 58%, rgba(122,82,55,0.20));
+  box-shadow: inset 18px 0 48px rgba(255,255,255,0.13), inset -22px 0 48px rgba(42,23,18,0.15);
+}
+
+.brand-logo-glow::before {
+  content: "";
+  position: absolute;
+  inset: 13% 8%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(255, 232, 166, 0.28) 0%, rgba(198, 163, 106, 0.16) 34%, transparent 72%);
+  filter: blur(12px);
+}
+
+.brand-logo-gold {
+  position: relative;
+  z-index: 1;
+  filter:
+    brightness(1.34)
+    contrast(1.18)
+    saturate(1.22)
+    drop-shadow(0 0 2px rgba(255, 232, 166, 0.34))
+    drop-shadow(0 0 9px rgba(198, 163, 106, 0.28));
+}
+
+.brand-logo-reference {
+  background-image: url("/images/brand/virtuosa-logo-gold-cropped.png");
+  background-repeat: no-repeat;
+  border-radius: 1px;
+  box-shadow: none;
+}
+
+.brand-logo-reference--header {
+  background-size: contain;
+  background-position: center;
+}
+
+.brand-logo-reference--drawer {
+  background-size: contain;
+  background-position: center;
+}
+
+.brand-logo-reference--footer {
+  background-size: contain;
+  background-position: center left;
+}
+
