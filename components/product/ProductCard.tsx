@@ -45,21 +45,14 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="mb-1 font-serif text-[1.5rem] font-semibold leading-none text-[#B88A62]">
           {formatPrice(product.price)}
         </p>
-        <p className="mb-4 font-sans text-[11px] font-medium text-[#8A5A36]/80">
-          Checkout seguro via Square
-        </p>
 
         <Link
           href={productHref}
-          className="flex min-h-[44px] w-full items-center justify-center rounded-[8px] bg-[#B88A62] px-4 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#9E714C]"
+          className="mt-5 flex min-h-[44px] w-full items-center justify-center rounded-[8px] bg-[#B88A62] px-4 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#9E714C]"
           aria-label={`Ver peça ${product.name}`}
         >
           Ver Peça →
         </Link>
-
-        <p className="mt-3 font-sans font-semibold uppercase text-[#8A5A36]/80" style={{ fontSize: "9px", letterSpacing: "0.15em" }}>
-          Seleção Virtuosa
-        </p>
       </div>
     </article>
   );

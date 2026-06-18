@@ -86,9 +86,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <p className="mt-5 font-serif text-[2rem] font-semibold leading-none text-[#B88A62]">
                 {formatPrice(product.price)}
               </p>
-              <p className="mt-2 font-sans text-[12px] font-semibold uppercase tracking-[0.12em] text-[#6F5547]">
-                Compra protegida via Square
-              </p>
 
               <p className="mt-7 max-w-[540px] font-sans text-[15px] leading-relaxed text-[#6F5547]">
                 {product.description}
@@ -97,6 +94,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div className="mt-7 grid gap-4 sm:grid-cols-2">
                 <InfoBlock title="Tamanhos" value={product.sizes?.join(" · ") ?? "Consultar"} />
                 <InfoBlock title="Cores" value={product.colors?.join(" · ") ?? "Consultar"} />
+              </div>
+
+              <div className="mt-8 grid gap-2 border-y border-[#D9C8B5] py-5 font-sans text-[13px] leading-relaxed text-[#4F3527]">
+                <p>✓ Entrega para todos os EUA</p>
+                <p>✓ Atendimento em português</p>
+                <p>✓ Checkout protegido via Square</p>
               </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -116,12 +119,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 >
                   Tirar dúvida
                 </Link>
-              </div>
-
-              <div className="mt-6 grid gap-2 border-y border-[#D9C8B5] py-5 font-sans text-[13px] leading-relaxed text-[#4F3527]">
-                <p>Entrega para todos os EUA</p>
-                <p>Checkout protegido via Square</p>
-                <p>Atendimento em português</p>
               </div>
             </div>
           </div>
