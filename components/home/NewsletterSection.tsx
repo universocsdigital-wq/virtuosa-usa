@@ -18,15 +18,16 @@ export function NewsletterSection() {
 
       <div className="container-virtuosa relative">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="flex flex-col items-center font-serif leading-tight text-white" style={{ fontSize: "clamp(2.15rem, 4vw, 3.25rem)" }}>
+          <Link
+            href="https://wa.me/c/17742043628"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="brand-logo-reference brand-logo-reference--footer relative mx-auto mb-5 block h-[74px] w-[230px] overflow-visible opacity-100 transition-transform hover:-translate-y-0.5 lg:h-[84px] lg:w-[260px]"
+            aria-label="Entrar no Grupo VIP"
+          />
+
+          <h2 className="flex flex-col items-center font-serif leading-tight text-white" style={{ fontSize: "clamp(2rem, 3.7vw, 3rem)" }}>
             <span>Entre para o</span>
-            <Link
-              href="https://wa.me/c/17742043628"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="brand-logo-reference brand-logo-reference--footer relative my-3 block h-[68px] w-[212px] overflow-visible opacity-100 transition-transform hover:-translate-y-0.5 lg:my-4 lg:h-[78px] lg:w-[242px]"
-              aria-label="Entrar no Grupo VIP"
-            />
             <span>Universo Virtuosa</span>
           </h2>
 

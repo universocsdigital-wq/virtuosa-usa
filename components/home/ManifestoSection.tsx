@@ -15,7 +15,7 @@ export function ManifestoSection() {
             <div className="relative aspect-[4/5] overflow-hidden bg-[#2A1712] shadow-[0_28px_80px_rgba(42,23,18,0.18)]">
               <Image
                 src="/images/manifesto/mulher-virtuosa.jpg"
-                alt="Mulher elegante em tons neutros representando a essÃªncia Virtuosa"
+                alt="Mulher elegante em tons neutros representando a essência Virtuosa"
                 fill
                 sizes="(max-width: 1024px) 100vw, 44vw"
                 className="object-cover object-[center_18%]"
@@ -34,7 +34,7 @@ export function ManifestoSection() {
 
           <div className="relative flex flex-col items-start lg:pl-4">
             <span className="mb-5 font-sans text-[10px] font-medium uppercase tracking-[0.24em] text-virtuosa-antique-gold">
-              Nossa EssÃªncia
+              Nossa Essência
             </span>
 
             <h2
@@ -46,22 +46,22 @@ export function ManifestoSection() {
 
             <div className="max-w-[560px] space-y-4 font-sans leading-relaxed text-virtuosa-light-brown" style={{ fontSize: "0.96rem", lineHeight: 1.82 }}>
               <p>
-                A Virtuosa nasceu para mulheres que desejam se vestir com intenÃ§Ã£o, sem abrir mÃ£o dos valores que fazem parte de quem sÃ£o.
+                A Virtuosa nasceu para mulheres que desejam se vestir com intenção, sem abrir mão dos valores que fazem parte de quem são.
               </p>
               <p>
-                A Mulher Virtuosa valoriza sua fÃ©, sua famÃ­lia e a forma como se apresenta ao mundo. Ela encontra beleza nos detalhes, forÃ§a na delicadeza e confianÃ§a em permanecer fiel Ã  sua essÃªncia.
+                A Mulher Virtuosa valoriza sua fé, sua família e a forma como se apresenta ao mundo. Ela encontra beleza nos detalhes, força na delicadeza e confiança em permanecer fiel à sua essência.
               </p>
               <p>
-                Entre a rotina, os compromissos e os diferentes papÃ©is que desempenha todos os dias, ela escolhe peÃ§as que acompanham sua jornada e refletem quem ela Ã©.
+                Entre a rotina, os compromissos e os diferentes papéis que desempenha todos os dias, ela escolhe peças que acompanham sua jornada e refletem quem ela é.
               </p>
             </div>
 
             <p className="mb-3 mt-8 font-serif italic text-virtuosa-deep-brown" style={{ fontSize: "1.05rem", lineHeight: 1.65 }}>
-              ConheÃ§a a seleÃ§Ã£o que traduz essa essÃªncia.
+              Conheça a seleção que traduz essa essência.
             </p>
 
             <Link href="#colecao" className="btn-secondary">
-              VISTA SUA ESSÃŠNCIA
+              VISTA SUA ESSÊNCIA
             </Link>
           </div>
         </div>

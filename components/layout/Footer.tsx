@@ -1,13 +1,9 @@
 ﻿import Link from "next/link";
 
 const curationLinks = [
-  { label: "Novidades", href: "/shop#lancamentos" },
-  { label: "Vestidos", href: "/shop#vestidos" },
-  { label: "Conjuntos", href: "/shop#conjuntos" },
-  { label: "Blusas", href: "/shop#blusas" },
-  { label: "Saias", href: "/shop#saias" },
-  { label: "Calças", href: "/shop#calcas" },
-  { label: "Grupo VIP", href: "https://wa.me/c/17742043628", external: true },
+  { label: "Coleção Virtuosa USA", href: "/#colecao" },
+  { label: "Mais Amadas", href: "/#best-sellers" },
+  { label: "Nossa Essência", href: "/#manifesto" },
 ];
 
 const aboutLinks = [
