@@ -1,10 +1,10 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export function NewsletterSection() {
   return (
     <section
       id="newsletter"
-      aria-label="Universo Virtuosa"
+      aria-label="Grupo VIP"
       className="relative overflow-hidden py-16 lg:py-20"
       style={{ backgroundColor: "#24110B" }}
     >
@@ -18,29 +18,23 @@ export function NewsletterSection() {
 
       <div className="container-virtuosa relative">
         <div className="mx-auto max-w-3xl text-center">
-          <Link
-            href="https://wa.me/c/17742043628"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="brand-logo-reference brand-logo-reference--footer relative mx-auto mb-6 block h-[76px] w-[230px] overflow-visible opacity-100 transition-transform hover:-translate-y-0.5"
-            aria-label="Entrar no Universo Virtuosa"
-          />
-
-          <h2 className="font-serif leading-tight text-white" style={{ fontSize: "clamp(2.65rem, 5vw, 4.2rem)" }}>
-            Entre para o
-            <br />
-            Universo Virtuosa
+          <h2 className="flex flex-col items-center font-serif leading-tight text-white" style={{ fontSize: "clamp(2.15rem, 4vw, 3.25rem)" }}>
+            <span>Entre para o</span>
+            <Link
+              href="https://wa.me/c/17742043628"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="brand-logo-reference brand-logo-reference--footer relative my-3 block h-[68px] w-[212px] overflow-visible opacity-100 transition-transform hover:-translate-y-0.5 lg:my-4 lg:h-[78px] lg:w-[242px]"
+              aria-label="Entrar no Grupo VIP"
+            />
+            <span>Universo Virtuosa</span>
           </h2>
 
           <p className="mx-auto mt-6 max-w-[720px] font-sans leading-relaxed" style={{ color: "rgba(247,241,232,0.9)", fontSize: "1rem" }}>
             Receba novas coleções, peças selecionadas e conteúdos pensados para mulheres que valorizam elegância, feminilidade e propósito. Um espaço reservado para quem deseja descobrir nossas novidades em primeira mão.
           </p>
 
-          <p className="mx-auto mt-5 font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C6A36A]">
-            ↓ toque para entrar
-          </p>
-
-          <div className="mt-5 flex justify-center">
+          <div className="mt-7 flex justify-center">
             <Link
               href="https://wa.me/c/17742043628"
               target="_blank"

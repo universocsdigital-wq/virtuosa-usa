@@ -12,7 +12,7 @@ const navLinks = [
   { label: "Conjuntos", href: "/shop#conjuntos", filter: "conjuntos" },
   { label: "Saias", href: "/shop#saias", filter: "saias" },
   { label: "Calças", href: "/shop#calcas", filter: "calcas" },
-  { label: "Universo Virtuosa", href: "https://wa.me/c/17742043628", external: true },
+  { label: "Grupo VIP", href: "https://wa.me/c/17742043628", external: true },
 ];
 
 export function Navbar() {

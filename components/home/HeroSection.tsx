@@ -44,7 +44,7 @@ export function HeroSection() {
               <Link href="/shop" className="btn-hero-primary min-w-[246px] whitespace-nowrap px-7 text-[12px]">
                 CONHEÇA A COLEÇÃO
               </Link>
-              <Link href="/about" className="btn-hero-secondary min-w-[206px] whitespace-nowrap px-7 text-[12px]">
+              <Link href="#manifesto" className="btn-hero-secondary min-w-[206px] whitespace-nowrap px-7 text-[12px]">
                 Sobre a Marca
               </Link>
             </div>

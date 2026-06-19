@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 const curationLinks = [
   { label: "Novidades", href: "/shop#lancamentos" },
@@ -7,14 +7,14 @@ const curationLinks = [
   { label: "Blusas", href: "/shop#blusas" },
   { label: "Saias", href: "/shop#saias" },
   { label: "Calças", href: "/shop#calcas" },
-  { label: "Universo Virtuosa", href: "https://wa.me/c/17742043628", external: true },
+  { label: "Grupo VIP", href: "https://wa.me/c/17742043628", external: true },
 ];
 
 const aboutLinks = [
-  { label: "Nossa Essência", href: "#manifesto" },
-  { label: "O Coração por Trás da Virtuosa", href: "#elaine-soares" },
-  { label: "Depoimentos", href: "#reviews" },
-  { label: "Entregas e Trocas", href: "#trust-bar" },
+  { label: "Nossa Essência", href: "/#manifesto" },
+  { label: "O Coração por Trás da Virtuosa", href: "/#elaine-soares" },
+  { label: "Depoimentos", href: "/#reviews" },
+  { label: "Entregas e Trocas", href: "/#trust-bar" },
 ];
 
 const socialLinks = [
@@ -50,11 +50,7 @@ export function Footer() {
                     WhatsApp
                   </Link>
                 </li>
-                <li>
-                  <Link href="https://www.instagram.com/virtuosa.usa/" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-[#F7D98F]">
-                    Instagram
-                  </Link>
-                </li>
+                
               </ul>
             </div>
 

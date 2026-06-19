@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -14,7 +14,7 @@ interface ProductPageProps {
 
 function checkoutFor(product: (typeof products)[number]) {
   if (product.checkoutUrl) return product.checkoutUrl;
-  const text = encodeURIComponent(`Olá, quero comprar esta peça da Virtuosa USA: ${product.name}.`);
+  const text = encodeURIComponent(`OlÃ¡, quero comprar esta peÃ§a da Virtuosa USA: ${product.name}.`);
   return `https://wa.me/17742043628?text=${text}`;
 }
 
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   if (!product) {
     return {
-      title: "Peça não encontrada | Virtuosa USA",
+      title: "PeÃ§a nÃ£o encontrada | Virtuosa USA",
     };
   }
 
@@ -55,7 +55,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="container-virtuosa py-10 lg:py-14">
           <div className="mb-6">
             <Link href="/shop" className="font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-[#B88A62]">
-              ← Voltar para coleção
+              â† Voltar para coleÃ§Ã£o
             </Link>
           </div>
 
@@ -77,7 +77,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div className="flex flex-col justify-center">
               <p className="mb-3 font-sans text-[10px] font-bold uppercase tracking-[0.22em] text-[#B88A62]">
-                Seleção Virtuosa
+                SeleÃ§Ã£o Virtuosa
               </p>
               <h1 className="font-serif text-[#2A1712]" style={{ fontSize: "clamp(2.35rem, 4.4vw, 4rem)", lineHeight: 1.02 }}>
                 {product.name}
@@ -92,14 +92,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </p>
 
               <div className="mt-7 grid gap-4 sm:grid-cols-2">
-                <InfoBlock title="Tamanhos" value={product.sizes?.join(" · ") ?? "Consultar"} />
-                <InfoBlock title="Cores" value={product.colors?.join(" · ") ?? "Consultar"} />
+                <InfoBlock title="Tamanhos" value={product.sizes?.join(" Â· ") ?? "Consultar"} />
+                <InfoBlock title="Cores" value={product.colors?.join(" Â· ") ?? "Consultar"} />
               </div>
 
               <div className="mt-8 grid gap-2 border-y border-[#D9C8B5] py-5 font-sans text-[13px] leading-relaxed text-[#4F3527]">
-                <p>✓ Entrega para todos os EUA</p>
-                <p>✓ Atendimento em português</p>
-                <p>✓ Checkout protegido via Square</p>
+                <p>âœ“ Entrega para todos os EUA</p>
+                <p>âœ“ Checkout protegido via Square</p>
               </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -109,15 +108,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   rel="noopener noreferrer"
                   className="inline-flex min-h-[54px] items-center justify-center rounded-[8px] bg-[#B88A62] px-7 font-sans text-[12px] font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#9E714C]"
                 >
-                  Comprar Agora →
-                </Link>
-                <Link
-                  href="https://wa.me/17742043628"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[54px] items-center justify-center rounded-[8px] border border-[#4F2107] px-7 font-sans text-[12px] font-bold uppercase tracking-[0.14em] text-[#4F2107] transition-colors hover:bg-[#4F2107] hover:text-white"
-                >
-                  Tirar dúvida
+                  ADICIONAR À SACOLA
                 </Link>
               </div>
             </div>
@@ -127,8 +118,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {relatedProducts.length > 0 && (
           <section className="container-virtuosa pb-14 lg:pb-20">
             <div className="mb-8 text-center">
-              <p className="section-subtitle">Também para você</p>
-              <h2 className="section-title">Peças da mesma seleção</h2>
+              <p className="section-subtitle">TambÃ©m para vocÃª</p>
+              <h2 className="section-title">PeÃ§as da mesma seleÃ§Ã£o</h2>
             </div>
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
               {relatedProducts.map((item) => (
