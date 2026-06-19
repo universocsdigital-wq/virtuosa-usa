@@ -29,7 +29,7 @@ export function NewsletterSection() {
 
           <div className="mt-6 flex justify-center">
             <Link
-              href="https://wa.me/c/17742043628"
+              href="https://chat.whatsapp.com/BYkfi3grimA4RvQspUTVFL"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-[52px] items-center justify-center border border-[#F1DDC1] bg-[#F1DDC1] px-9 font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-[#4F2107] transition-colors hover:border-[#F5D58A] hover:bg-[#F5D58A]"

@@ -14,7 +14,7 @@ const aboutLinks = [
 
 const socialLinks = [
   { label: "Instagram", href: "https://www.instagram.com/virtuosa.usa/", external: true },
-  { label: "Grupo VIP", href: "https://wa.me/c/17742043628", external: true },
+  { label: "Grupo VIP", href: "https://chat.whatsapp.com/BYkfi3grimA4RvQspUTVFL", external: true },
 ];
 
 export function Footer() {

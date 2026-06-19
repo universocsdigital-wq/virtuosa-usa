@@ -1,13 +1,13 @@
 import Link from "next/link";
 
-const VIP_GROUP_URL = "https://wa.me/c/17742043628";
+const VIP_GROUP_URL = "https://chat.whatsapp.com/BYkfi3grimA4RvQspUTVFL";
 
 export function LaunchInvitation() {
   return (
     <section
       id="lancamentos-home"
       aria-labelledby="lancamentos-title"
-      className="relative overflow-hidden border-y border-virtuosa-antique-gold/20 bg-virtuosa-warm-beige py-12 lg:py-14"
+      className="relative overflow-hidden border-y border-virtuosa-antique-gold/20 bg-[#EDE1D2] py-12 lg:py-14"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.045]"

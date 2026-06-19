@@ -11,7 +11,7 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
     <section
       id="reviews"
       aria-label="Depoimentos das clientes"
-      className="relative overflow-hidden bg-virtuosa-warm-beige pb-[26px] pt-[38px] lg:pb-[32px] lg:pt-[46px]"
+      className="relative overflow-hidden bg-[#F8F3EB] pb-[26px] pt-[38px] lg:pb-[32px] lg:pt-[46px]"
     >
       <div
         className="pointer-events-none absolute right-[-3%] top-1/2 -translate-y-1/2"
