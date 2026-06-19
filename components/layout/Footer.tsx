@@ -28,27 +28,13 @@ export function Footer() {
         </div>
 
         <div className="container-virtuosa relative py-12 lg:py-14">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-[1.18fr_1fr_1.15fr_1.15fr_1.1fr_0.9fr] xl:gap-10">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-[1.28fr_1fr_1.15fr_1.25fr_0.95fr] xl:gap-12">
             <div>
               <Link href="/" className="brand-logo-reference brand-logo-reference--footer relative mb-5 block h-[82px] w-[240px] overflow-visible" aria-label="Virtuosa USA" />
             </div>
 
             <FooterColumn title="Curadoria" links={curationLinks} />
             <FooterColumn title="Sobre" links={aboutLinks} />
-
-            <div>
-              <h4 className="mb-4 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F7D98F]">
-                Atendimento
-              </h4>
-              <ul className="flex flex-col gap-2.5 font-sans text-[13px] text-[#F1DDC1]/85">
-                <li>
-                  <Link href="https://wa.me/17742043628" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-[#F7D98F]">
-                    WhatsApp
-                  </Link>
-                </li>
-                
-              </ul>
-            </div>
 
             <div>
               <h4 className="mb-4 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F7D98F]">
