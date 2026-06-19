@@ -184,9 +184,9 @@ export function ShopClient({ products }: { products: Product[] }) {
           <h1 className="font-serif text-[#2A1712]" style={{ fontSize: "clamp(2.15rem, 4vw, 3.8rem)", lineHeight: 1.05 }}>
             Peças Selecionadas para Você
           </h1>
-          <div className="mx-auto mt-5 max-w-3xl space-y-2 font-sans text-[14px] leading-relaxed text-[#4F3527] lg:mx-0 lg:text-[15px]">
-            <p>Cada peça foi escolhida para mulheres que desejam se vestir com elegância, feminilidade e autenticidade.</p>
-            <p>Explore nossa seleção, descubra os detalhes de cada peça e encontre aquela que melhor expressa sua essência.</p>
+          <div className="mx-auto mt-5 space-y-2 font-sans text-[14px] leading-relaxed text-[#4F3527] lg:mx-0 lg:text-[15px]">
+            <p className="lg:whitespace-nowrap">Cada peça foi escolhida para mulheres que desejam se vestir com elegância, feminilidade e autenticidade.</p>
+            <p className="lg:whitespace-nowrap">Explore nossa seleção, descubra os detalhes de cada peça e encontre aquela que melhor expressa sua essência.</p>
           </div>
         </div>
       </section>
