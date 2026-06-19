@@ -5,7 +5,7 @@ import { ShopClient } from "@/components/shop/ShopClient";
 import { products } from "@/lib/data/products";
 
 export const metadata: Metadata = {
-  title: "Todas as Peças | Virtuosa USA",
+  title: "Peças Selecionadas para Você | Virtuosa USA",
   description: "Explore vestidos, blusas, saias, conjuntos e calças da Virtuosa USA.",
 };
 
