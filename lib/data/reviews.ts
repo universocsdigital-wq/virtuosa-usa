@@ -29,7 +29,7 @@ export const reviews: Review[] = [
     id: "4",
     author: "Ximene M.",
     rating: 5,
-    text: "Sem problemas, todas as peças são lindas e maravilhosas. Amei tudo. Deus abençoe.",
+    text: "Todas as peças são lindas e maravilhosas. Amei tudo. Deus abençoe.",
     verified: true,
     date: "2026-06-19",
   },
