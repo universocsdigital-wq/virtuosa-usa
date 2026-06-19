@@ -51,7 +51,7 @@ export function ProductCard({ product }: ProductCardProps) {
           className="mt-5 flex min-h-[44px] w-full items-center justify-center rounded-[8px] bg-[#B88A62] px-4 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#9E714C]"
           aria-label={`Ver peça ${product.name}`}
         >
-          Ver Peça →
+          Ver Peça {"\u2192"}
         </Link>
       </div>
     </article>

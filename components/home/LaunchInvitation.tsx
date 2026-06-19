@@ -18,7 +18,7 @@ export function LaunchInvitation() {
         }}
       />
 
-      <div className="container-virtuosa relative flex flex-col items-center justify-between gap-7 text-center lg:flex-row lg:text-left">
+      <div className="container-virtuosa relative flex flex-col items-center text-center">
         <div className="max-w-2xl">
           <span className="mb-3 block font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-virtuosa-antique-gold">
             Lançamentos
@@ -39,9 +39,9 @@ export function LaunchInvitation() {
           href={VIP_GROUP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-12 shrink-0 items-center justify-center border border-virtuosa-antique-gold bg-virtuosa-deep-brown px-8 font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_20px_rgba(42,23,18,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-virtuosa-antique-gold hover:shadow-[0_11px_26px_rgba(42,23,18,0.20)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-virtuosa-antique-gold focus-visible:ring-offset-2"
+          className="mt-7 inline-flex min-h-12 shrink-0 items-center justify-center border border-virtuosa-antique-gold bg-virtuosa-deep-brown px-8 font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_20px_rgba(42,23,18,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-virtuosa-antique-gold hover:shadow-[0_11px_26px_rgba(42,23,18,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-virtuosa-antique-gold focus-visible:ring-offset-2"
         >
-          Entrar no Grupo VIP
+          Entrar no Grupo VIP {"\u2192"}
         </Link>
       </div>
     </section>

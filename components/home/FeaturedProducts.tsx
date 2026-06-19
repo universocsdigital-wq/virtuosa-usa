@@ -37,7 +37,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
 
         <div className="mt-12 text-center">
           <Link href="/shop" className="btn-hero-secondary">
-            Ver Coleção Completa
+            Ver Coleção Completa {"\u2192"}
           </Link>
         </div>
       </div>

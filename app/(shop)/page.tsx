@@ -9,7 +9,6 @@ import { ManifestoSection }  from "@/components/home/ManifestoSection";
 import { BestSellers }       from "@/components/home/BestSellers";
 import { CustomerReviews }   from "@/components/home/CustomerReviews";
 import { OwnerStory }        from "@/components/home/OwnerStory";
-import { NewsletterSection } from "@/components/home/NewsletterSection";
 
 import { featuredProducts, bestSellers } from "@/lib/data/products";
 import { reviews, aggregateRating }      from "@/lib/data/reviews";
@@ -85,8 +84,6 @@ export default function HomePage() {
         {/* 7. Owner Story */}
         <OwnerStory />
 
-        {/* 8. Universo Virtuosa */}
-        <NewsletterSection />
       </main>
 
       <Footer />

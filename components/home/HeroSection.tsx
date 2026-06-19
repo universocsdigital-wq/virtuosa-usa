@@ -42,10 +42,10 @@ export function HeroSection() {
 
             <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
               <Link href="/shop" className="btn-hero-primary min-w-[246px] whitespace-nowrap px-7 text-[12px]">
-                CONHEÇA A COLEÇÃO
+                CONHEÇA A COLEÇÃO {"\u2192"}
               </Link>
               <Link href="#manifesto" className="btn-hero-secondary min-w-[206px] whitespace-nowrap px-7 text-[12px]">
-                Sobre a Marca
+                Sobre a Marca {"\u2192"}
               </Link>
             </div>
           </div>

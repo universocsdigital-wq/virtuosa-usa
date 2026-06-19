@@ -69,7 +69,7 @@ export function BestSellers({ products }: BestSellersProps) {
 
         <div className="mt-10 text-center">
           <Link href="/shop#lancamentos" className="btn-secondary">
-            VER TODAS →
+            VER TODAS {"\u2192"}
           </Link>
         </div>
       </div>
