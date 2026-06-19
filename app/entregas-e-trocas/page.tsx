@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "Entregas e Trocas | Virtuosa USA",
-  description: "Política de envio, trocas e devoluções da Virtuosa USA.",
+  description: "Política de envio e trocas da Virtuosa USA.",
 };
 
 export default function ShippingAndReturnsPage() {
@@ -40,13 +40,13 @@ export default function ShippingAndReturnsPage() {
                 <p>Caso o pedido seja devolvido por endereço incorreto ou incompleto, poderá ser necessário o pagamento de um novo frete para reenvio.</p>
               </PolicySection>
 
-              <PolicySection title="Política de Trocas e Devoluções">
-                <p>Na Virtuosa USA, queremos que você tenha uma excelente experiência de compra. Caso seja necessário realizar uma troca ou devolução, siga as orientações abaixo.</p>
+              <PolicySection title="Política de Trocas">
+                <p>Na Virtuosa USA, queremos que você tenha uma excelente experiência de compra. Caso seja necessário realizar uma troca, siga as orientações abaixo.</p>
 
                 <h2>Prazo para Solicitação</h2>
-                <p>A solicitação de troca ou devolução deve ser realizada em até 7 dias corridos após o recebimento do pedido.</p>
+                <p>A solicitação de troca deve ser realizada em até 7 dias corridos após o recebimento do pedido.</p>
 
-                <h2>Como Solicitar uma Troca ou Devolução</h2>
+                <h2>Como Solicitar uma Troca</h2>
                 <p>Para iniciar o processo, entre em contato com nossa equipe através do WhatsApp:</p>
                 <p>
                   <Link href="https://wa.me/17742043628" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#4F2107] underline underline-offset-4">
@@ -57,27 +57,27 @@ export default function ShippingAndReturnsPage() {
                 <ul>
                   <li>Nome completo;</li>
                   <li>Número do pedido;</li>
-                  <li>Produto que deseja trocar ou devolver;</li>
+                  <li>Produto que deseja trocar;</li>
                   <li>Motivo da solicitação.</li>
                 </ul>
                 <p>Após o recebimento da solicitação, nossa equipe realizará a análise e retornará em até 7 dias corridos com as orientações para continuidade do processo.</p>
 
                 <h2>Condições para Aprovação</h2>
-                <p>Para ser elegível à troca ou devolução, o produto deverá:</p>
+                <p>Para ser elegível à troca, o produto deverá:</p>
                 <ul>
                   <li>Estar sem sinais de uso;</li>
                   <li>Estar sem manchas, odores ou alterações;</li>
                   <li>Possuir etiquetas originais;</li>
-                  <li>Ser devolvido nas mesmas condições em que foi recebido.</li>
+                  <li>Ser enviado nas mesmas condições em que foi recebido.</li>
                 </ul>
                 <p>Produtos que não atenderem a essas condições poderão ter a solicitação recusada.</p>
 
-                <h2>Frete de Devolução</h2>
-                <p>O custo do envio da peça para troca ou devolução é de responsabilidade da cliente.</p>
+                <h2>Frete da Troca</h2>
+                <p>O custo do envio da peça para troca é de responsabilidade da cliente.</p>
                 <p>Em casos de defeito de fabricação ou erro no envio do pedido, a Virtuosa USA assumirá os custos necessários para a correção da ocorrência.</p>
 
                 <h2>Produtos Não Elegíveis</h2>
-                <p>Não aceitamos trocas ou devoluções de:</p>
+                <p>Não aceitamos trocas de:</p>
                 <ul>
                   <li>Produtos em promoção ou liquidação;</li>
                   <li>Últimas unidades adquiridas em lives;</li>
@@ -86,7 +86,7 @@ export default function ShippingAndReturnsPage() {
                 </ul>
 
                 <h2>Opções Disponíveis</h2>
-                <p>Após o recebimento e aprovação do produto devolvido, a cliente poderá optar por:</p>
+                <p>Após o recebimento e aprovação do produto enviado, a cliente poderá optar por:</p>
                 <ul>
                   <li>Troca por outro tamanho do mesmo produto, quando disponível;</li>
                   <li>Troca por outro produto disponível na loja;</li>
@@ -94,11 +94,8 @@ export default function ShippingAndReturnsPage() {
                 </ul>
 
                 <h2>Crédito em Loja</h2>
-                <p>Caso não haja disponibilidade do tamanho ou produto desejado, será disponibilizado crédito em loja correspondente ao valor pago pelo item devolvido.</p>
+                <p>Caso não haja disponibilidade do tamanho ou produto desejado, será disponibilizado crédito em loja correspondente ao valor pago pelo item enviado.</p>
                 <p>O crédito poderá ser utilizado em futuras compras na Virtuosa USA.</p>
-
-                <h2>Reembolso</h2>
-                <p>Não realizamos reembolso em dinheiro para pedidos entregues corretamente e sem defeitos. Nestes casos, a devolução será realizada exclusivamente por meio de troca ou crédito em loja.</p>
               </PolicySection>
             </div>
           </div>
