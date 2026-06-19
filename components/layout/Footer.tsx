@@ -9,7 +9,7 @@ const curationLinks = [
 const aboutLinks = [
   { label: "O Coração por Trás da Virtuosa", href: "/#elaine-soares" },
   { label: "Depoimentos", href: "/#reviews" },
-  { label: "Entregas e Trocas", href: "/entregas-e-trocas" },
+  { label: "Envios e Trocas", href: "/entregas-e-trocas" },
 ];
 
 const socialLinks = [
