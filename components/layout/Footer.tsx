@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 
 const curationLinks = [
-  { label: "Coleção Virtuosa USA", href: "/#colecao" },
+  { label: "Coleção", href: "/shop#lancamentos" },
   { label: "Mais Amadas", href: "/#best-sellers" },
   { label: "Nossa Essência", href: "/#manifesto" },
 ];
