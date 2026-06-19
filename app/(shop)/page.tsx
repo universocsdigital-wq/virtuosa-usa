@@ -3,6 +3,7 @@ import { Navbar }            from "@/components/layout/Navbar";
 import { Footer }            from "@/components/layout/Footer";
 import { HeroSection }       from "@/components/home/HeroSection";
 import { FeaturedProducts }  from "@/components/home/FeaturedProducts";
+import { LaunchInvitation }  from "@/components/home/LaunchInvitation";
 import { TrustBar }          from "@/components/home/TrustBar";
 import { ManifestoSection }  from "@/components/home/ManifestoSection";
 import { BestSellers }       from "@/components/home/BestSellers";
@@ -68,6 +69,9 @@ export default function HomePage() {
 
         {/* 3. Featured Products */}
         <FeaturedProducts products={featuredProducts} />
+
+        {/* Lançamentos */}
+        <LaunchInvitation />
 
         {/* 4. Manifesto */}
         <ManifestoSection />

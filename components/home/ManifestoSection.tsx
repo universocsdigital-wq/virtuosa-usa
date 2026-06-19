@@ -60,7 +60,10 @@ export function ManifestoSection() {
               Conheça a seleção que traduz essa essência.
             </p>
 
-            <Link href="#colecao" className="btn-secondary">
+            <Link
+              href="#colecao"
+              className="inline-flex min-h-12 items-center justify-center border border-virtuosa-antique-gold bg-virtuosa-cream px-7 font-sans text-[12px] font-semibold uppercase tracking-[0.12em] text-virtuosa-deep-brown shadow-[0_7px_18px_rgba(92,61,46,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-virtuosa-antique-gold hover:text-white hover:shadow-[0_10px_24px_rgba(92,61,46,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-virtuosa-antique-gold focus-visible:ring-offset-2"
+            >
               VISTA SUA ESSÊNCIA
             </Link>
           </div>
