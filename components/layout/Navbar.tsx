@@ -94,7 +94,7 @@ export function Navbar() {
       {mobileOpen && (
         <div className="fixed inset-0 z-modal lg:hidden">
           <div className="absolute inset-0 bg-black/45 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <nav className="absolute bottom-0 left-0 top-0 flex w-[290px] flex-col overflow-hidden" style={{ backgroundColor: "#4F2107" }}>
+          <nav className="absolute bottom-0 left-0 top-0 flex w-[290px] flex-col overflow-hidden" style={{ backgroundColor: "#3A1708" }}>
             <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
               <span className="brand-logo-reference brand-logo-reference--drawer relative block h-12 w-[170px] overflow-visible" aria-label="Virtuosa USA" />
               <button onClick={() => setMobileOpen(false)} className="p-2 text-[#F1DDC1] transition-colors hover:text-[#F5D58A]" aria-label="Fechar menu">
@@ -109,7 +109,7 @@ export function Navbar() {
                     href={link.href}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
-                    className="flex items-center border-b border-white/10 py-4 font-sans text-[13px] font-medium uppercase tracking-[0.14em] text-virtuosa-very-light-brown/82 transition-colors hover:text-virtuosa-antique-gold"
+                    className="flex items-center border-b border-[#F7D98F]/18 py-4 font-sans text-[13px] font-bold uppercase tracking-[0.14em] text-[#F7E6C9] transition-colors hover:text-[#F7D98F]"
                     onClick={(event) => handleNavClick(event, link)}
                   >
                     {link.label}
