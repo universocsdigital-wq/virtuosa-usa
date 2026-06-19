@@ -5,7 +5,7 @@ export function NewsletterSection() {
     <section
       id="newsletter"
       aria-label="Grupo VIP"
-      className="relative overflow-hidden py-16 lg:py-20"
+      className="relative overflow-hidden py-12 lg:py-14"
       style={{ backgroundColor: "#24110B" }}
     >
       <div className="absolute inset-0 texture-linen opacity-42" aria-hidden />
@@ -18,24 +18,16 @@ export function NewsletterSection() {
 
       <div className="container-virtuosa relative">
         <div className="mx-auto max-w-3xl text-center">
-          <Link
-            href="https://wa.me/c/17742043628"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="brand-logo-reference brand-logo-reference--footer relative mx-auto mb-5 block h-[74px] w-[230px] overflow-visible opacity-100 transition-transform hover:-translate-y-0.5 lg:h-[84px] lg:w-[260px]"
-            aria-label="Entrar no Grupo VIP"
-          />
-
-          <h2 className="flex flex-col items-center font-serif leading-tight text-white" style={{ fontSize: "clamp(2rem, 3.7vw, 3rem)" }}>
+          <h2 className="flex flex-col items-center font-serif leading-tight text-white" style={{ fontSize: "clamp(1.95rem, 3.4vw, 2.85rem)" }}>
             <span>Entre para o</span>
             <span>Universo Virtuosa</span>
           </h2>
 
-          <p className="mx-auto mt-6 max-w-[720px] font-sans leading-relaxed" style={{ color: "rgba(247,241,232,0.9)", fontSize: "1rem" }}>
+          <p className="mx-auto mt-5 max-w-[720px] font-sans leading-relaxed" style={{ color: "rgba(247,241,232,0.9)", fontSize: "1rem" }}>
             Receba novas coleções, peças selecionadas e conteúdos pensados para mulheres que valorizam elegância, feminilidade e propósito. Um espaço reservado para quem deseja descobrir nossas novidades em primeira mão.
           </p>
 
-          <div className="mt-7 flex justify-center">
+          <div className="mt-6 flex justify-center">
             <Link
               href="https://wa.me/c/17742043628"
               target="_blank"
