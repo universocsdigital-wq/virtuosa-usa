@@ -22,7 +22,7 @@ export function NewsletterSection() {
             href="https://wa.me/c/17742043628"
             target="_blank"
             rel="noopener noreferrer"
-            className="brand-logo-reference brand-logo-reference--footer relative mx-auto mb-5 block h-[74px] w-[230px] translate-x-3 overflow-visible opacity-100 transition-transform hover:-translate-y-0.5 lg:h-[84px] lg:w-[260px] lg:translate-x-5"
+            className="brand-logo-reference brand-logo-reference--footer relative mx-auto mb-5 block h-[74px] w-[230px] translate-x-1 overflow-visible opacity-100 transition-transform hover:-translate-y-0.5 lg:h-[84px] lg:w-[260px] lg:translate-x-2"
             aria-label="Entrar no Grupo VIP"
           />
 

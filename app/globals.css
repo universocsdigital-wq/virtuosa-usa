@@ -647,3 +647,22 @@
   background-position: center left;
 }
 
+
+.policy-content h2:not(:first-child) {
+  margin-top: 1.65rem;
+  font-family: var(--font-montserrat);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-camel);
+}
+
+.policy-content ul {
+  margin-left: 1.1rem;
+  list-style: disc;
+}
+
+.policy-content li + li {
+  margin-top: 0.35rem;
+}
