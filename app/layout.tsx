@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import "./globals.css";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { CartProvider } from "@/components/cart/CartProvider";
 
 // ─── FONTES ───────────────────────────────────────────────────────────
 const playfair = Playfair_Display({
@@ -104,7 +106,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-virtuosa-warm-beige text-virtuosa-deep-brown font-sans antialiased">
-        {children}
+        <CartProvider>
+          {children}
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { User, ShoppingBag, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { useCart } from "@/components/cart/CartProvider";
 
 const navLinks = [
   { label: "Lançamentos", href: "/shop#lancamentos", filter: "lancamentos" },
@@ -17,7 +18,7 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [cartCount] = useState(0);
+  const { totalItems: cartCount, openCart } = useCart();
   const pathname = usePathname();
 
   function handleNavClick(event: React.MouseEvent<HTMLAnchorElement>, link: (typeof navLinks)[number]) {
@@ -60,7 +61,7 @@ export function Navbar() {
                 <User className="h-5 w-5" strokeWidth={1.25} />
                 <span className="hidden font-sans text-[10px] font-semibold uppercase tracking-[0.12em] lg:inline">Conta</span>
               </Link>
-              <Link href="/shop" className="group relative flex items-center gap-2 p-2 text-[#F1DDC1] transition-colors hover:text-[#F5D58A]" aria-label={`Sacola - ${cartCount} itens`}>
+              <button type="button" onClick={openCart} className="group relative flex items-center gap-2 p-2 text-[#F1DDC1] transition-colors hover:text-[#F5D58A]" aria-label={`Abrir sacola - ${cartCount} itens`}>
                 <ShoppingBag className="h-5 w-5" strokeWidth={1.25} />
                 <span className="hidden font-sans text-[10px] font-semibold uppercase tracking-[0.12em] lg:inline">Sacola</span>
                 {cartCount > 0 && (
@@ -68,7 +69,7 @@ export function Navbar() {
                     {cartCount}
                   </span>
                 )}
-              </Link>
+              </button>
             </div>
           </div>
 
