@@ -28,7 +28,7 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
 
       <div className="container-virtuosa">
         <div className="mb-7 text-center lg:mb-9">
-          <span className="section-subtitle">O Que as Clientes Dizem</span>
+          <span className="section-subtitle">Virtuosas</span>
           <h2 className="section-title">Palavras Delas</h2>
           <span className="gold-divider" />
           <p className="mx-auto mt-4 max-w-xl font-sans text-[13px] leading-relaxed text-virtuosa-light-brown">
