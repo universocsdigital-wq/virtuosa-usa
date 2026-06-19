@@ -15,17 +15,7 @@ export default function ShippingAndReturnsPage() {
       <main className="bg-[#F7F1E8]">
         <section className="container-virtuosa py-14 lg:py-20">
           <div className="mx-auto max-w-3xl">
-            <p className="mb-4 font-sans text-[10px] font-bold uppercase tracking-[0.22em] text-[#B88A62]">
-              Virtuosa USA
-            </p>
-            <h1 className="font-serif text-[#2A1712]" style={{ fontSize: "clamp(2.5rem, 5vw, 4.35rem)", lineHeight: 1 }}>
-              Entregas e Trocas
-            </h1>
-            <p className="mt-6 font-sans text-[15px] leading-relaxed text-[#6F5547]">
-              Aqui estão as orientações para envio, rastreamento, trocas e devoluções de pedidos realizados na Virtuosa USA.
-            </p>
-
-            <div className="mt-12 space-y-12 rounded-[2px] border border-[#D9C8B5] bg-white/45 p-7 shadow-[0_24px_70px_rgba(42,23,18,0.07)] lg:p-10">
+            <div className="space-y-12 rounded-[2px] border border-[#D9C8B5] bg-white/45 p-7 shadow-[0_24px_70px_rgba(42,23,18,0.07)] lg:p-10">
               <PolicySection title="Política de Envio">
                 <p>A Virtuosa USA realiza envios para clientes localizados nos Estados Unidos.</p>
 
