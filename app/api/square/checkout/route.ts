@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
-        "Square-Version": process.env.SQUARE_API_VERSION ?? "2025-10-16",
+        "Square-Version": process.env.SQUARE_API_VERSION ?? "2026-05-20",
       },
       body: JSON.stringify({
         idempotency_key: crypto.randomUUID(),

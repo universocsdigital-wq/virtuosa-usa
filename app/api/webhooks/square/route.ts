@@ -16,7 +16,7 @@ async function getSquareOrder(orderId: string) {
   if (!token) return null;
   const baseUrl = process.env.SQUARE_ENVIRONMENT === "sandbox" ? "https://connect.squareupsandbox.com" : "https://connect.squareup.com";
   const response = await fetch(`${baseUrl}/v2/orders/${orderId}`, {
-    headers: { Authorization: `Bearer ${token}`, "Square-Version": process.env.SQUARE_API_VERSION ?? "2025-10-16" },
+    headers: { Authorization: `Bearer ${token}`, "Square-Version": process.env.SQUARE_API_VERSION ?? "2026-05-20" },
     cache: "no-store",
   });
   if (!response.ok) return null;
@@ -56,7 +56,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    if (event.type === "payment.completed") {
+    const paymentEvent = event.data?.object?.payment as Record<string, unknown> | undefined;
+    const paymentStatus = String(paymentEvent?.status ?? "");
+
+    if (event.type === "payment.completed" || (event.type === "payment.updated" && paymentStatus === "COMPLETED")) {
       const payment = event.data?.object?.payment as Record<string, unknown> | undefined;
       const orderId = String(payment?.order_id ?? "");
       const squareOrder = orderId ? await getSquareOrder(orderId) : null;
@@ -79,7 +82,11 @@ export async function POST(request: Request) {
       }
     }
 
-    if (event.type === "payment.canceled" || event.type === "order.canceled") {
+    if (
+      event.type === "payment.canceled" ||
+      (event.type === "payment.updated" && ["CANCELED", "FAILED"].includes(paymentStatus)) ||
+      event.type === "order.canceled"
+    ) {
       const object = event.data?.object ?? {};
       const payment = object.payment as Record<string, unknown> | undefined;
       const order = object.order as Record<string, unknown> | undefined;
