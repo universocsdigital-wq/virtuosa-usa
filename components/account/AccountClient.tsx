@@ -131,16 +131,16 @@ export function AccountClient() {
         </div>
 
         {step === "email" ? (
-          <form onSubmit={requestCode} className="mx-auto mt-7 max-w-[520px]">
+          <form onSubmit={requestCode} className="mx-auto mt-7 max-w-[440px]">
             <label htmlFor="account-email" className="mb-2 block font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Seu e-mail</label>
             <input id="account-email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="h-11 w-full border border-[#CDB89F] bg-[#FFFDF8] px-4 font-sans text-sm text-[#2A1712] outline-none focus:border-[#8A5A36]" autoComplete="email" />
-            <button type="submit" disabled={loading} className="mx-auto mt-3 flex min-h-11 w-full max-w-[360px] items-center justify-center bg-[#8A5A36] px-6 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_7px_18px_rgba(42,23,18,0.14)] disabled:opacity-60">{loading ? "Enviando..." : "Receber código \u2192"}</button>
+            <button type="submit" disabled={loading} className="mx-auto mt-3 flex min-h-11 w-full max-w-[320px] items-center justify-center bg-[#8A5A36] px-6 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_7px_18px_rgba(42,23,18,0.14)] disabled:opacity-60">{loading ? "Enviando..." : "Receber código \u2192"}</button>
           </form>
         ) : (
-          <form onSubmit={verifyCode} className="mx-auto mt-7 max-w-[520px]">
+          <form onSubmit={verifyCode} className="mx-auto mt-7 max-w-[440px]">
             <label htmlFor="account-code" className="mb-2 block font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Código recebido</label>
             <input id="account-code" inputMode="numeric" pattern="[0-9]*" required value={token} onChange={(event) => setToken(event.target.value.replace(/\D/g, "").slice(0, 8))} className="h-11 w-full border border-[#CDB89F] bg-[#FFFDF8] px-4 text-center font-sans text-xl tracking-[0.35em] text-[#2A1712] outline-none focus:border-[#8A5A36]" autoComplete="one-time-code" />
-            <button type="submit" disabled={loading} className="mx-auto mt-3 flex min-h-11 w-full max-w-[360px] items-center justify-center bg-[#8A5A36] px-6 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_7px_18px_rgba(42,23,18,0.14)] disabled:opacity-60">{loading ? "Entrando..." : "Consultar pedidos \u2192"}</button>
+            <button type="submit" disabled={loading} className="mx-auto mt-3 flex min-h-11 w-full max-w-[320px] items-center justify-center bg-[#8A5A36] px-6 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_7px_18px_rgba(42,23,18,0.14)] disabled:opacity-60">{loading ? "Entrando..." : "Consultar pedidos \u2192"}</button>
             <button type="button" onClick={() => setStep("email")} className="mt-4 w-full font-sans text-[11px] text-[#8A5A36] underline underline-offset-4">Usar outro e-mail</button>
           </form>
         )}
