@@ -96,7 +96,7 @@ export async function POST(request: Request) {
             apple_pay: true,
             google_pay: true,
             cash_app_pay: true,
-            afterpay_clearpay: true,
+            afterpay_clearpay: false,
           },
         },
         payment_note: `Virtuosa USA — ${body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"}`,

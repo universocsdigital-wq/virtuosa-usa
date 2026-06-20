@@ -57,7 +57,7 @@ export function Navbar() {
             />
 
             <div className="absolute right-0 flex items-center gap-4">
-              <Link href="/about" className="group flex items-center gap-2 p-2 text-[#F1DDC1] transition-colors hover:text-[#F5D58A]" aria-label="Conhecer a marca">
+              <Link href="/conta" className="group flex items-center gap-2 p-2 text-[#F1DDC1] transition-colors hover:text-[#F5D58A]" aria-label="Minha conta e pedidos">
                 <User className="h-5 w-5" strokeWidth={1.25} />
                 <span className="hidden font-sans text-[10px] font-semibold uppercase tracking-[0.12em] lg:inline">Conta</span>
               </Link>

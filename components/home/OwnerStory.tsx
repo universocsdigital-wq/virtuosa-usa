@@ -39,7 +39,7 @@ export function OwnerStory() {
                 Empresária, mulher de fé, esposa, mãe e brasileira vivendo nos Estados Unidos, Elaine conhece de perto os desafios e recomeços que fazem parte da jornada de tantas mulheres que construíram uma nova vida longe de casa.
               </p>
               <p>
-                Foi dessa vivência que nasceu a Virtuosa USA: uma curadoria criada por uma mulher que entende outras mulheres.
+                Foi dessa vivência que nasceu a Virtuosa USA: uma boutique criada por uma mulher que entende outras mulheres.
               </p>
               <p>
                 Cada peça é escolhida com intenção e propósito, pensando na mulher que deseja se vestir com elegância, feminilidade e autenticidade, sem abrir mão de seus valores.

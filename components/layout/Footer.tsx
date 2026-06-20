@@ -32,7 +32,7 @@ export function Footer() {
               <Link href="/" className="brand-logo-reference brand-logo-reference--footer relative mb-5 block h-[82px] w-[240px] overflow-visible" aria-label="Virtuosa USA" />
             </div>
 
-            <FooterColumn title="Curadoria" links={curationLinks} />
+            <FooterColumn title="Explore" links={curationLinks} />
             <FooterColumn title="Sobre" links={aboutLinks} />
 
             <div>
@@ -42,9 +42,9 @@ export function Footer() {
               <ul className="flex flex-col gap-2.5 font-sans text-[13px] text-[#F1DDC1]/85">
                 <li>Checkout protegido via Square</li>
                 <li>Cartões de Crédito e Débito</li>
-                <li>Zelle</li>
-                <li>Venmo</li>
-                <li>Afterpay</li>
+                <li>Apple Pay</li>
+                <li>Google Pay</li>
+                <li>Cash App Pay</li>
               </ul>
             </div>
 
