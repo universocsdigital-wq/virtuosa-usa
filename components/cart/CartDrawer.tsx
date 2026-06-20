@@ -9,6 +9,8 @@ export function CartDrawer() {
   const { items, totalItems, totalPrice, isOpen, closeCart, removeItem, updateQuantity } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fulfillmentType, setFulfillmentType] = useState<"shipping" | "pickup">("shipping");
+  const shippingPrice = fulfillmentType === "shipping" ? 12 : 0;
 
   async function checkout() {
     setLoading(true);
@@ -18,6 +20,7 @@ export function CartDrawer() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          fulfillmentType,
           items: items.map((item) => ({
             productId: item.product.id,
             quantity: item.quantity,
@@ -94,11 +97,33 @@ export function CartDrawer() {
             </div>
 
             <footer className="border-t border-[#D9C8B5] bg-[#F8F3EB] p-6">
-              <div className="mb-5 flex items-end justify-between">
-                <span className="font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Subtotal</span>
-                <span className="font-serif text-2xl text-[#2A1712]">{formatPrice(totalPrice)}</span>
+              <fieldset className="mb-5">
+                <legend className="mb-3 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Entrega</legend>
+                <div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={() => setFulfillmentType("shipping")} className={`min-h-[54px] border px-3 text-left font-sans text-[11px] leading-relaxed ${fulfillmentType === "shipping" ? "border-[#8A5A36] bg-[#E8D9C6] text-[#2A1712]" : "border-[#D9C8B5] bg-white/60 text-[#6F5547]"}`}>
+                    <strong className="block text-[11px]">Envio USPS</strong>
+                    US$ 12 · com rastreamento
+                  </button>
+                  <button type="button" onClick={() => setFulfillmentType("pickup")} className={`min-h-[54px] border px-3 text-left font-sans text-[11px] leading-relaxed ${fulfillmentType === "pickup" ? "border-[#8A5A36] bg-[#E8D9C6] text-[#2A1712]" : "border-[#D9C8B5] bg-white/60 text-[#6F5547]"}`}>
+                    <strong className="block text-[11px]">Retirada local</strong>
+                    Grátis · Milford, MA
+                  </button>
+                </div>
+              </fieldset>
+
+              <div className="mb-2 flex items-center justify-between font-sans text-[12px] text-[#6F5547]">
+                <span>Subtotal</span>
+                <span>{formatPrice(totalPrice)}</span>
               </div>
-              <p className="mb-4 font-sans text-[11px] leading-relaxed text-[#6F5547]">Frete e opções de pagamento serão apresentados no checkout seguro da Square.</p>
+              <div className="mb-5 flex items-center justify-between font-sans text-[12px] text-[#6F5547]">
+                <span>{fulfillmentType === "shipping" ? "Frete USPS" : "Retirada local"}</span>
+                <span>{shippingPrice ? formatPrice(shippingPrice) : "Grátis"}</span>
+              </div>
+              <div className="mb-5 flex items-end justify-between border-t border-[#D9C8B5] pt-4">
+                <span className="font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Total</span>
+                <span className="font-serif text-2xl text-[#2A1712]">{formatPrice(totalPrice + shippingPrice)}</span>
+              </div>
+              <p className="mb-4 font-sans text-[11px] leading-relaxed text-[#6F5547]">Pagamento protegido pela Square. O endereço será solicitado apenas para envio.</p>
               {error && <p className="mb-4 border border-red-300 bg-red-50 px-3 py-2 font-sans text-[12px] text-red-800">{error}</p>}
               <button type="button" onClick={checkout} disabled={loading} className="flex min-h-[52px] w-full items-center justify-center bg-[#8A5A36] px-6 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_8px_20px_rgba(42,23,18,0.16)] transition-colors hover:bg-[#6F452C] disabled:cursor-wait disabled:opacity-60">
                 {loading ? "Preparando checkout..." : "Finalizar compra \u2192"}
