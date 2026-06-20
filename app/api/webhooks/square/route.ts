@@ -33,6 +33,7 @@ function getOrderDetails(order: Record<string, unknown> | null) {
     trackingNumber: String(shipmentDetails?.tracking_number ?? ""),
     carrier: String(shipmentDetails?.shipping_note ?? "USPS"),
     items: (order?.line_items as unknown[]) ?? [],
+    fulfillmentState: String(shipment?.state ?? ""),
   };
 }
 
@@ -84,6 +85,28 @@ export async function POST(request: Request) {
       const order = object.order as Record<string, unknown> | undefined;
       const orderId = String(payment?.order_id ?? order?.id ?? "");
       if (orderId) await upsertSupabaseOrder({ square_order_id: orderId, status: "canceled", updated_at: new Date().toISOString() });
+    }
+
+    if (event.type === "order.fulfillment.updated") {
+      const object = event.data?.object ?? {};
+      const fulfillmentUpdate = object.order_fulfillment_updated as Record<string, unknown> | undefined;
+      const embeddedOrder = object.order as Record<string, unknown> | undefined;
+      const orderId = String(fulfillmentUpdate?.order_id ?? embeddedOrder?.id ?? "");
+
+      if (orderId) {
+        const squareOrder = await getSquareOrder(orderId);
+        const details = getOrderDetails(squareOrder);
+        const update: Record<string, unknown> = {
+          square_order_id: orderId,
+          status: details.trackingNumber || details.fulfillmentState === "COMPLETED" ? "shipped" : "processing",
+          updated_at: new Date().toISOString(),
+        };
+        if (details.email) update.customer_email = details.email;
+        if (details.trackingNumber) update.tracking_number = details.trackingNumber;
+        if (details.carrier) update.carrier = details.carrier;
+        if (details.items.length) update.items = details.items;
+        await upsertSupabaseOrder(update);
+      }
     }
   } catch (error) {
     console.error("[Square webhook] O evento foi validado, mas não pôde ser salvo.", error);
