@@ -122,10 +122,13 @@ export function AccountClient() {
 
   return (
     <section className="flex min-h-[66vh] items-center justify-center bg-[#F8F3EB] px-6 py-14">
-      <div className="w-full max-w-[480px] border border-[#D9C8B5] bg-white/55 p-7 shadow-[0_20px_60px_rgba(42,23,18,0.09)] sm:p-10">
+      <div className="w-full max-w-[820px] border border-[#D9C8B5] bg-white/55 p-7 shadow-[0_20px_60px_rgba(42,23,18,0.09)] sm:p-10 lg:px-14">
         <p className="text-center font-sans text-[10px] font-bold uppercase tracking-[0.2em] text-[#B88A62]">Minha Conta</p>
-        <h1 className="mt-3 text-center font-serif text-4xl text-[#2A1712]">Acompanhe seus pedidos</h1>
-        <p className="mx-auto mt-4 max-w-sm text-center font-sans text-[13px] leading-relaxed text-[#6F5547]">Entre com o mesmo e-mail usado na compra. Você receberá um código temporário, sem precisar criar senha.</p>
+        <h1 className="mt-3 text-center font-serif text-4xl text-[#2A1712] sm:whitespace-nowrap">Acompanhe seus pedidos</h1>
+        <div className="mx-auto mt-4 text-center font-sans text-[13px] leading-relaxed text-[#6F5547]">
+          <p className="lg:whitespace-nowrap">Acesse sua área exclusiva para acompanhar seus pedidos e consultar informações de entrega.</p>
+          <p className="lg:whitespace-nowrap">Informe o e-mail utilizado na compra e enviaremos um código de acesso para você.</p>
+        </div>
 
         {step === "email" ? (
           <form onSubmit={requestCode} className="mt-7">
