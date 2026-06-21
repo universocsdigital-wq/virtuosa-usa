@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export function ManifestoSection() {
   return (
-    <section id="manifesto" aria-label="A Mulher Virtuosa" className="section-warm texture-linen relative overflow-hidden bg-[#F8F3EB] py-11 lg:py-24">
+    <section id="manifesto" aria-label="A Mulher Virtuosa" className="section-warm texture-linen relative overflow-hidden bg-[#F8F3EB] py-11 lg:py-16">
       <div className="absolute right-[-10%] top-1/2 h-[560px] w-[560px] -translate-y-1/2 opacity-[0.038] lg:h-[680px] lg:w-[680px]" aria-hidden>
         <Image src="/svg/MONOGRAMA/Monograma sem circulo fundo marrom.svg" alt="" fill className="object-contain" />
       </div>
@@ -39,12 +39,12 @@ export function ManifestoSection() {
 
             <h2
               className="mb-5 font-serif text-virtuosa-deep-brown lg:mb-7"
-              style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.35rem)", lineHeight: 1.05, letterSpacing: "-0.01em" }}
+              style={{ fontSize: "clamp(2.25rem, 4.2vw, 3rem)", lineHeight: 1.03, letterSpacing: "-0.01em" }}
             >
               A Mulher<br />Virtuosa
             </h2>
 
-            <div className="max-w-[560px] space-y-3 font-sans text-[0.88rem] leading-[1.68] text-virtuosa-light-brown lg:space-y-4 lg:text-[0.96rem] lg:leading-[1.82]">
+            <div className="max-w-[560px] space-y-3 font-sans text-[0.88rem] leading-[1.62] text-virtuosa-light-brown lg:text-[0.9rem] lg:leading-[1.62]">
               <p>
                 A Virtuosa nasceu para mulheres que desejam se vestir com intenção, sem abrir mão dos valores que fazem parte de quem são.
               </p>
@@ -56,7 +56,7 @@ export function ManifestoSection() {
               </p>
             </div>
 
-            <p className="mb-3 mt-5 font-serif text-[0.98rem] italic leading-relaxed text-virtuosa-deep-brown lg:mt-8 lg:text-[1.05rem]">
+            <p className="mb-3 mt-5 font-serif text-[0.98rem] italic leading-relaxed text-virtuosa-deep-brown lg:mt-6 lg:text-[1rem]">
               Conheça a seleção que traduz essa essência.
             </p>
 
