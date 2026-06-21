@@ -26,7 +26,7 @@ export function Footer() {
           <img src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
         </div>
 
-        <div className="container-virtuosa relative py-5 lg:py-14">
+        <div className="container-virtuosa relative py-5 lg:py-12">
           <div className="grid grid-cols-2 items-start gap-x-6 gap-y-6 md:grid-cols-2 xl:grid-cols-[1.28fr_1fr_1.15fr_1.25fr_0.95fr] xl:gap-12">
             <div className="hidden xl:col-span-1 xl:block">
               <Link href="/" className="brand-logo-reference brand-logo-reference--footer relative block h-[58px] w-[190px] overflow-visible xl:mb-5 xl:h-[82px] xl:w-[240px]" aria-label="Virtuosa USA" />

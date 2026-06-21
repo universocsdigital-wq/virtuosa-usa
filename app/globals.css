@@ -104,7 +104,7 @@
 
   /* SeÃ§Ã£o padrÃ£o */
   .section {
-    @apply py-[64px] lg:py-[88px];
+    @apply py-[54px] lg:py-[74px];
   }
 
   /* TÃ­tulo de seÃ§Ã£o */

@@ -4,8 +4,8 @@ import Link from "next/link";
 export function HeroSection() {
   return (
     <section id="hero" aria-label="Virtuosa USA" className="relative w-full overflow-hidden" style={{ backgroundColor: "#170B07" }}>
-      <div className="grid min-h-[660px] lg:min-h-[610px] lg:grid-cols-[43%_57%]">
-        <div className="relative flex items-center px-6 py-14 sm:px-10 lg:px-16 xl:px-20">
+      <div className="grid lg:min-h-[610px] lg:grid-cols-[43%_57%]">
+        <div className="relative flex items-center px-6 py-10 sm:px-10 sm:py-12 lg:px-16 lg:py-14 xl:px-20">
           <div
             className="pointer-events-none absolute inset-0"
             style={{
@@ -32,7 +32,7 @@ export function HeroSection() {
             </h1>
 
             <p
-              className="mt-8 max-w-[410px] font-sans uppercase leading-relaxed"
+              className="mt-6 max-w-[410px] font-sans uppercase leading-relaxed lg:mt-8"
               style={{ color: "rgba(247,241,232,0.9)", fontSize: "12px", letterSpacing: "0.17em" }}
             >
               Peças selecionadas para mulheres
@@ -40,7 +40,7 @@ export function HeroSection() {
               que vestem com intenção.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row lg:mt-8 lg:gap-3.5">
               <Link href="/shop" className="btn-hero-primary min-w-[246px] whitespace-nowrap px-7 text-[12px]">
                 CONHEÇA A COLEÇÃO {"\u2192"}
               </Link>
@@ -51,7 +51,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="relative min-h-[540px] overflow-hidden bg-[#170B07] lg:min-h-full">
+        <div className="relative min-h-[420px] overflow-hidden bg-[#170B07] sm:min-h-[480px] lg:min-h-full">
           <Image
             src="/images/hero/hero-virtuosa-final.png"
             alt="Vestido branco elegante em atmosfera editorial Virtuosa"

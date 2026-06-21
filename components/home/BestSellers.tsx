@@ -15,9 +15,9 @@ export function BestSellers({ products }: BestSellersProps) {
       </div>
 
       <div className="container-virtuosa relative">
-        <div className="mb-10 text-center">
+        <div className="mb-7 text-center lg:mb-9">
           <h2 className="section-title">As mais amadas</h2>
-          <p className="mx-auto mt-5 max-w-[560px] font-sans text-[0.72rem] leading-relaxed text-virtuosa-light-brown sm:text-[0.82rem] lg:text-[0.95rem]">
+          <p className="mx-auto mt-3 max-w-[560px] font-sans text-[0.72rem] leading-relaxed text-virtuosa-light-brown sm:text-[0.82rem] lg:mt-4 lg:text-[0.95rem]">
             <span className="block whitespace-nowrap">As peças que nossas clientes mais amam</span>
             <span className="block whitespace-nowrap">escolhidas com cuidado, e usadas com elegância</span>
           </p>
@@ -25,7 +25,7 @@ export function BestSellers({ products }: BestSellersProps) {
 
         <ProductCarousel products={products} ariaLabel="Peças mais amadas pelas clientes" />
 
-        <div className="mt-10 text-center">
+        <div className="mt-8 text-center lg:mt-9">
           <Link href="/shop#lancamentos" className="btn-secondary">
             VER TODAS {"\u2192"}
           </Link>

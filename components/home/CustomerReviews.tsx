@@ -23,7 +23,7 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
     <section
       id="reviews"
       aria-label="Depoimentos das clientes"
-      className="relative overflow-hidden bg-[#F8F3EB] pb-[28px] pt-[34px] lg:pb-[38px] lg:pt-[44px]"
+      className="relative overflow-hidden bg-[#F8F3EB] pb-[24px] pt-[30px] lg:pb-[32px] lg:pt-[36px]"
     >
       <div
         className="pointer-events-none absolute right-[-3%] top-1/2 -translate-y-1/2"
@@ -34,7 +34,7 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
       </div>
 
       <div className="container-virtuosa relative">
-        <div className="mb-6 text-center lg:mb-8">
+        <div className="mb-5 text-center lg:mb-7">
           <span className="section-subtitle">Virtuosas</span>
           <h2 className="section-title">Palavras Delas</h2>
           <span className="gold-divider" />

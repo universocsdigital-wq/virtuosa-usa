@@ -3,13 +3,13 @@ import Link from "next/link";
 
 export function ManifestoSection() {
   return (
-    <section id="manifesto" aria-label="A Mulher Virtuosa" className="section-warm texture-linen relative overflow-hidden bg-[#F8F3EB] py-11 lg:py-16">
+    <section id="manifesto" aria-label="A Mulher Virtuosa" className="section-warm texture-linen relative overflow-hidden bg-[#F8F3EB] py-10 lg:py-14">
       <div className="absolute right-[-10%] top-1/2 h-[560px] w-[560px] -translate-y-1/2 opacity-[0.038] lg:h-[680px] lg:w-[680px]" aria-hidden>
         <Image src="/svg/MONOGRAMA/Monograma sem circulo fundo marrom.svg" alt="" fill className="object-contain" />
       </div>
 
       <div className="container-virtuosa relative">
-        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[44%_56%] lg:gap-16">
+        <div className="grid grid-cols-1 items-center gap-7 lg:grid-cols-[44%_56%] lg:gap-12">
           <div className="relative">
             <div className="absolute -left-5 -top-5 bottom-5 right-5 border border-virtuosa-antique-gold/22" aria-hidden />
             <div className="relative aspect-[4/5] overflow-hidden bg-[#2A1712] shadow-[0_28px_80px_rgba(42,23,18,0.18)]">

@@ -30,14 +30,14 @@ const trustItems = [
 export function TrustBar() {
   return (
     <section id="trust-bar" aria-label="Por que escolher a Virtuosa" className="bg-virtuosa-champagne">
-      <div className="container-virtuosa py-6 lg:py-7">
-        <div className="grid grid-cols-2 gap-y-6 lg:grid-cols-4 lg:gap-y-0">
+      <div className="container-virtuosa py-5 lg:py-6">
+        <div className="grid grid-cols-2 gap-y-5 lg:grid-cols-4 lg:gap-y-0">
           {trustItems.map((item) => (
             <div
               key={item.id}
               className="relative flex flex-col items-center px-3 text-center lg:border-r lg:border-[#B38A62]/20 lg:px-4 lg:last:border-r-0"
             >
-              <span className="mb-3 flex h-9 w-9 items-center justify-center text-virtuosa-camel" aria-hidden>
+              <span className="mb-2 flex h-9 w-9 items-center justify-center text-virtuosa-camel" aria-hidden>
                 {item.icon}
               </span>
               <h3 className="mb-2 font-sans text-[10px] font-semibold uppercase tracking-[0.13em] text-virtuosa-deep-brown">

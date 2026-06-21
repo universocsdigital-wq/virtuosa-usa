@@ -7,7 +7,7 @@ export function LaunchInvitation() {
     <section
       id="lancamentos-home"
       aria-labelledby="lancamentos-title"
-      className="relative overflow-hidden border-y border-virtuosa-antique-gold/20 bg-[#EDE1D2] py-12 lg:py-14"
+      className="relative overflow-hidden border-y border-virtuosa-antique-gold/20 bg-[#EDE1D2] py-8 lg:py-10"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.045]"
@@ -39,7 +39,7 @@ export function LaunchInvitation() {
           href={VIP_GROUP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-7 inline-flex min-h-12 shrink-0 items-center justify-center border border-virtuosa-antique-gold bg-virtuosa-deep-brown px-8 font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_20px_rgba(42,23,18,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-virtuosa-antique-gold hover:shadow-[0_11px_26px_rgba(42,23,18,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-virtuosa-antique-gold focus-visible:ring-offset-2"
+          className="mt-5 inline-flex min-h-12 shrink-0 items-center justify-center border border-virtuosa-antique-gold bg-virtuosa-deep-brown px-8 font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_8px_20px_rgba(42,23,18,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-virtuosa-antique-gold hover:shadow-[0_11px_26px_rgba(42,23,18,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-virtuosa-antique-gold focus-visible:ring-offset-2"
         >
           Entrar no Grupo VIP {"\u2192"}
         </Link>
