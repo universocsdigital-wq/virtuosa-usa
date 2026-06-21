@@ -18,9 +18,7 @@ export function BestSellers({ products }: BestSellersProps) {
         <div className="mb-10 text-center">
           <h2 className="section-title">Mais Amadas</h2>
           <p className="mx-auto mt-5 max-w-[560px] font-sans text-[0.95rem] leading-relaxed text-virtuosa-light-brown">
-            As peças que nossas clientes mais amam,
-            <br />
-            escolhidas com cuidado e usadas com elegância.
+            As peças que nossas clientes amam.
           </p>
         </div>
 
