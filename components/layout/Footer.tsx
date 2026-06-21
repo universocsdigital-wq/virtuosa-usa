@@ -28,14 +28,14 @@ export function Footer() {
 
         <div className="container-virtuosa relative py-7 lg:py-14">
           <div className="grid grid-cols-2 items-start gap-x-6 gap-y-6 md:grid-cols-2 xl:grid-cols-[1.28fr_1fr_1.15fr_1.25fr_0.95fr] xl:gap-12">
-            <div className="col-span-2 flex justify-center border-b border-white/10 pb-5 xl:col-span-1 xl:block xl:border-0 xl:pb-0">
+            <div className="col-span-2 flex justify-center border-b border-white/15 pb-5 xl:col-span-1 xl:block xl:border-0 xl:pb-0">
               <Link href="/" className="brand-logo-reference brand-logo-reference--footer relative block h-[58px] w-[190px] overflow-visible xl:mb-5 xl:h-[82px] xl:w-[240px]" aria-label="Virtuosa USA" />
             </div>
 
             <FooterColumn title="Explore" links={curationLinks} />
             <FooterColumn title="Sobre" links={aboutLinks} />
 
-            <div className="min-w-0 border-t border-white/10 pt-4 xl:border-0 xl:pt-0">
+            <div className="min-w-0 pt-1 xl:pt-0">
               <h4 className="mb-2.5 font-sans text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#F7D98F] sm:text-[10px]">
                 Compra Segura
               </h4>
@@ -102,7 +102,7 @@ function FooterColumn({
   links: { label: string; href: string; external?: boolean }[];
 }) {
   return (
-    <div className="min-w-0 border-t border-white/10 pt-4 xl:border-0 xl:pt-0">
+    <div className="min-w-0 pt-1 xl:pt-0">
       <h4 className="mb-2.5 font-sans text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#F7D98F] sm:text-[10px]">
         {title}
       </h4>

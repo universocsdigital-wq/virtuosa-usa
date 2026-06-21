@@ -6,8 +6,8 @@ export function OwnerStory() {
       className="section-warm texture-linen relative overflow-hidden bg-[#EDE1D2] py-9 lg:pb-[64px] lg:pt-[24px]"
     >
       <div className="container-virtuosa">
-        <div className="grid items-center border-t border-[#D9C8B5] pt-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 lg:pt-10">
-          <div className="relative mx-auto hidden aspect-[4/5] w-full max-w-[360px] overflow-hidden border border-[#C6A36A]/35 bg-[#F7F1E8] shadow-[0_24px_70px_rgba(42,23,18,0.10)] lg:block">
+        <div className="grid items-center gap-7 border-t border-[#D9C8B5] pt-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 lg:pt-10">
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-[230px] overflow-hidden border border-[#C6A36A]/35 bg-[#F7F1E8] shadow-[0_18px_48px_rgba(42,23,18,0.08)] lg:max-w-[360px] lg:shadow-[0_24px_70px_rgba(42,23,18,0.10)]">
             <div className="absolute inset-5 border border-[#C6A36A]/22" aria-hidden />
             <div className="absolute inset-0 texture-linen opacity-70" aria-hidden />
             <div
