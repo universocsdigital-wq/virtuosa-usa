@@ -16,9 +16,10 @@ export function BestSellers({ products }: BestSellersProps) {
 
       <div className="container-virtuosa relative">
         <div className="mb-10 text-center">
-          <h2 className="section-title">Mais Amadas</h2>
-          <p className="mx-auto mt-5 max-w-[560px] font-sans text-[0.95rem] leading-relaxed text-virtuosa-light-brown">
-            As peças que nossas clientes amam.
+          <h2 className="section-title">As mais amadas</h2>
+          <p className="mx-auto mt-5 max-w-[560px] font-sans text-[0.72rem] leading-relaxed text-virtuosa-light-brown sm:text-[0.82rem] lg:text-[0.95rem]">
+            <span className="block whitespace-nowrap">As peças que nossas clientes mais amam</span>
+            <span className="block whitespace-nowrap">escolhidas com cuidado, e usadas com elegância</span>
           </p>
         </div>
 
