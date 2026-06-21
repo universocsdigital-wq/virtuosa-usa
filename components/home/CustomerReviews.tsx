@@ -11,7 +11,7 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
     <section
       id="reviews"
       aria-label="Depoimentos das clientes"
-      className="relative overflow-hidden bg-[#F8F3EB] pb-[26px] pt-[38px] lg:pb-[32px] lg:pt-[46px]"
+      className="relative overflow-hidden bg-[#F8F3EB] pb-[22px] pt-[30px] lg:pb-[32px] lg:pt-[46px]"
     >
       <div
         className="pointer-events-none absolute right-[-3%] top-1/2 -translate-y-1/2"
@@ -27,7 +27,7 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
       </div>
 
       <div className="container-virtuosa">
-        <div className="mb-7 text-center lg:mb-9">
+        <div className="mb-5 text-center lg:mb-9">
           <span className="section-subtitle">Virtuosas</span>
           <h2 className="section-title">Palavras Delas</h2>
           <span className="gold-divider" />
@@ -38,9 +38,11 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-3 lg:gap-5">
           {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
+            <div key={review.id} className="w-[82vw] max-w-[320px] shrink-0 snap-start md:w-auto md:max-w-none">
+              <ReviewCard review={review} />
+            </div>
           ))}
         </div>
       </div>
@@ -51,7 +53,7 @@ export function CustomerReviews({ reviews }: CustomerReviewsProps) {
 function ReviewCard({ review }: { review: Review }) {
   return (
     <article
-      className="relative bg-virtuosa-cream p-6 lg:p-7"
+      className="relative h-full bg-virtuosa-cream p-5 lg:p-7"
       style={{ borderRadius: "2px" }}
       aria-label={`Depoimento de ${review.author}`}
     >

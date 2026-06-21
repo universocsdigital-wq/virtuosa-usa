@@ -26,20 +26,20 @@ export function Footer() {
           <img src="/svg/MONOGRAMA/Monograma sem Circulo Fundo Branco.svg" alt="" className="h-full w-full object-contain" />
         </div>
 
-        <div className="container-virtuosa relative py-12 lg:py-14">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-[1.28fr_1fr_1.15fr_1.25fr_0.95fr] xl:gap-12">
-            <div>
-              <Link href="/" className="brand-logo-reference brand-logo-reference--footer relative mb-5 block h-[82px] w-[240px] overflow-visible" aria-label="Virtuosa USA" />
+        <div className="container-virtuosa relative py-9 lg:py-14">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-2 xl:grid-cols-[1.28fr_1fr_1.15fr_1.25fr_0.95fr] xl:gap-12">
+            <div className="col-span-2 xl:col-span-1">
+              <Link href="/" className="brand-logo-reference brand-logo-reference--footer relative mx-auto mb-1 block h-[68px] w-[210px] overflow-visible xl:mx-0 xl:mb-5 xl:h-[82px] xl:w-[240px]" aria-label="Virtuosa USA" />
             </div>
 
             <FooterColumn title="Explore" links={curationLinks} />
             <FooterColumn title="Sobre" links={aboutLinks} />
 
             <div>
-              <h4 className="mb-4 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F7D98F]">
+              <h4 className="mb-3 font-sans text-[9px] font-semibold uppercase tracking-[0.14em] text-[#F7D98F] sm:text-[10px]">
                 Compra Segura
               </h4>
-              <ul className="flex flex-col gap-2.5 font-sans text-[13px] text-[#F1DDC1]/85">
+              <ul className="flex flex-col gap-2 font-sans text-[11.5px] leading-relaxed text-[#F1DDC1]/90 sm:text-[13px]">
                 <li>Checkout protegido via Square</li>
                 <li>Cartões de Crédito e Débito</li>
                 <li>Apple Pay</li>
@@ -51,12 +51,12 @@ export function Footer() {
             <FooterColumn title="Conecte-se" links={socialLinks} />
           </div>
 
-          <p className="mx-auto mt-12 max-w-[620px] text-center font-serif text-[1.15rem] leading-relaxed text-[#F1DDC1]/90">
+          <p className="mx-auto mt-8 max-w-[620px] text-center font-serif text-[1rem] leading-relaxed text-[#F1DDC1]/90 lg:mt-12 lg:text-[1.15rem]">
             Vestindo mulheres com elegância, propósito e feminilidade.
           </p>
         </div>
 
-        <div className="border-t border-white/10 py-5">
+        <div className="border-t border-white/10 py-4 lg:py-5">
           <div className="container-virtuosa flex flex-col items-center justify-between gap-3 text-center sm:flex-row">
             <p className="font-sans text-[11px] text-[#F1DDC1]/70">
               © 2026 Virtuosa USA. Todos os direitos reservados.
@@ -103,17 +103,17 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h4 className="mb-4 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F7D98F]">
+      <h4 className="mb-3 font-sans text-[9px] font-semibold uppercase tracking-[0.14em] text-[#F7D98F] sm:text-[10px]">
         {title}
       </h4>
-      <ul className="flex flex-col gap-2.5">
+      <ul className="flex flex-col gap-2">
         {links.map((link) => (
           <li key={`${title}-${link.label}`}>
             <Link
               href={link.href}
               target={link.external ? "_blank" : undefined}
               rel={link.external ? "noopener noreferrer" : undefined}
-              className="font-sans text-[13px] text-[#F1DDC1]/85 transition-colors duration-200 hover:text-[#F7D98F]"
+              className="font-sans text-[11.5px] leading-relaxed text-[#F1DDC1]/90 transition-colors duration-200 hover:text-[#F7D98F] sm:text-[13px]"
             >
               {link.label}
             </Link>

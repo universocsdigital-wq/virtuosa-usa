@@ -3,13 +3,13 @@ import Link from "next/link";
 
 export function ManifestoSection() {
   return (
-    <section id="manifesto" aria-label="A Mulher Virtuosa" className="section-warm texture-linen relative overflow-hidden bg-[#F8F3EB] py-18 lg:py-24">
+    <section id="manifesto" aria-label="A Mulher Virtuosa" className="section-warm texture-linen relative overflow-hidden bg-[#F8F3EB] py-11 lg:py-24">
       <div className="absolute right-[-10%] top-1/2 h-[560px] w-[560px] -translate-y-1/2 opacity-[0.038] lg:h-[680px] lg:w-[680px]" aria-hidden>
         <Image src="/svg/MONOGRAMA/Monograma sem circulo fundo marrom.svg" alt="" fill className="object-contain" />
       </div>
 
       <div className="container-virtuosa relative">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[44%_56%] lg:gap-16">
+        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[44%_56%] lg:gap-16">
           <div className="relative">
             <div className="absolute -left-5 -top-5 bottom-5 right-5 border border-virtuosa-antique-gold/22" aria-hidden />
             <div className="relative aspect-[4/5] overflow-hidden bg-[#2A1712] shadow-[0_28px_80px_rgba(42,23,18,0.18)]">
@@ -33,18 +33,18 @@ export function ManifestoSection() {
           </div>
 
           <div className="relative flex flex-col items-start lg:pl-4">
-            <span className="mb-5 font-sans text-[10px] font-medium uppercase tracking-[0.24em] text-virtuosa-antique-gold">
+            <span className="mb-3 font-sans text-[9px] font-medium uppercase tracking-[0.2em] text-virtuosa-antique-gold lg:mb-5 lg:text-[10px] lg:tracking-[0.24em]">
               Nossa Essência
             </span>
 
             <h2
-              className="mb-7 font-serif text-virtuosa-deep-brown"
+              className="mb-5 font-serif text-virtuosa-deep-brown lg:mb-7"
               style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.35rem)", lineHeight: 1.05, letterSpacing: "-0.01em" }}
             >
               A Mulher<br />Virtuosa
             </h2>
 
-            <div className="max-w-[560px] space-y-4 font-sans leading-relaxed text-virtuosa-light-brown" style={{ fontSize: "0.96rem", lineHeight: 1.82 }}>
+            <div className="max-w-[560px] space-y-3 font-sans text-[0.88rem] leading-[1.68] text-virtuosa-light-brown lg:space-y-4 lg:text-[0.96rem] lg:leading-[1.82]">
               <p>
                 A Virtuosa nasceu para mulheres que desejam se vestir com intenção, sem abrir mão dos valores que fazem parte de quem são.
               </p>
@@ -56,7 +56,7 @@ export function ManifestoSection() {
               </p>
             </div>
 
-            <p className="mb-3 mt-8 font-serif italic text-virtuosa-deep-brown" style={{ fontSize: "1.05rem", lineHeight: 1.65 }}>
+            <p className="mb-3 mt-5 font-serif text-[0.98rem] italic leading-relaxed text-virtuosa-deep-brown lg:mt-8 lg:text-[1.05rem]">
               Conheça a seleção que traduz essa essência.
             </p>
 
