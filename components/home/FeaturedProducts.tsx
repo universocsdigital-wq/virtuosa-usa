@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ProductCard } from "@/components/product/ProductCard";
+import { ProductCarousel } from "@/components/home/ProductCarousel";
 import type { Product } from "@/types";
 
 interface FeaturedProductsProps {
@@ -29,11 +29,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-7">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} dark />
-          ))}
-        </div>
+        <ProductCarousel products={products} dark ariaLabel="Peças da Coleção Virtuosa USA" />
 
         <div className="mt-12 text-center">
           <Link href="/shop" className="btn-hero-secondary">

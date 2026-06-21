@@ -123,4 +123,4 @@ export const products: Product[] = [
 
 export const bestSellers: Product[] = products.filter((p) => p.badge === "best-seller");
 
-export const featuredProducts: Product[] = products.slice(0, 4);
+export const featuredProducts: Product[] = products;
