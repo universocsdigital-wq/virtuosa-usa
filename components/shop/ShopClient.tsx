@@ -181,12 +181,18 @@ export function ShopClient({ products }: { products: Product[] }) {
       <section className="border-b border-[#D9C8B5] bg-[#FCF8F2] py-9 lg:py-12">
         <div className="container-virtuosa text-center lg:text-left">
           <p className="mb-3 font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9E714C]">Virtuosa USA</p>
-          <h1 className="font-serif text-[#2A1712]" style={{ fontSize: "clamp(2.15rem, 4vw, 3.8rem)", lineHeight: 1.05 }}>
+          <h1 className="whitespace-nowrap font-serif text-[clamp(1.55rem,6.8vw,2rem)] leading-tight text-[#2A1712] lg:text-[3.8rem] lg:leading-[1.05]">
             Peças Selecionadas para Você
           </h1>
-          <div className="mx-auto mt-5 space-y-2 font-sans text-[14px] leading-relaxed text-[#4F3527] lg:mx-0 lg:text-[15px]">
-            <p className="lg:whitespace-nowrap">Cada peça foi escolhida para mulheres que desejam se vestir com elegância, feminilidade e autenticidade.</p>
-            <p className="lg:whitespace-nowrap">Explore nossa seleção, descubra os detalhes de cada peça e encontre aquela que melhor expressa sua essência.</p>
+          <div className="mx-auto mt-4 font-sans text-[#4F3527] lg:mx-0 lg:mt-5">
+            <div className="space-y-2 text-center text-[clamp(0.56rem,2.55vw,0.68rem)] leading-relaxed lg:hidden">
+              <p className="whitespace-nowrap">Peças escolhidas para vestir com elegância e autenticidade.</p>
+              <p className="whitespace-nowrap">Explore os detalhes e encontre o que expressa sua essência.</p>
+            </div>
+            <div className="hidden space-y-2 text-[15px] leading-relaxed lg:block">
+              <p className="whitespace-nowrap">Cada peça foi escolhida para mulheres que desejam se vestir com elegância, feminilidade e autenticidade.</p>
+              <p className="whitespace-nowrap">Explore nossa seleção, descubra os detalhes de cada peça e encontre aquela que melhor expressa sua essência.</p>
+            </div>
           </div>
         </div>
       </section>
