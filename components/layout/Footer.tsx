@@ -27,19 +27,19 @@ export function Footer() {
         </div>
 
         <div className="container-virtuosa relative py-7 lg:py-14">
-          <div className="grid grid-cols-2 gap-x-5 gap-y-6 md:grid-cols-2 xl:grid-cols-[1.28fr_1fr_1.15fr_1.25fr_0.95fr] xl:gap-12">
-            <div className="col-span-2 xl:col-span-1">
-              <Link href="/" className="brand-logo-reference brand-logo-reference--footer relative mx-auto block h-[58px] w-[190px] overflow-visible xl:mx-0 xl:mb-5 xl:h-[82px] xl:w-[240px]" aria-label="Virtuosa USA" />
+          <div className="grid grid-cols-2 items-start gap-x-6 gap-y-6 md:grid-cols-2 xl:grid-cols-[1.28fr_1fr_1.15fr_1.25fr_0.95fr] xl:gap-12">
+            <div className="col-span-2 flex justify-center border-b border-white/10 pb-5 xl:col-span-1 xl:block xl:border-0 xl:pb-0">
+              <Link href="/" className="brand-logo-reference brand-logo-reference--footer relative block h-[58px] w-[190px] overflow-visible xl:mb-5 xl:h-[82px] xl:w-[240px]" aria-label="Virtuosa USA" />
             </div>
 
             <FooterColumn title="Explore" links={curationLinks} />
             <FooterColumn title="Sobre" links={aboutLinks} />
 
-            <div>
+            <div className="min-w-0 border-t border-white/10 pt-4 xl:border-0 xl:pt-0">
               <h4 className="mb-2.5 font-sans text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#F7D98F] sm:text-[10px]">
                 Compra Segura
               </h4>
-              <ul className="grid gap-1.5 font-sans text-[10.5px] leading-snug text-[#F1DDC1]/90 sm:text-[13px]">
+              <ul className="grid gap-1.5 font-sans text-[10px] leading-snug text-[#F1DDC1]/90 sm:text-[13px]">
                 <li>Checkout protegido via Square</li>
                 <li>Cartões de Crédito e Débito</li>
                 <li>Apple Pay</li>
@@ -102,7 +102,7 @@ function FooterColumn({
   links: { label: string; href: string; external?: boolean }[];
 }) {
   return (
-    <div>
+    <div className="min-w-0 border-t border-white/10 pt-4 xl:border-0 xl:pt-0">
       <h4 className="mb-2.5 font-sans text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#F7D98F] sm:text-[10px]">
         {title}
       </h4>
@@ -113,7 +113,7 @@ function FooterColumn({
               href={link.href}
               target={link.external ? "_blank" : undefined}
               rel={link.external ? "noopener noreferrer" : undefined}
-              className="font-sans text-[10.5px] leading-snug text-[#F1DDC1]/90 transition-colors duration-200 hover:text-[#F7D98F] sm:text-[13px] sm:leading-relaxed"
+              className="font-sans text-[10px] leading-snug text-[#F1DDC1]/90 transition-colors duration-200 hover:text-[#F7D98F] sm:text-[13px] sm:leading-relaxed"
             >
               {link.label}
             </Link>

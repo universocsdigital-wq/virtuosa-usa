@@ -23,7 +23,7 @@ export function OwnerStory() {
             <div className="absolute bottom-8 left-1/2 h-px w-24 -translate-x-1/2 bg-[#C6A36A]/45" aria-hidden />
           </div>
 
-          <div className="mx-auto max-w-[700px] text-center lg:text-left">
+          <div className="mx-auto w-full max-w-[700px] text-center lg:text-left">
             <span className="mb-3 block font-sans text-[9px] font-semibold uppercase tracking-[0.18em] text-virtuosa-antique-gold lg:mb-4 lg:text-[10px] lg:tracking-[0.22em]">
               O coração por trás da Virtuosa
             </span>
@@ -31,14 +31,14 @@ export function OwnerStory() {
               Elaine Soares
             </h2>
 
-            <div className="mt-5 space-y-3 font-sans text-[0.88rem] leading-[1.65] text-virtuosa-light-brown lg:hidden">
+            <div className="mx-auto mt-5 max-w-[350px] space-y-3 text-left font-sans text-[0.82rem] leading-[1.58] text-virtuosa-light-brown lg:hidden">
               <p>
-                Empresária, mulher de fé, esposa, mãe e brasileira nos Estados Unidos, Elaine conhece os desafios e recomeços de quem constrói uma nova vida longe de casa.
+                Empresária, mulher de fé, esposa, mãe e brasileira nos EUA, Elaine conhece os desafios de recomeçar longe de casa.
               </p>
               <p>
-                Dessa vivência nasceu a Virtuosa USA: uma boutique que escolhe cada peça com intenção, beleza e respeito aos valores de cada mulher.
+                Dessa vivência nasceu a Virtuosa USA, uma boutique que escolhe cada peça com intenção e respeito aos valores de cada mulher.
               </p>
-              <p className="pt-1 font-serif text-[1.08rem] leading-relaxed text-virtuosa-deep-brown">
+              <p className="pt-2 text-center font-serif text-[1rem] leading-relaxed text-virtuosa-deep-brown">
                 Bem-vinda à Virtuosa.<br />Um espaço para vestir sua essência.
               </p>
             </div>
