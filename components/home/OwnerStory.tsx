@@ -3,7 +3,7 @@ export function OwnerStory() {
     <section
       id="elaine-soares"
       aria-label="O coração por trás da Virtuosa"
-      className="section-warm texture-linen relative overflow-hidden bg-[#EDE1D2] py-9 lg:pb-[64px] lg:pt-[24px]"
+      className="section-warm texture-linen relative overflow-hidden bg-[#EDE1D2] pb-5 pt-9 lg:pb-[64px] lg:pt-[24px]"
     >
       <div className="container-virtuosa">
         <div className="grid items-center gap-7 border-t border-[#D9C8B5] pt-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 lg:pt-10">
