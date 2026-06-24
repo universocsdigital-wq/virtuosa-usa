@@ -30,8 +30,6 @@ function getCategory(name: string): ProductCategory {
   if (n.includes("calça") || n.includes("calca")) return "calcas";
   if (n.includes("conjunto")) return "conjuntos";
   if (
-    n.includes("casaquinho") ||
-    n.includes("casaqueto") ||
     n.includes("blazer") ||
     n.includes("cardigan") ||
     n.includes("colete")
