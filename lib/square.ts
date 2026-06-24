@@ -4,7 +4,11 @@ const SQUARE_BASE_URL = "https://connect.squareup.com/v2";
 const SQUARE_VERSION = "2024-01-18";
 
 function getSquareToken(): string {
-  const token = process.env.SQUARE_ACCESS_TOKEN;
+  // Suporta tanto SQUARE_ACCESS_TOKEN quanto o nome em português configurado na Vercel
+  const token =
+    process.env.SQUARE_ACCESS_TOKEN ||
+    process.env["LOCALIZAÇÃO_QUADRADA_"] ||
+    process.env.LOCALIZACAO_QUADRADA_;
   if (!token) throw new Error("SQUARE_ACCESS_TOKEN não configurado");
   return token;
 }
@@ -25,7 +29,13 @@ function getCategory(name: string): ProductCategory {
   if (n.includes("saia")) return "saias";
   if (n.includes("calça") || n.includes("calca")) return "calcas";
   if (n.includes("conjunto")) return "conjuntos";
-  if (n.includes("casaquinho") || n.includes("casaqueto") || n.includes("blazer")) return "conjuntos";
+  if (
+    n.includes("casaquinho") ||
+    n.includes("casaqueto") ||
+    n.includes("blazer") ||
+    n.includes("cardigan") ||
+    n.includes("colete")
+  ) return "conjuntos";
   return "blusas";
 }
 
@@ -73,19 +83,25 @@ export async function getSquareProducts(): Promise<Product[]> {
     objects.filter((o) => o.type === "IMAGE").map((o) => [o.id, o])
   );
 
-  const products: Product[] = items.map((item, index) => {
+  const products: Product[] = items.map((item) => {
     const idata = item.item_data!;
     const name = idata.name;
     const variations = idata.variations || [];
 
-    // Obter URL da imagem principal
+    // Obter URLs de todas as imagens do produto
     const imageIds = idata.image_ids || [];
     let imageUrl = "/images/placeholder.jpg";
-    if (imageIds.length > 0) {
-      const imgObj = imageMap.get(imageIds[0]);
+    const allImages: string[] = [];
+
+    for (const imgId of imageIds) {
+      const imgObj = imageMap.get(imgId);
       if (imgObj?.image_data?.url) {
-        imageUrl = imgObj.image_data.url;
+        allImages.push(imgObj.image_data.url);
       }
+    }
+
+    if (allImages.length > 0) {
+      imageUrl = allImages[0];
     }
 
     // Extrair tamanhos únicos das variações
@@ -121,10 +137,6 @@ export async function getSquareProducts(): Promise<Product[]> {
     const priceAmount = firstVariation?.item_variation_data?.price_money?.amount || 0;
     const price = priceAmount / 100;
 
-    // Verificar se tem estoque (por enquanto baseado no status do item)
-    // O Square marca como sold out via inventory, mas aqui usamos inStock: true por padrão
-    const inStock = true;
-
     return {
       id: item.id,
       name,
@@ -133,11 +145,12 @@ export async function getSquareProducts(): Promise<Product[]> {
       rating: 4.9,
       reviewCount: 0,
       image: imageUrl,
+      images: allImages.length > 1 ? allImages : undefined,
       category: getCategory(name),
       description: idata.description || "",
       sizes: sizes.length > 0 ? sizes : undefined,
       colors: colors.length > 0 ? colors : undefined,
-      inStock,
+      inStock: true,
     } satisfies Product;
   });
 
