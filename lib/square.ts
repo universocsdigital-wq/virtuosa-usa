@@ -39,6 +39,72 @@ function getCategory(name: string): ProductCategory {
   return "blusas";
 }
 
+interface SquareInventoryCount {
+  catalog_object_id: string;
+  catalog_object_type: string;
+  state: string;
+  quantity: string;
+}
+
+/**
+ * Busca contagens de estoque do Square para uma lista de IDs de variações.
+ * Retorna um Map de variationId → quantidade total em estoque.
+ */
+async function getInventoryCounts(
+  token: string,
+  variationIds: string[]
+): Promise<Map<string, number>> {
+  const inventoryMap = new Map<string, number>();
+  if (variationIds.length === 0) return inventoryMap;
+
+  try {
+    const response = await fetch(
+      `${SQUARE_BASE_URL}/inventory/counts/batch-retrieve`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Square-Version": SQUARE_VERSION,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          catalog_object_ids: variationIds,
+          states: ["IN_STOCK"],
+        }),
+        next: { revalidate: 300 },
+      }
+    );
+
+    if (!response.ok) {
+      console.error(`Square Inventory API error: ${response.status}`);
+      // Em caso de erro, assume que todos os produtos estão em estoque
+      for (const id of variationIds) {
+        inventoryMap.set(id, 1);
+      }
+      return inventoryMap;
+    }
+
+    const data = await response.json();
+    const counts: SquareInventoryCount[] = data.counts || [];
+
+    for (const count of counts) {
+      if (count.state === "IN_STOCK") {
+        const qty = parseFloat(count.quantity) || 0;
+        const existing = inventoryMap.get(count.catalog_object_id) || 0;
+        inventoryMap.set(count.catalog_object_id, existing + qty);
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao buscar estoque do Square:", err);
+    // Em caso de erro, assume que todos os produtos estão em estoque
+    for (const id of variationIds) {
+      inventoryMap.set(id, 1);
+    }
+  }
+
+  return inventoryMap;
+}
+
 interface SquareCatalogObject {
   id: string;
   type: string;
@@ -82,6 +148,18 @@ export async function getSquareProducts(): Promise<Product[]> {
   const imageMap = new Map(
     objects.filter((o) => o.type === "IMAGE").map((o) => [o.id, o])
   );
+
+  // Coletar todos os IDs de variações para consultar estoque em lote
+  const allVariationIds: string[] = [];
+  for (const item of items) {
+    const variations = item.item_data?.variations || [];
+    for (const v of variations) {
+      allVariationIds.push(v.id);
+    }
+  }
+
+  // Buscar estoque de todas as variações de uma vez
+  const inventoryMap = await getInventoryCounts(token, allVariationIds);
 
   const products: Product[] = items.map((item) => {
     const idata = item.item_data!;
@@ -150,7 +228,8 @@ export async function getSquareProducts(): Promise<Product[]> {
       description: idata.description || "",
       sizes: sizes.length > 0 ? sizes : undefined,
       colors: colors.length > 0 ? colors : undefined,
-      inStock: true,
+      // Produto está em estoque se QUALQUER variação tiver quantidade > 0
+      inStock: variations.some((v) => (inventoryMap.get(v.id) || 0) > 0),
     } satisfies Product;
   });
 
