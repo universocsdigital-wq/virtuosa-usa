@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
@@ -50,15 +49,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="grid gap-9 lg:grid-cols-[52%_48%] lg:gap-14">
             <div className="relative overflow-hidden rounded-[16px] bg-[#2A1712] shadow-[0_24px_70px_rgba(42,23,18,0.13)]">
               <div className="relative aspect-[4/5]">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={product.image}
                   alt={product.name}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 52vw"
-                  className="object-cover"
-                  quality={92}
-                  priority
-                  unoptimized={product.image.includes("s3.us-west-2.amazonaws.com")}
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 texture-linen opacity-20" aria-hidden />
               </div>
