@@ -15,6 +15,18 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [390, 768, 1024, 1280, 1920],
     imageSizes: [100, 300, 400, 600],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "items-images-production.s3.us-west-2.amazonaws.com",
+        pathname: "/files/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.s3.amazonaws.com",
+        pathname: "/**",
+      },
+    ],
   },
   experimental: {},
 };
