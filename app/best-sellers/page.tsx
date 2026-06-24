@@ -3,6 +3,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getSquareProducts } from "@/lib/square";
+import type { Product } from "@/types";
 
 export const metadata: Metadata = {
   title: "Mais Amadas | Virtuosa USA",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function BestSellersPage() {
-  let products = [];
+  let products: Product[] = [];
   try {
     const all = await getSquareProducts();
     // Ordenar por preço decrescente (mais caras = mais exclusivas)

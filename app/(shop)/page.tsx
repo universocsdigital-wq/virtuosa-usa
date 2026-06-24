@@ -10,6 +10,7 @@ import { BestSellers }       from "@/components/home/BestSellers";
 import { CustomerReviews }   from "@/components/home/CustomerReviews";
 import { OwnerStory }        from "@/components/home/OwnerStory";
 import { getSquareProducts } from "@/lib/square";
+import type { Product } from "@/types";
 import { reviews, aggregateRating } from "@/lib/data/reviews";
 
 export const metadata: Metadata = {
@@ -42,7 +43,7 @@ const jsonLd = {
 
 export default async function HomePage() {
   // Buscar produtos do Square em tempo real
-  let allProducts = [];
+  let allProducts: Product[] = [];
   try {
     allProducts = await getSquareProducts();
   } catch {
