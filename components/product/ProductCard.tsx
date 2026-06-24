@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
@@ -18,14 +17,12 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={productHref} className="block" aria-label={`Ver peça ${product.name}`}>
         <div className="relative aspect-[4/5] overflow-hidden bg-[#23110B]">
           {hasRealImage ? (
-            <Image
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
               src={product.image}
               alt={product.name}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              quality={85}
-              unoptimized={product.image.includes("s3.us-west-2.amazonaws.com")}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
             />
           ) : (
             <>
