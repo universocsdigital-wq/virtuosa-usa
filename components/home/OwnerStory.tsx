@@ -15,9 +15,9 @@ export function OwnerStory() {
               alt="Elaine Soares, fundadora da Virtuosa USA"
               fill
               sizes="(min-width: 1024px) 360px, 230px"
-              className="scale-[1.16] object-cover object-[center_68%]"
+              className="scale-[1.12] object-cover object-[center_58%]"
             />
-            <div className="absolute inset-4 border border-[#F7F1E8]/55" aria-hidden />
+            <div className="absolute inset-x-4 bottom-4 top-7 border border-[#F7F1E8]/55" aria-hidden />
             <div className="absolute inset-0 bg-gradient-to-t from-[#2A1712]/12 via-transparent to-[#F7F1E8]/8" aria-hidden />
             <div className="absolute bottom-8 left-1/2 h-px w-24 -translate-x-1/2 bg-[#C6A36A]/45" aria-hidden />
           </div>
