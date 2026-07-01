@@ -13,7 +13,7 @@ const contentSecurityPolicy = [
   `script-src ${scriptSource}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com https://items-images-production.s3.us-west-2.amazonaws.com https://*.s3.amazonaws.com https://*.s3.us-west-2.amazonaws.com",
   "connect-src 'self'",
   "upgrade-insecure-requests",
 ].join("; ");

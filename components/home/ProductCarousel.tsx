@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ProductCard } from "@/components/product/ProductCard";
 import type { Product } from "@/types";
 
@@ -12,39 +12,63 @@ interface ProductCarouselProps {
 
 export function ProductCarousel({ products, dark = false, ariaLabel }: ProductCarouselProps) {
   const carouselRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef(false);
+  const loopProducts = useMemo(() => [...products, ...products], [products]);
 
-  function move(direction: "left" | "right") {
+  const normalizePosition = useCallback(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const loopWidth = carousel.scrollWidth / 2;
+    if (loopWidth <= 0) return;
+
+    if (carousel.scrollLeft >= loopWidth) carousel.scrollLeft -= loopWidth;
+    if (carousel.scrollLeft < 0) carousel.scrollLeft += loopWidth;
+  }, []);
+
+  const move = useCallback((direction: "left" | "right") => {
     const carousel = carouselRef.current;
     if (!carousel) return;
 
     const step = Math.max(carousel.clientWidth * 0.52, 180);
-    const reachedEnd = carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 12;
-    const reachedStart = carousel.scrollLeft <= 12;
-
-    if (direction === "right" && reachedEnd) {
-      carousel.scrollTo({ left: 0, behavior: "smooth" });
-      return;
-    }
-
-    if (direction === "left" && reachedStart) {
-      carousel.scrollTo({ left: carousel.scrollWidth, behavior: "smooth" });
-      return;
-    }
-
     carousel.scrollBy({ left: direction === "right" ? step : -step, behavior: "smooth" });
-  }
+    window.setTimeout(normalizePosition, 520);
+  }, [normalizePosition]);
 
   useEffect(() => {
-    const timer = window.setInterval(() => move("right"), 5200);
-    return () => window.clearInterval(timer);
-  }, []);
+    let frameId = 0;
+    let lastTime = performance.now();
+
+    function tick(time: number) {
+      const carousel = carouselRef.current;
+      if (carousel && !isPausedRef.current) {
+        const delta = time - lastTime;
+        carousel.scrollLeft += delta * 0.018;
+        normalizePosition();
+      }
+      lastTime = time;
+      frameId = window.requestAnimationFrame(tick);
+    }
+
+    frameId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [normalizePosition]);
 
   const arrowClass = dark
     ? "border-white/25 bg-[#2A1712]/90 text-[#F7D98F] hover:bg-[#4F2107]"
     : "border-[#C6A36A]/45 bg-[#F7F1E8]/95 text-[#4F2107] hover:bg-[#F1DDC1]";
 
   return (
-    <div className="relative mx-auto max-w-[1220px]" aria-label={ariaLabel}>
+    <div
+      className="relative mx-auto max-w-[1220px]"
+      aria-label={ariaLabel}
+      onMouseEnter={() => {
+        isPausedRef.current = true;
+      }}
+      onMouseLeave={() => {
+        isPausedRef.current = false;
+      }}
+    >
       <button
         type="button"
         onClick={() => move("left")}
@@ -56,12 +80,13 @@ export function ProductCarousel({ products, dark = false, ariaLabel }: ProductCa
 
       <div
         ref={carouselRef}
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5 lg:gap-7"
+        className="flex gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5 lg:gap-7"
       >
-        {products.map((product) => (
+        {loopProducts.map((product, index) => (
           <div
-            key={product.id}
-            className="w-[47%] shrink-0 snap-start sm:w-[calc(50%-10px)] lg:w-[calc(25%-21px)]"
+            key={`${product.id}-${index}`}
+            className="w-[47%] shrink-0 sm:w-[calc(50%-10px)] lg:w-[calc(25%-21px)]"
+            aria-hidden={index >= products.length}
           >
             <ProductCard product={product} dark={dark} />
           </div>
