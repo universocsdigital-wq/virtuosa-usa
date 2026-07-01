@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export function OwnerStory() {
   return (
     <section
@@ -8,18 +10,15 @@ export function OwnerStory() {
       <div className="container-virtuosa">
         <div className="grid items-center gap-6 border-t border-[#D9C8B5] pt-7 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12 lg:pt-7">
           <div className="relative mx-auto aspect-[4/5] w-full max-w-[230px] overflow-hidden border border-[#C6A36A]/35 bg-[#F7F1E8] shadow-[0_18px_48px_rgba(42,23,18,0.08)] lg:max-w-[360px] lg:shadow-[0_24px_70px_rgba(42,23,18,0.10)]">
-            <div className="absolute inset-5 border border-[#C6A36A]/22" aria-hidden />
-            <div className="absolute inset-0 texture-linen opacity-70" aria-hidden />
-            <div
-              className="absolute inset-0 opacity-[0.075]"
-              style={{
-                backgroundImage: "url('/svg/MONOGRAMA/Monograma sem Circulo Fundo Claro.svg.svg')",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "52%",
-              }}
-              aria-hidden
+            <Image
+              src="/images/brand/elaine-soares.jpg"
+              alt="Elaine Soares, fundadora da Virtuosa USA"
+              fill
+              sizes="(min-width: 1024px) 360px, 230px"
+              className="object-cover object-center"
             />
+            <div className="absolute inset-4 border border-[#F7F1E8]/55" aria-hidden />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#2A1712]/12 via-transparent to-[#F7F1E8]/8" aria-hidden />
             <div className="absolute bottom-8 left-1/2 h-px w-24 -translate-x-1/2 bg-[#C6A36A]/45" aria-hidden />
           </div>
 
