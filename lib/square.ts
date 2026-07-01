@@ -1,16 +1,16 @@
 import type { Product, ProductCategory } from "@/types";
+import { products as staticProducts } from "@/lib/data/products";
 
 const SQUARE_BASE_URL = "https://connect.squareup.com/v2";
 const SQUARE_VERSION = "2024-01-18";
 
-function getSquareToken(): string {
+function getSquareToken(): string | null {
   // Suporta tanto SQUARE_ACCESS_TOKEN quanto o nome em português configurado na Vercel
   const token =
     process.env.SQUARE_ACCESS_TOKEN ||
     process.env["LOCALIZAÇÃO_QUADRADA_"] ||
     process.env.LOCALIZACAO_QUADRADA_;
-  if (!token) throw new Error("SQUARE_ACCESS_TOKEN não configurado");
-  return token;
+  return token || null;
 }
 
 function toSlug(name: string): string {
@@ -125,6 +125,7 @@ interface SquareCatalogObject {
 
 export async function getSquareProducts(): Promise<Product[]> {
   const token = getSquareToken();
+  if (!token) return staticProducts;
 
   const response = await fetch(`${SQUARE_BASE_URL}/catalog/list?types=ITEM,IMAGE`, {
     headers: {
