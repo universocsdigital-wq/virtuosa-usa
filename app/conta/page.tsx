@@ -6,6 +6,7 @@ import { AccountClient } from "@/components/account/AccountClient";
 export const metadata: Metadata = {
   title: "Minha Conta | Virtuosa USA",
   description: "Consulte seus pedidos e acompanhe seus envios da Virtuosa USA.",
+  robots: { index: false, follow: false },
 };
 
 export default function AccountPage() {

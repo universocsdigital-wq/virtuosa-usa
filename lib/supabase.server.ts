@@ -24,6 +24,35 @@ export async function getSupabaseUser(accessToken: string) {
   return (await response.json()) as { id: string; email?: string };
 }
 
+export async function revokeSupabaseSession(accessToken: string) {
+  const { url, anonKey } = supabaseConfig();
+  await fetch(`${url}/auth/v1/logout`, {
+    method: "POST",
+    headers: { apikey: anonKey, Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+}
+
+export async function ensureSupabaseUser(email: string) {
+  if (!email) return;
+  const { url, serviceRoleKey } = supabaseConfig();
+  const response = await fetch(`${url}/auth/v1/admin/users`, {
+    method: "POST",
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, email_confirm: true }),
+    cache: "no-store",
+  });
+
+  // O Supabase retorna 422 quando o usuário já existe.
+  if (!response.ok && response.status !== 422) {
+    throw new Error(`Falha ao preparar acesso do cliente: ${response.status}`);
+  }
+}
+
 export async function upsertSupabaseOrder(order: Record<string, unknown>) {
   const { url, serviceRoleKey } = supabaseConfig();
   const response = await fetch(`${url}/rest/v1/orders?on_conflict=square_order_id`, {

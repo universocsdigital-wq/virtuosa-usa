@@ -29,8 +29,9 @@ export function CartDrawer() {
           })),
         }),
       });
-      const data = (await response.json()) as { checkoutUrl?: string; error?: string };
+      const data = (await response.json()) as { checkoutUrl?: string; orderId?: string; error?: string };
       if (!response.ok || !data.checkoutUrl) throw new Error(data.error ?? "Não foi possível iniciar o checkout.");
+      if (data.orderId) window.sessionStorage.setItem("virtuosa-pending-order", data.orderId);
       window.location.assign(data.checkoutUrl);
     } catch (checkoutError) {
       setError(checkoutError instanceof Error ? checkoutError.message : "Não foi possível iniciar o checkout.");

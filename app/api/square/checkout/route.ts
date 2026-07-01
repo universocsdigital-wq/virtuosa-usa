@@ -1,4 +1,6 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
+import { durableRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getSquareProducts } from "@/lib/square";
 
 const SHIPPING_CENTS = 1200;
@@ -16,7 +18,26 @@ interface CheckoutRequest {
 }
 
 export async function POST(request: Request) {
-  // Suporta tanto os nomes em português (Vercel) quanto os nomes em inglês
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > 32_768) {
+    return NextResponse.json({ error: "A sacola excedeu o tamanho permitido." }, { status: 413 });
+  }
+
+  const clientIp = getClientIp(request);
+  const checkoutLimit = await durableRateLimit({
+    namespace: "square-checkout-ip",
+    identifier: clientIp,
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!checkoutLimit.allowed) {
+    return NextResponse.json(
+      { error: "Muitas tentativas de checkout. Aguarde e tente novamente." },
+      { status: 429, headers: { "Retry-After": String(checkoutLimit.retryAfter) } },
+    );
+  }
+
   const accessToken =
     process.env.SQUARE_ACCESS_TOKEN ||
     process.env["LOCALIZAÇÃO_QUADRADA_"] ||
@@ -35,7 +56,7 @@ export async function POST(request: Request) {
   if (!accessToken || !locationId) {
     return NextResponse.json(
       { error: "O checkout da Square está aguardando a configuração da loja." },
-      { status: 503 }
+      { status: 503 },
     );
   }
 
@@ -46,21 +67,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Sacola inválida." }, { status: 400 });
   }
 
-  if (!body.items?.length) {
-    return NextResponse.json({ error: "A sacola está vazia." }, { status: 400 });
-  }
+  if (!body.items?.length) return NextResponse.json({ error: "A sacola está vazia." }, { status: 400 });
+  if (body.items.length > 20) return NextResponse.json({ error: "A sacola possui itens demais." }, { status: 400 });
   if (body.fulfillmentType !== "shipping" && body.fulfillmentType !== "pickup") {
     return NextResponse.json({ error: "Escolha envio ou retirada local." }, { status: 400 });
   }
 
-  // Buscar produtos do Square (com cache de 5 minutos)
   let allProducts;
   try {
     allProducts = await getSquareProducts();
   } catch {
     return NextResponse.json(
       { error: "Não foi possível verificar os produtos. Tente novamente." },
-      { status: 502 }
+      { status: 502 },
     );
   }
 
@@ -76,39 +95,25 @@ export async function POST(request: Request) {
 
     if (!product) {
       return NextResponse.json(
-        {
-          error:
-            "Um produto da sacola não está mais disponível. Atualize a página e tente novamente.",
-        },
-        { status: 400 }
+        { error: "Um produto da sacola não está mais disponível. Atualize a página e tente novamente." },
+        { status: 400 },
       );
     }
 
     const quantity = Math.floor(item.quantity);
     if (!Number.isFinite(quantity) || quantity < 1 || quantity > 20) {
-      return NextResponse.json(
-        { error: `Quantidade inválida para ${product.name}.` },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: `Quantidade inválida para ${product.name}.` }, { status: 400 });
     }
 
     if (product.sizes?.length && (!item.size || !product.sizes.includes(item.size))) {
-      return NextResponse.json(
-        { error: `Escolha um tamanho válido para ${product.name}.` },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: `Escolha um tamanho válido para ${product.name}.` }, { status: 400 });
     }
 
     if (product.colors?.length && (!item.color || !product.colors.includes(item.color))) {
-      return NextResponse.json(
-        { error: `Escolha uma cor válida para ${product.name}.` },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: `Escolha uma cor válida para ${product.name}.` }, { status: 400 });
     }
 
-    const variation = [item.size && `Tamanho ${item.size}`, item.color]
-      .filter(Boolean)
-      .join(" · ");
+    const variation = [item.size && `Tamanho ${item.size}`, item.color].filter(Boolean).join(" · ");
 
     lineItems.push({
       name: product.name,
@@ -126,52 +131,49 @@ export async function POST(request: Request) {
     });
   }
 
-  const squareBaseUrl =
-    environment === "sandbox"
-      ? "https://connect.squareupsandbox.com"
-      : "https://connect.squareup.com";
-
+  const idempotencyPayload = JSON.stringify({
+    clientIp,
+    fulfillmentType: body.fulfillmentType,
+    items: body.items
+      .map(({ productId, quantity, size, color }) => ({ productId, quantity, size: size ?? "", color: color ?? "" }))
+      .sort((a, b) => `${a.productId}:${a.size}:${a.color}`.localeCompare(`${b.productId}:${b.size}:${b.color}`)),
+    timeBucket: Math.floor(Date.now() / (10 * 60 * 1000)),
+  });
+  const idempotencyKey = createHash("sha256").update(idempotencyPayload).digest("hex");
+  const squareBaseUrl = environment === "sandbox" ? "https://connect.squareupsandbox.com" : "https://connect.squareup.com";
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env["URL_SUPABASE"]?.replace("supabase", "virtuosausa") ||
     "https://virtuosausa.com";
 
   try {
-    const squareResponse = await fetch(
-      `${squareBaseUrl}/v2/online-checkout/payment-links`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-          "Square-Version":
-            process.env.SQUARE_API_VERSION ||
-            process.env["SQUARE_API_VERSION"] ||
-            "2026-05-20",
+    const squareResponse = await fetch(`${squareBaseUrl}/v2/online-checkout/payment-links`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "Square-Version": process.env.SQUARE_API_VERSION ?? "2026-05-20",
+      },
+      body: JSON.stringify({
+        idempotency_key: idempotencyKey,
+        order: {
+          location_id: locationId,
+          line_items: lineItems,
         },
-        body: JSON.stringify({
-          idempotency_key: crypto.randomUUID(),
-          order: {
-            location_id: locationId,
-            line_items: lineItems,
+        checkout_options: {
+          ask_for_shipping_address: body.fulfillmentType === "shipping",
+          redirect_url: `${siteUrl}/checkout/sucesso`,
+          accepted_payment_methods: {
+            apple_pay: true,
+            google_pay: true,
+            cash_app_pay: true,
+            afterpay_clearpay: false,
           },
-          checkout_options: {
-            ask_for_shipping_address: body.fulfillmentType === "shipping",
-            redirect_url: "https://virtuosausa.com/checkout/sucesso",
-            accepted_payment_methods: {
-              apple_pay: true,
-              google_pay: true,
-              cash_app_pay: true,
-              afterpay_clearpay: false,
-            },
-          },
-          payment_note: `Virtuosa USA — ${
-            body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"
-          }`,
-        }),
-        cache: "no-store",
-      }
-    );
+        },
+        payment_note: `Virtuosa USA — ${body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"}`,
+      }),
+      cache: "no-store",
+    });
 
     const squareData = (await squareResponse.json()) as {
       payment_link?: { url?: string; order_id?: string };
@@ -179,10 +181,9 @@ export async function POST(request: Request) {
     };
 
     if (!squareResponse.ok || !squareData.payment_link?.url) {
-      const detail = squareData.errors?.[0]?.detail;
       return NextResponse.json(
-        { error: detail ?? "A Square não conseguiu criar o checkout." },
-        { status: 502 }
+        { error: squareData.errors?.[0]?.detail ?? "A Square não conseguiu criar o checkout." },
+        { status: 502 },
       );
     }
 
@@ -193,7 +194,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json(
       { error: "Não foi possível conectar à Square. Tente novamente." },
-      { status: 502 }
+      { status: 502 },
     );
   }
 }

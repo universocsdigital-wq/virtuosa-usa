@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { products } from "@/lib/data/products";
 import type { CartItem, Product } from "@/types";
 
 interface CartContextValue {
@@ -18,9 +19,35 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "virtuosa-cart";
+const CART_VERSION = 1;
+const CART_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+interface StoredCart {
+  version: number;
+  savedAt: number;
+  items: CartItem[];
+}
 
 function sameItem(item: CartItem, productId: string, size?: string, color?: string) {
   return item.product.id === productId && item.size === size && item.color === color;
+}
+
+function sanitizeItems(value: unknown): CartItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((candidate) => {
+    if (!candidate || typeof candidate !== "object") return [];
+    const item = candidate as Partial<CartItem>;
+    const productId = item.product?.id;
+    const product = products.find((entry) => entry.id === productId && entry.inStock);
+    if (!product) return [];
+
+    const quantity = Math.min(20, Math.max(1, Math.floor(Number(item.quantity) || 1)));
+    const size = item.size && product.sizes?.includes(item.size) ? item.size : undefined;
+    const color = item.color && product.colors?.includes(item.color) ? item.color : undefined;
+    if (product.sizes?.length && !size) return [];
+    if (product.colors?.length && !color) return [];
+    return [{ product, quantity, size, color }];
+  });
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -31,7 +58,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved) setItems(JSON.parse(saved) as CartItem[]);
+      if (saved) {
+        const parsed = JSON.parse(saved) as StoredCart | CartItem[];
+        if (Array.isArray(parsed)) {
+          setItems(sanitizeItems(parsed));
+        } else if (parsed.version === CART_VERSION && Date.now() - parsed.savedAt <= CART_TTL_MS) {
+          setItems(sanitizeItems(parsed.items));
+        } else {
+          window.localStorage.removeItem(STORAGE_KEY);
+        }
+      }
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
     } finally {
@@ -40,7 +76,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (hydrated) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    if (hydrated) {
+      const storedCart: StoredCart = { version: CART_VERSION, savedAt: Date.now(), items };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storedCart));
+    }
   }, [hydrated, items]);
 
   useEffect(() => {

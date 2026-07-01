@@ -43,3 +43,5 @@ next-env.d.ts
 .npm-cache/
 dev-server*.log
 *.zip
+/tmp/
+/auditoria-seguranca-virtuosausa.html

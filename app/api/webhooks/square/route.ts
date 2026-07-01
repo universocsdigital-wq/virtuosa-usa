@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
-import { upsertSupabaseOrder } from "@/lib/supabase.server";
+import { ensureSupabaseUser, upsertSupabaseOrder } from "@/lib/supabase.server";
 
 export const runtime = "nodejs";
 
@@ -68,6 +68,7 @@ export async function POST(request: Request) {
       const customerEmail = String(payment?.buyer_email_address ?? details.email ?? "").toLowerCase();
 
       if (orderId) {
+        if (customerEmail) await ensureSupabaseUser(customerEmail);
         await upsertSupabaseOrder({
           square_order_id: orderId,
           square_payment_id: String(payment?.id ?? ""),
