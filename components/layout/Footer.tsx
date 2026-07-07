@@ -39,8 +39,8 @@ export function Footer() {
               <h4 className="mb-2.5 font-sans text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#F7D98F] sm:text-[10px]">
                 Compra Segura
               </h4>
-              <p className="max-w-[190px] font-sans text-[10px] leading-relaxed text-[#F1DDC1]/90 sm:text-[13px]">
-                Checkout protegido via Square com cartões, carteiras digitais e Cash App Pay.
+              <p className="max-w-[210px] font-sans text-[10px] leading-relaxed text-[#F1DDC1]/90 sm:text-[13px]">
+                Pagamento protegido via Square.
               </p>
               <PaymentBadges />
             </div>
@@ -93,30 +93,25 @@ export function Footer() {
 
 function PaymentBadges() {
   const badges = [
-    { label: "Cash App Pay", content: "$" },
-    { label: "Apple Pay", content: "\uF8FF Pay" },
-    { label: "Google Pay", content: "G Pay" },
-    { label: "Visa", content: "VISA" },
-    { label: "Mastercard", content: "MC" },
-    { label: "American Express", content: "AMEX" },
-    { label: "Discover", content: "DISC" },
+    "Cartões",
+    "Apple Pay",
+    "Google Pay",
+    "Cash App Pay",
   ];
 
   return (
     <div
-      className="mt-3 inline-flex max-w-[214px] flex-wrap items-center gap-1.5 rounded-[6px] border border-[#F7D98F]/18 bg-[#2A1208]/22 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:mt-4 sm:max-w-[240px]"
+      className="mt-3 grid max-w-[170px] grid-cols-2 gap-1.5 sm:mt-4 sm:max-w-[190px]"
       aria-label="Formas de pagamento aceitas"
     >
-        {badges.map((badge) => (
-          <span
-            key={badge.label}
-            title={badge.label}
-            aria-label={badge.label}
-            className="inline-flex h-5 min-w-[30px] items-center justify-center rounded-[3px] bg-[#F8E9D2] px-1.5 font-sans text-[7.5px] font-bold leading-none tracking-[0.02em] text-[#4F2107] shadow-[0_5px_12px_rgba(0,0,0,0.14)] sm:h-[22px] sm:min-w-[34px] sm:text-[8px]"
-          >
-            {badge.content}
-          </span>
-        ))}
+      {badges.map((badge) => (
+        <span
+          key={badge}
+          className="inline-flex h-7 items-center justify-center border border-[#F7D98F]/24 bg-[#F8E9D2]/8 px-2 text-center font-sans text-[8px] font-semibold uppercase tracking-[0.08em] text-[#F7D98F] sm:text-[8.5px]"
+        >
+          {badge}
+        </span>
+      ))}
     </div>
   );
 }
