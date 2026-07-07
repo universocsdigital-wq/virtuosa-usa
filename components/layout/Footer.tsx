@@ -97,30 +97,30 @@ export function Footer() {
 
 function PaymentBadges() {
   const badges = [
-    { label: "Cash App Pay", className: "bg-[#00D632] text-white", content: "$" },
-    { label: "Apple Pay", className: "bg-white text-black", content: "\uF8FF Pay" },
-    { label: "Google Pay", className: "bg-white text-[#3C4043]", content: "G Pay" },
-    { label: "Visa", className: "bg-white text-[#1A1F71]", content: "VISA" },
-    { label: "Mastercard", className: "bg-white text-[#EA001B]", content: "●●" },
-    { label: "American Express", className: "bg-[#2E77BC] text-white", content: "AMEX" },
-    { label: "Discover", className: "bg-white text-[#F58220]", content: "DISCOVER" },
+    { label: "Cash App Pay", content: "$" },
+    { label: "Apple Pay", content: "\uF8FF Pay" },
+    { label: "Google Pay", content: "G Pay" },
+    { label: "Visa", content: "VISA" },
+    { label: "Mastercard", content: "MC" },
+    { label: "American Express", content: "AMEX" },
+    { label: "Discover", content: "DISC" },
   ];
 
   return (
-    <div
-      className="mt-3 flex max-w-[190px] flex-wrap items-center gap-1.5 sm:mt-4 sm:max-w-[220px]"
-      aria-label="Formas de pagamento aceitas"
-    >
-      {badges.map((badge) => (
-        <span
-          key={badge.label}
-          title={badge.label}
-          aria-label={badge.label}
-          className={`${badge.className} inline-flex h-5 min-w-8 items-center justify-center rounded-[3px] px-1.5 font-sans text-[8px] font-bold leading-none shadow-[0_4px_10px_rgba(0,0,0,0.12)] ring-1 ring-white/35 sm:h-6 sm:min-w-9 sm:text-[9px]`}
-        >
-          {badge.content}
-        </span>
-      ))}
+    <div className="mt-3 max-w-[205px] sm:mt-4 sm:max-w-[230px]" aria-label="Formas de pagamento aceitas">
+      <div className="mb-2 h-px w-12 bg-[#F7D98F]/35" aria-hidden />
+      <div className="flex flex-wrap items-center gap-1.5">
+        {badges.map((badge) => (
+          <span
+            key={badge.label}
+            title={badge.label}
+            aria-label={badge.label}
+            className="inline-flex h-6 min-w-[34px] items-center justify-center rounded-[4px] border border-[#F7D98F]/25 bg-[#F9EFE0]/95 px-1.5 font-sans text-[8px] font-bold leading-none tracking-[0.02em] text-[#4F2107] shadow-[0_8px_18px_rgba(0,0,0,0.14)] sm:h-6 sm:min-w-[38px] sm:text-[8.5px]"
+          >
+            {badge.content}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
