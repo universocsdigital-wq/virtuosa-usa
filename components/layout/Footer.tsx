@@ -39,13 +39,9 @@ export function Footer() {
               <h4 className="mb-2.5 font-sans text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#F7D98F] sm:text-[10px]">
                 Compra Segura
               </h4>
-              <ul className="grid gap-1.5 font-sans text-[10px] leading-snug text-[#F1DDC1]/90 sm:text-[13px]">
-                <li>Checkout protegido via Square</li>
-                <li>Cartões de Crédito e Débito</li>
-                <li>Apple Pay</li>
-                <li>Google Pay</li>
-                <li>Cash App Pay</li>
-              </ul>
+              <p className="max-w-[190px] font-sans text-[10px] leading-relaxed text-[#F1DDC1]/90 sm:text-[13px]">
+                Checkout protegido via Square com cartões, carteiras digitais e Cash App Pay.
+              </p>
               <PaymentBadges />
             </div>
 
@@ -107,20 +103,20 @@ function PaymentBadges() {
   ];
 
   return (
-    <div className="mt-3 max-w-[205px] sm:mt-4 sm:max-w-[230px]" aria-label="Formas de pagamento aceitas">
-      <div className="mb-2 h-px w-12 bg-[#F7D98F]/35" aria-hidden />
-      <div className="flex flex-wrap items-center gap-1.5">
+    <div
+      className="mt-3 inline-flex max-w-[214px] flex-wrap items-center gap-1.5 rounded-[6px] border border-[#F7D98F]/18 bg-[#2A1208]/22 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:mt-4 sm:max-w-[240px]"
+      aria-label="Formas de pagamento aceitas"
+    >
         {badges.map((badge) => (
           <span
             key={badge.label}
             title={badge.label}
             aria-label={badge.label}
-            className="inline-flex h-6 min-w-[34px] items-center justify-center rounded-[4px] border border-[#F7D98F]/25 bg-[#F9EFE0]/95 px-1.5 font-sans text-[8px] font-bold leading-none tracking-[0.02em] text-[#4F2107] shadow-[0_8px_18px_rgba(0,0,0,0.14)] sm:h-6 sm:min-w-[38px] sm:text-[8.5px]"
+            className="inline-flex h-5 min-w-[30px] items-center justify-center rounded-[3px] bg-[#F8E9D2] px-1.5 font-sans text-[7.5px] font-bold leading-none tracking-[0.02em] text-[#4F2107] shadow-[0_5px_12px_rgba(0,0,0,0.14)] sm:h-[22px] sm:min-w-[34px] sm:text-[8px]"
           >
             {badge.content}
           </span>
         ))}
-      </div>
     </div>
   );
 }
