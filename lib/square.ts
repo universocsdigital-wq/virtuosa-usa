@@ -116,6 +116,7 @@ interface SquareCatalogObject {
     name: string;
     sku?: string;
     price_money?: { amount: number; currency: string };
+    image_ids?: string[];
   };
   image_data?: {
     url: string;
@@ -123,25 +124,65 @@ interface SquareCatalogObject {
   };
 }
 
+async function fetchSquareCatalogObjects(token: string): Promise<SquareCatalogObject[]> {
+  const objects: SquareCatalogObject[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const params = new URLSearchParams({ types: "ITEM,IMAGE" });
+    if (cursor) params.set("cursor", cursor);
+
+    const response = await fetch(`${SQUARE_BASE_URL}/catalog/list?${params.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Square-Version": SQUARE_VERSION,
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 60 },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Square API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    objects.push(...((data.objects || []) as SquareCatalogObject[]));
+    cursor = data.cursor;
+  } while (cursor);
+
+  return objects;
+}
+
+function addUnique(target: string[], values: string[]) {
+  for (const value of values) {
+    if (value && !target.includes(value)) {
+      target.push(value);
+    }
+  }
+}
+
+function getImageUrlsFromIds(
+  imageIds: string[],
+  imageMap: Map<string, SquareCatalogObject>
+): string[] {
+  const urls: string[] = [];
+
+  for (const imageId of imageIds) {
+    const imageObject = imageMap.get(imageId);
+    const imageUrl = imageObject?.image_data?.url;
+    if (imageUrl && !urls.includes(imageUrl)) {
+      urls.push(imageUrl);
+    }
+  }
+
+  return urls;
+}
+
 export async function getSquareProducts(): Promise<Product[]> {
   const token = getSquareToken();
   if (!token) return staticProducts;
 
-  const response = await fetch(`${SQUARE_BASE_URL}/catalog/list?types=ITEM,IMAGE`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Square-Version": SQUARE_VERSION,
-      "Content-Type": "application/json",
-    },
-    next: { revalidate: 300 }, // cache por 5 minutos
-  });
-
-  if (!response.ok) {
-    throw new Error(`Square API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const objects: SquareCatalogObject[] = data.objects || [];
+  const objects = await fetchSquareCatalogObjects(token);
 
   const items = objects.filter((o) => o.type === "ITEM");
   const imageMap = new Map(
@@ -165,21 +206,17 @@ export async function getSquareProducts(): Promise<Product[]> {
     const name = idata.name;
     const variations = idata.variations || [];
 
-    // Obter URLs de todas as imagens do produto
-    const imageIds = idata.image_ids || [];
-    let imageUrl = "/images/placeholder.jpg";
+    // Obter URLs de todas as imagens do produto e das variacoes.
+    const imageIds: string[] = [];
+    addUnique(imageIds, idata.image_ids || []);
+    for (const variation of variations) {
+      addUnique(imageIds, variation.item_variation_data?.image_ids || []);
+    }
+
     const allImages: string[] = [];
+    addUnique(allImages, getImageUrlsFromIds(imageIds, imageMap));
 
-    for (const imgId of imageIds) {
-      const imgObj = imageMap.get(imgId);
-      if (imgObj?.image_data?.url) {
-        allImages.push(imgObj.image_data.url);
-      }
-    }
-
-    if (allImages.length > 0) {
-      imageUrl = allImages[0];
-    }
+    const imageUrl = allImages[0] || "/images/placeholder.jpg";
 
     // Extrair tamanhos únicos das variações
     const sizes = Array.from(
@@ -222,7 +259,7 @@ export async function getSquareProducts(): Promise<Product[]> {
       rating: 4.9,
       reviewCount: 0,
       image: imageUrl,
-      images: allImages.length > 1 ? allImages : undefined,
+      images: allImages.length > 0 ? allImages : undefined,
       category: getCategory(name),
       description: idata.description || "",
       sizes: sizes.length > 0 ? sizes : undefined,
