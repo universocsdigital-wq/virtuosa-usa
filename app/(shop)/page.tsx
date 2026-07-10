@@ -10,6 +10,7 @@ import { BestSellers }       from "@/components/home/BestSellers";
 import { CustomerReviews }   from "@/components/home/CustomerReviews";
 import { OwnerStory }        from "@/components/home/OwnerStory";
 import { getSquareProducts } from "@/lib/square";
+import { getCollectionProducts, getHighestTicketProducts } from "@/lib/product-selection";
 import type { Product } from "@/types";
 import { reviews, aggregateRating } from "@/lib/data/reviews";
 
@@ -50,13 +51,11 @@ export default async function HomePage() {
     // Fallback silencioso — seções ficam vazias mas a página não quebra
   }
 
-  // "Mais Amadas" = as 6 peças mais caras do catálogo
-  const bestSellers = [...allProducts]
-    .sort((a, b) => b.price - a.price)
-    .slice(0, 6);
+  // "Mais Amadas" = peças de maior ticket, sem repetir modelo/cor
+  const bestSellers = getHighestTicketProducts(allProducts, 8);
 
-  // "Em Destaque" = todos os produtos do Square
-  const featuredProducts = allProducts;
+  // "Coleção" = produtos do Square sem repetir modelo/cor
+  const featuredProducts = getCollectionProducts(allProducts);
 
   return (
     <>

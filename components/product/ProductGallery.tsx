@@ -21,12 +21,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         className="group relative block w-full overflow-hidden rounded-[16px] bg-[#2A1712] text-left shadow-[0_24px_70px_rgba(42,23,18,0.13)]"
         aria-label={`Ampliar foto de ${productName}`}
       >
-        <div className="relative aspect-[4/5]">
+        <div className="relative aspect-[4/5] bg-gradient-to-br from-[#F7F1E8] via-[#E8D9C6] to-[#8A7568]/35">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={selectedImage}
             alt={productName}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            className="absolute inset-0 h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-[1.02]"
           />
           <div className="absolute inset-0 texture-linen opacity-20" aria-hidden />
           <span className="absolute bottom-4 right-4 rounded-full border border-white/45 bg-[#2A1712]/55 px-4 py-2 font-sans text-[10px] font-bold uppercase tracking-[0.16em] text-white/90 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
@@ -45,7 +45,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 key={`${image}-${index}`}
                 type="button"
                 onClick={() => setSelectedIndex(index)}
-                className={`relative aspect-[4/5] overflow-hidden rounded-[10px] border bg-[#2A1712] transition-all duration-200 ${
+                className={`relative aspect-[4/5] overflow-hidden rounded-[10px] border bg-[#F7F1E8] transition-all duration-200 ${
                   isSelected
                     ? "border-[#B88A62] ring-2 ring-[#B88A62]/35"
                     : "border-[#D8C4AD] opacity-80 hover:border-[#B88A62] hover:opacity-100"
@@ -56,7 +56,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 <img
                   src={image}
                   alt={`${productName} - foto ${index + 1}`}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-contain p-1"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
               </button>

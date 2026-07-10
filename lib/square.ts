@@ -23,6 +23,29 @@ function toSlug(name: string): string {
     .replace(/\s+/g, "-");
 }
 
+function normalizeProductName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function applyProductOverrides(product: Product): Product {
+  if (normalizeProductName(product.name).includes("elisama")) {
+    return {
+      ...product,
+      name: "Conjunto Elisama",
+      slug: "conjunto-elisama",
+      price: 310,
+      category: "conjuntos",
+      sizes: ["P", "G"],
+      colors: ["Nude"],
+    };
+  }
+
+  return product;
+}
+
 function getCategory(name: string): ProductCategory {
   const n = name.toLowerCase();
   if (n.includes("vestido")) return "vestidos";
@@ -251,7 +274,7 @@ export async function getSquareProducts(): Promise<Product[]> {
     const priceAmount = firstVariation?.item_variation_data?.price_money?.amount || 0;
     const price = priceAmount / 100;
 
-    return {
+    return applyProductOverrides({
       id: item.id,
       name,
       slug: toSlug(name),
@@ -266,7 +289,7 @@ export async function getSquareProducts(): Promise<Product[]> {
       colors: colors.length > 0 ? colors : undefined,
       // Produto está em estoque se QUALQUER variação tiver quantidade > 0
       inStock: variations.some((v) => (inventoryMap.get(v.id) || 0) > 0),
-    } satisfies Product;
+    } satisfies Product);
   });
 
   // Ordenar: vestidos primeiro, depois saias, conjuntos, blusas
