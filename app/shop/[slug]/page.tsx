@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
+import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchasePanel } from "@/components/product/ProductPurchasePanel";
 import { formatPrice } from "@/lib/utils";
 import { getSquareProducts, getSquareProductBySlug } from "@/lib/square";
@@ -48,37 +49,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </Link>
           </div>
           <div className="grid gap-9 lg:grid-cols-[52%_48%] lg:gap-14">
-            <div>
-              <div className="relative overflow-hidden rounded-[16px] bg-[#2A1712] shadow-[0_24px_70px_rgba(42,23,18,0.13)]">
-                <div className="relative aspect-[4/5]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={galleryImages[0]}
-                    alt={product.name}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 texture-linen opacity-20" aria-hidden />
-                </div>
-              </div>
-              {galleryImages.length > 1 && (
-                <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5">
-                  {galleryImages.map((image, index) => (
-                    <div
-                      key={`${image}-${index}`}
-                      className="relative aspect-[4/5] overflow-hidden rounded-[10px] border border-[#D8C4AD] bg-[#2A1712]"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={image}
-                        alt={`${product.name} - foto ${index + 1}`}
-                        className="absolute inset-0 h-full w-full object-cover"
-                        loading={index === 0 ? "eager" : "lazy"}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProductGallery images={galleryImages} productName={product.name} />
             <div className="flex flex-col justify-center">
               <p className="mb-3 font-sans text-[10px] font-bold uppercase tracking-[0.22em] text-[#B88A62]">Seleção Virtuosa</p>
               <h1 className="font-serif text-[#2A1712]" style={{ fontSize: "clamp(2.35rem, 4.4vw, 4rem)", lineHeight: 1.02 }}>{product.name}</h1>
