@@ -112,14 +112,23 @@ export async function POST(request: Request) {
     if (product.colors?.length && (!item.color || !product.colors.includes(item.color))) {
       return NextResponse.json({ error: `Escolha uma cor vÃ¡lida para ${product.name}.` }, { status: 400 });
     }
-    if (product.inventoryBySize && item.size) {
-      const availableQuantity = product.inventoryBySize[item.size] ?? 0;
+    const availableQuantity =
+      item.size && item.color && product.inventoryByColorSize?.[item.color]
+        ? product.inventoryByColorSize[item.color][item.size] ?? 0
+        : item.size && product.inventoryBySize
+        ? product.inventoryBySize[item.size] ?? 0
+        : undefined;
+
+    if (availableQuantity !== undefined) {
       if (availableQuantity <= 0) {
-        return NextResponse.json({ error: `${product.name} está sem estoque no tamanho ${item.size}.` }, { status: 400 });
+        return NextResponse.json(
+          { error: `${product.name} está sem estoque nessa combinação.` },
+          { status: 400 }
+        );
       }
       if (quantity > availableQuantity) {
         return NextResponse.json(
-          { error: `Temos apenas ${availableQuantity} unidade(s) de ${product.name} no tamanho ${item.size}.` },
+          { error: `Temos apenas ${availableQuantity} unidade(s) de ${product.name} nessa combinação.` },
           { status: 400 },
         );
       }

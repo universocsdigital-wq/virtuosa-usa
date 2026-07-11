@@ -91,6 +91,10 @@ function applyProductOverrides(product: Product): Product {
       sizes: ["P", "M", "G"],
       colors: ["Rose", "Laranja"],
       inventoryBySize: { P: 2, M: 3, G: 6 },
+      inventoryByColorSize: {
+        Rose: { M: 1, G: 3 },
+        Laranja: { P: 2, M: 2, G: 3 },
+      },
     };
   }
 

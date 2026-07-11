@@ -32,7 +32,10 @@ function sameItem(item: CartItem, productId: string, size?: string, color?: stri
   return item.product.id === productId && item.size === size && item.color === color;
 }
 
-function getMaxQuantity(product: Product, size?: string) {
+function getMaxQuantity(product: Product, size?: string, color?: string) {
+  if (size && color && product.inventoryByColorSize?.[color]) {
+    return Math.max(0, product.inventoryByColorSize[color][size] ?? 0);
+  }
   if (!size || !product.inventoryBySize) return 20;
   return Math.max(0, product.inventoryBySize[size] ?? 0);
 }
@@ -50,7 +53,7 @@ function sanitizeItems(value: unknown): CartItem[] {
     const color = item.color && product.colors?.includes(item.color) ? item.color : undefined;
     if (product.sizes?.length && !size) return [];
     if (product.colors?.length && !color) return [];
-    const maxQuantity = getMaxQuantity(product, size);
+    const maxQuantity = getMaxQuantity(product, size, color);
     if (maxQuantity <= 0) return [];
     const quantity = Math.min(maxQuantity, Math.max(1, Math.floor(Number(item.quantity) || 1)));
     return [{ product, quantity, size, color }];
@@ -97,7 +100,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [isOpen]);
 
   const addItem = useCallback((product: Product, options: { size?: string; color?: string; quantity?: number }) => {
-    const maxQuantity = getMaxQuantity(product, options.size);
+    const maxQuantity = getMaxQuantity(product, options.size, options.color);
     if (maxQuantity <= 0) return;
     const quantity = Math.min(options.quantity ?? 1, maxQuantity);
     setItems((current) => {
@@ -123,7 +126,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setItems((current) => current.map((item) =>
       sameItem(item, productId, size, color)
-        ? { ...item, quantity: Math.max(1, Math.min(quantity, getMaxQuantity(item.product, size))) }
+        ? { ...item, quantity: Math.max(1, Math.min(quantity, getMaxQuantity(item.product, size, color))) }
         : item
     ));
   }, []);

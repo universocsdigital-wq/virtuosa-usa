@@ -1,16 +1,28 @@
 "use client";
+
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { useCart } from "@/components/cart/CartProvider";
 import type { Product } from "@/types";
+
+function getAvailableQuantity(product: Product, size?: string, color?: string) {
+  if (!size) return undefined;
+  if (color && product.inventoryByColorSize?.[color]) return product.inventoryByColorSize[color][size] ?? 0;
+  return product.inventoryBySize?.[size];
+}
 
 export function ProductPurchasePanel({ product }: { product: Product }) {
   const { addItem } = useCart();
   const [size, setSize] = useState(product.sizes?.length === 1 ? product.sizes[0] : "");
   const [color, setColor] = useState(product.colors?.length === 1 ? product.colors[0] : "");
   const [error, setError] = useState("");
-  const selectedSizeQuantity = size ? product.inventoryBySize?.[size] : undefined;
-  const selectedSizeUnavailable = Boolean(size && product.inventoryBySize && (selectedSizeQuantity ?? 0) <= 0);
+
+  const selectedSizeQuantity = getAvailableQuantity(product, size, color);
+  const selectedSizeUnavailable = Boolean(
+    size &&
+      (product.inventoryByColorSize?.[color] || product.inventoryBySize) &&
+      (selectedSizeQuantity ?? 0) <= 0
+  );
 
   function addToCart() {
     if (!product.inStock) return;
@@ -18,12 +30,12 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
       setError("Selecione um tamanho para continuar.");
       return;
     }
-    if (selectedSizeUnavailable) {
-      setError("Esse tamanho está sem estoque.");
-      return;
-    }
     if (product.colors?.length && !color) {
       setError("Selecione uma cor para continuar.");
+      return;
+    }
+    if (selectedSizeUnavailable) {
+      setError("Essa combinação está sem estoque.");
       return;
     }
     setError("");
@@ -37,8 +49,9 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
           <legend className="mb-3 font-sans text-[10px] font-bold uppercase tracking-[0.16em] text-[#8A5A36]">Escolha o tamanho</legend>
           <div className="flex flex-wrap gap-2">
             {product.sizes.map((option) => {
-              const quantity = product.inventoryBySize?.[option];
-              const unavailable = quantity !== undefined && quantity <= 0;
+              const requiresColor = Boolean(product.inventoryByColorSize && product.colors?.length && !color);
+              const quantity = getAvailableQuantity(product, option, color);
+              const unavailable = !requiresColor && quantity !== undefined && quantity <= 0;
 
               return (
                 <button
@@ -56,7 +69,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
                   aria-pressed={size === option}
                 >
                   <span>{option}</span>
-                  {quantity !== undefined && quantity > 0 ? (
+                  {!requiresColor && quantity !== undefined && quantity > 0 ? (
                     <span className="mt-0.5 text-[9px] font-medium normal-case tracking-normal opacity-75">
                       {quantity} disp.
                     </span>
@@ -80,7 +93,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
                 disabled={!product.inStock}
                 className={`min-h-11 border px-4 font-sans text-[12px] font-semibold transition-colors ${
                   !product.inStock
-                    ? "border-[#D9C8B5] bg-[#F0EAE1] text-[#B0A090] cursor-not-allowed"
+                    ? "cursor-not-allowed border-[#D9C8B5] bg-[#F0EAE1] text-[#B0A090]"
                     : color === option
                     ? "border-[#8A5A36] bg-[#E8D9C6] text-[#2A1712]"
                     : "border-[#CDB89F] bg-white/55 text-[#2A1712] hover:border-[#8A5A36]"
