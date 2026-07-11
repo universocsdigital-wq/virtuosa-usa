@@ -401,7 +401,7 @@ export default function AdminDashboardPage() {
   });
 
   const s = {
-    page: { minHeight: "100vh", background: "#f5f0eb", fontFamily: "Georgia, serif" } as React.CSSProperties,
+    page: { minHeight: "100vh", background: "#f5f0eb", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif" } as React.CSSProperties,
     header: {
       background: "#2C1810", color: "#fff", padding: "14px 20px",
       display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -410,11 +410,11 @@ export default function AdminDashboardPage() {
     headerRight: { display: "flex", gap: 10, alignItems: "center" } as React.CSSProperties,
     addBtn: {
       background: "#8B6914", border: "none", color: "#fff",
-      padding: "7px 16px", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
+      padding: "7px 16px", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     } as React.CSSProperties,
     logoutBtn: {
       background: "transparent", border: "1px solid rgba(255,255,255,0.4)", color: "#fff",
-      padding: "6px 14px", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
+      padding: "6px 14px", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     } as React.CSSProperties,
     controls: { padding: "16px 16px 0", display: "flex", gap: 10, flexWrap: "wrap" as const } as React.CSSProperties,
     searchInput: {
@@ -426,7 +426,7 @@ export default function AdminDashboardPage() {
       borderColor: active ? "#8B6914" : "#ddd",
       background: active ? "#8B6914" : "#fff",
       color: active ? "#fff" : "#555",
-      borderRadius: 8, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
+      borderRadius: 8, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
     grid: {
       display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
@@ -450,7 +450,7 @@ export default function AdminDashboardPage() {
     cardActions: { display: "flex", gap: 6, marginTop: 8 } as React.CSSProperties,
     saleBtn: {
       flex: 1, padding: "7px 0", background: "#8B6914", color: "#fff",
-      border: "none", borderRadius: 6, fontSize: 11, cursor: "pointer", fontFamily: "Georgia, serif",
+      border: "none", borderRadius: 6, fontSize: 11, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     } as React.CSSProperties,
     iconBtn: (enabled: boolean): React.CSSProperties => ({
       padding: "7px 10px",
@@ -460,7 +460,7 @@ export default function AdminDashboardPage() {
       borderColor: enabled ? "#ddd" : "#eee",
       borderRadius: 6, fontSize: 11,
       cursor: enabled ? "pointer" : "not-allowed",
-      fontFamily: "Georgia, serif",
+      fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
     overlay: {
       position: "fixed" as const, inset: 0, background: "rgba(0,0,0,0.5)",
@@ -479,11 +479,11 @@ export default function AdminDashboardPage() {
     } as React.CSSProperties,
     input: {
       width: "100%", padding: "10px 12px", border: "1px solid #ddd", borderRadius: 8,
-      fontSize: 14, fontFamily: "Georgia, serif", outline: "none", boxSizing: "border-box" as const,
+      fontSize: 14, fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif", outline: "none", boxSizing: "border-box" as const,
     } as React.CSSProperties,
     textarea: {
       width: "100%", padding: "10px 12px", border: "1px solid #ddd", borderRadius: 8,
-      fontSize: 14, fontFamily: "Georgia, serif", outline: "none",
+      fontSize: 14, fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif", outline: "none",
       boxSizing: "border-box" as const, minHeight: 80, resize: "vertical" as const,
     } as React.CSSProperties,
     sizeGrid: { display: "flex", flexWrap: "wrap" as const, gap: 8 } as React.CSSProperties,
@@ -494,14 +494,14 @@ export default function AdminDashboardPage() {
       color: active ? "#fff" : stock === 0 ? "#ccc" : "#333",
       borderRadius: 6, fontSize: 13,
       cursor: stock === 0 ? "not-allowed" : "pointer",
-      fontFamily: "Georgia, serif",
+      fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
     sizeBtnSimple: (active: boolean): React.CSSProperties => ({
       padding: "7px 14px", border: "1px solid",
       borderColor: active ? "#8B6914" : "#ddd",
       background: active ? "#8B6914" : "#fff",
       color: active ? "#fff" : "#333",
-      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
+      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
     qtyRow: { display: "flex", alignItems: "center", gap: 12 } as React.CSSProperties,
     qtyBtn: {
@@ -516,17 +516,17 @@ export default function AdminDashboardPage() {
       borderColor: active ? "#8B6914" : "#ddd",
       background: active ? "#8B6914" : "#fff",
       color: active ? "#fff" : "#333",
-      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
+      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
     confirmBtn: {
       width: "100%", marginTop: 24, padding: "13px", background: "#8B6914",
       color: "#fff", border: "none", borderRadius: 8, fontSize: 15,
-      cursor: "pointer", fontFamily: "Georgia, serif", letterSpacing: "0.05em",
+      cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif", letterSpacing: "0.05em",
     } as React.CSSProperties,
     cancelBtn: {
       width: "100%", marginTop: 10, padding: "11px", background: "transparent",
       color: "#888", border: "1px solid #ddd", borderRadius: 8,
-      fontSize: 14, cursor: "pointer", fontFamily: "Georgia, serif",
+      fontSize: 14, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     } as React.CSSProperties,
     successMsg: {
       background: "#dcfce7", border: "1px solid #86efac", borderRadius: 8,
@@ -543,12 +543,12 @@ export default function AdminDashboardPage() {
     uploadBtn: {
       width: "100%", padding: "10px", background: "#f5f0eb",
       border: "1px dashed #8B6914", borderRadius: 8, fontSize: 13,
-      color: "#8B6914", cursor: "pointer", fontFamily: "Georgia, serif",
+      color: "#8B6914", cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
       textAlign: "center" as const,
     } as React.CSSProperties,
     select: {
       width: "100%", padding: "10px 12px", border: "1px solid #ddd",
-      borderRadius: 8, fontSize: 14, fontFamily: "Georgia, serif",
+      borderRadius: 8, fontSize: 14, fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
       outline: "none", background: "#fff",
     } as React.CSSProperties,
     sizeRow: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 } as React.CSSProperties,
@@ -559,14 +559,14 @@ export default function AdminDashboardPage() {
     addSizeBtn: {
       padding: "8px 14px", background: "#fff", border: "1px dashed #8B6914",
       borderRadius: 6, fontSize: 13, color: "#8B6914", cursor: "pointer",
-      fontFamily: "Georgia, serif", marginTop: 4,
+      fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif", marginTop: 4,
     } as React.CSSProperties,
     actionToggle: (active: boolean): React.CSSProperties => ({
       flex: 1, padding: "9px", border: "1px solid",
       borderColor: active ? "#8B6914" : "#ddd",
       background: active ? "#8B6914" : "#fff",
       color: active ? "#fff" : "#555",
-      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
+      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
   };
 
@@ -647,7 +647,7 @@ export default function AdminDashboardPage() {
                               borderColor: qty === 0 ? "#f0f0f0" : "#ddd",
                               background: qty === 0 ? "#fafafa" : "#fff",
                               color: qty === 0 ? "#ccc" : "#444",
-                              fontFamily: "Georgia, serif",
+                              fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
                             }}
                           >
                             {size} <strong style={{ color: qty === 0 ? "#ccc" : "#8B6914" }}>{qty}</strong>
