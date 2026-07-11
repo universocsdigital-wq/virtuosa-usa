@@ -120,10 +120,10 @@ function applyProductOverrides(product: Product): Product {
 }
 
 function createManualProducts(existingProducts: Product[]): Product[] {
-  const normalizedNames = existingProducts.map((product) => normalizeProductName(product.name));
+  const existingSlugs = new Set(existingProducts.map((product) => product.slug));
   const manualProducts: Product[] = [];
 
-  if (!normalizedNames.some((name) => name.includes("soney"))) {
+  if (!existingSlugs.has("conjunto-soney-verde")) {
     manualProducts.push({
       id: "manual-conjunto-soney-verde",
       name: "Conjunto Soney Verde",
@@ -144,7 +144,7 @@ function createManualProducts(existingProducts: Product[]): Product[] {
     });
   }
 
-  if (!normalizedNames.some((name) => name.includes("t shirt") && name.includes("flores"))) {
+  if (!existingSlugs.has("t-shirt-aplicacao-de-flores-branca")) {
     manualProducts.push({
       id: "manual-t-shirt-aplicacao-de-flores-branca",
       name: "T-shirt Aplicação de Flores Branca",
