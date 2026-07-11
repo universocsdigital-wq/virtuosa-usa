@@ -8,6 +8,40 @@ function getSquareToken(): string | null {
   return process.env.SQUARE_ACCESS_TOKEN || null;
 }
 
+function normalizeCategoryName(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+async function resolveSquareCategoryId(categoryName: string, token: string): Promise<string | undefined> {
+  if (!categoryName) return undefined;
+
+  const response = await fetch(`${SQUARE_BASE_URL}/catalog/list?types=CATEGORY`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Square-Version": SQUARE_VERSION,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    console.warn("[admin/update-product] Categoria nao localizada no Square", await response.text().catch(() => ""));
+    return undefined;
+  }
+
+  const data = await response.json();
+  const target = normalizeCategoryName(categoryName);
+  const match = (data.objects ?? []).find((object: { id?: string; category_data?: { name?: string } }) =>
+    normalizeCategoryName(object.category_data?.name ?? "") === target
+  );
+
+  return match?.id;
+}
+
 export async function POST(req: NextRequest) {
   const isAdmin = await getAdminSession();
   if (!isAdmin) {
@@ -21,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { productId, name, description, price } = body;
+    const { productId, name, description, price, category } = body;
 
     if (!productId) {
       return NextResponse.json({ error: "productId e obrigatorio." }, { status: 400 });
@@ -52,16 +86,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Produto nao encontrado." }, { status: 404 });
     }
 
+    const updatedItemData: Record<string, unknown> = {
+      ...existingObject.item_data,
+      name: name || existingObject.item_data?.name,
+      description: description !== undefined ? description : existingObject.item_data?.description,
+    };
+
+    if (category) {
+      const categoryId = await resolveSquareCategoryId(category, token);
+      if (categoryId) {
+        updatedItemData.category_id = categoryId;
+      }
+    }
+
     // Montar objeto atualizado
     const updatedObject: Record<string, unknown> = {
       type: "ITEM",
       id: productId,
       version: existingObject.version,
-      item_data: {
-        ...existingObject.item_data,
-        name: name || existingObject.item_data?.name,
-        description: description !== undefined ? description : existingObject.item_data?.description,
-      },
+      item_data: updatedItemData,
     };
 
     // Se preço foi informado, atualizar todas as variações

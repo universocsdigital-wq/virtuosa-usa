@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface ProductItem {
   id: string;
   name: string;
+  slug?: string;
   price: number;
   image: string;
   category: string;
@@ -26,6 +27,49 @@ const PAYMENT_METHODS = [
 ];
 
 const SIZE_OPTIONS = ["PP", "P", "M", "G", "GG", "XG", "XGG", "U"];
+const STORE_CATEGORIES = [
+  "Lançamentos",
+  "Vestidos",
+  "Blusas",
+  "Camisas",
+  "Conjuntos",
+  "Saias",
+  "Casacos",
+  "Macacão",
+  "Calças",
+  "Live",
+];
+
+const CATEGORY_LABEL_BY_ID: Record<string, string> = {
+  lancamentos: "Lançamentos",
+  vestidos: "Vestidos",
+  blusas: "Blusas",
+  camisas: "Camisas",
+  conjuntos: "Conjuntos",
+  saias: "Saias",
+  casacos: "Casacos",
+  macacao: "Macacão",
+  calcas: "Calças",
+  live: "Live",
+};
+
+function normalizeCategory(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function getCategoryLabel(category: string): string {
+  if (!category) return "Vestidos";
+  const normalized = normalizeCategory(category);
+  return (
+    CATEGORY_LABEL_BY_ID[normalized] ??
+    STORE_CATEGORIES.find((item) => normalizeCategory(item) === normalized) ??
+    "Vestidos"
+  );
+}
 
 function sortSizes(sizes: string[]): string[] {
   return [...sizes].sort((a, b) => {
@@ -72,6 +116,7 @@ export default function AdminDashboardPage() {
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editPrice, setEditPrice] = useState("");
+  const [editCategory, setEditCategory] = useState("Vestidos");
   const [editLoading, setEditLoading] = useState(false);
   const [editSuccess, setEditSuccess] = useState("");
   const [editError, setEditError] = useState("");
@@ -157,6 +202,7 @@ export default function AdminDashboardPage() {
     setEditName(product.name);
     setEditDescription("");
     setEditPrice(product.price.toFixed(2));
+    setEditCategory(getCategoryLabel(product.category));
     setEditSuccess("");
     setEditError("");
     setEditImageFile(null);
@@ -271,6 +317,7 @@ export default function AdminDashboardPage() {
           name: editName,
           description: editDescription || undefined,
           price: parseFloat(editPrice) || undefined,
+          category: editCategory,
         }),
       });
       const data = await res.json();
@@ -279,7 +326,7 @@ export default function AdminDashboardPage() {
         setProducts((prev) =>
           prev.map((p) =>
             p.squareId === squareId
-              ? { ...p, name: editName, price: parseFloat(editPrice) || p.price }
+              ? { ...p, name: editName, price: parseFloat(editPrice) || p.price, category: editCategory }
               : p
           )
         );
@@ -392,6 +439,21 @@ export default function AdminDashboardPage() {
     setCreateSizes((prev) => prev.map((s, i) => (i === idx ? { ...s, [field]: value } : s)));
   }
 
+  async function copyProductLink(product: ProductItem) {
+    if (!product.slug) {
+      alert("Link da peça ainda não está disponível. Recarregue os produtos e tente novamente.");
+      return;
+    }
+
+    const url = `${window.location.origin}/shop/${product.slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      alert("Link da peça copiado para enviar na live.");
+    } catch {
+      window.prompt("Copie o link da peça:", url);
+    }
+  }
+
   const filtered = products.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const total = getTotalStock(p);
@@ -451,6 +513,17 @@ export default function AdminDashboardPage() {
     saleBtn: {
       flex: 1, padding: "7px 0", background: "#8B6914", color: "#fff",
       border: "none", borderRadius: 6, fontSize: 11, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    } as React.CSSProperties,
+    linkBtn: {
+      padding: "7px 10px",
+      background: "#f5f0eb",
+      color: "#8B6914",
+      border: "1px solid #d7c6ae",
+      borderRadius: 6,
+      fontSize: 11,
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+      fontWeight: 600,
     } as React.CSSProperties,
     iconBtn: (enabled: boolean): React.CSSProperties => ({
       padding: "7px 10px",
@@ -659,6 +732,13 @@ export default function AdminDashboardPage() {
                   <div style={s.cardActions}>
                     <button style={s.saleBtn} onClick={() => openSaleModal(product)}>Venda</button>
                     <button
+                      style={s.linkBtn}
+                      onClick={() => copyProductLink(product)}
+                      title="Copiar link da peça para enviar na live"
+                    >
+                      Link
+                    </button>
+                    <button
                       style={s.iconBtn(hasSquare)}
                       onClick={() => openStockModal(product)}
                       title={hasSquare ? "Ajustar estoque" : "Produto local — cadastre no Square"}
@@ -776,6 +856,13 @@ export default function AdminDashboardPage() {
             <label style={s.label}>Preco (USD)</label>
             <input style={s.input} type="number" step="0.01" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} />
 
+            <label style={s.label}>Categoria</label>
+            <select style={s.select} value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
+              {STORE_CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
             {editSuccess && <div style={s.successMsg}>{editSuccess}</div>}
             {editError && <div style={s.errorMsg}>{editError}</div>}
 
@@ -882,7 +969,7 @@ export default function AdminDashboardPage() {
 
             <label style={s.label}>Categoria</label>
             <select style={s.select} value={createCategory} onChange={(e) => setCreateCategory(e.target.value)}>
-              {["Vestidos", "Blusas", "Saias", "Calcas", "Conjuntos", "Acessorios", "Outros"].map((c) => (
+              {STORE_CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>

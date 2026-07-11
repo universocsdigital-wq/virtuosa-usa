@@ -12,6 +12,40 @@ function getLocationId(): string | null {
   return process.env.SQUARE_LOCATION_ID || process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID || null;
 }
 
+function normalizeCategoryName(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+async function resolveSquareCategoryId(categoryName: string, token: string): Promise<string | undefined> {
+  if (!categoryName) return undefined;
+
+  const response = await fetch(`${SQUARE_BASE_URL}/catalog/list?types=CATEGORY`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Square-Version": SQUARE_VERSION,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    console.warn("[admin/create-product] Categoria nao localizada no Square", await response.text().catch(() => ""));
+    return undefined;
+  }
+
+  const data = await response.json();
+  const target = normalizeCategoryName(categoryName);
+  const match = (data.objects ?? []).find((object: { id?: string; category_data?: { name?: string } }) =>
+    normalizeCategoryName(object.category_data?.name ?? "") === target
+  );
+
+  return match?.id;
+}
+
 export async function POST(req: NextRequest) {
   const isAdmin = await getAdminSession();
   if (!isAdmin) {
@@ -39,6 +73,7 @@ export async function POST(req: NextRequest) {
 
     const idempotencyKey = `admin-create-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const priceInCents = Math.round(parseFloat(price) * 100);
+    const categoryId = await resolveSquareCategoryId(category, token);
 
     // Criar variações para cada tamanho
     const variations = sizes.map((s: { size: string; quantity: number }, i: number) => ({
@@ -76,7 +111,7 @@ export async function POST(req: NextRequest) {
           item_data: {
             name,
             description: description || "",
-            category_id: category || undefined,
+            category_id: categoryId,
             variations,
           },
         },
