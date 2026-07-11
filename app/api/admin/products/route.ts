@@ -11,20 +11,27 @@ export async function GET() {
   try {
     const products = await getSquareProducts();
     // Retorna apenas os campos necessarios para o painel
-    const simplified = products.map((p) => ({
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      price: p.price,
-      image: p.image,
-      category: p.category,
-      sizes: p.sizes ?? [],
-      colors: p.colors ?? [],
-      inventoryBySize: p.inventoryBySize ?? {},
-      inventoryByColorSize: p.inventoryByColorSize ?? {},
-      inStock: p.inStock,
-      sourceProductId: p.sourceProductId,
-    }));
+    const simplified = products.map((p) => {
+      // squareId é o ID real do Square (sem sufixo de cor e sem prefixo manual-)
+      const rawId = p.sourceProductId ?? p.id;
+      const isManual = rawId.startsWith("manual-");
+      const squareId = isManual ? null : rawId;
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        price: p.price,
+        image: p.image,
+        category: p.category,
+        sizes: p.sizes ?? [],
+        colors: p.colors ?? [],
+        inventoryBySize: p.inventoryBySize ?? {},
+        inventoryByColorSize: p.inventoryByColorSize ?? {},
+        inStock: p.inStock,
+        sourceProductId: p.sourceProductId,
+        squareId, // null para produtos manuais sem backing no Square
+      };
+    });
     return NextResponse.json({ products: simplified });
   } catch (err) {
     console.error("[admin/products]", err);

@@ -15,6 +15,7 @@ interface ProductItem {
   inventoryByColorSize: Record<string, Record<string, number>>;
   inStock: boolean;
   sourceProductId?: string;
+  squareId: string | null; // null = produto manual sem backing no Square
 }
 
 const PAYMENT_METHODS = [
@@ -67,7 +68,7 @@ export default function AdminDashboardPage() {
   const [saleSuccess, setSaleSuccess] = useState("");
   const [saleError, setSaleError] = useState("");
 
-  // Modal de edição
+  // Modal de edicao
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editPrice, setEditPrice] = useState("");
@@ -106,6 +107,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     loadProducts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function loadProducts() {
@@ -147,6 +149,10 @@ export default function AdminDashboardPage() {
   }
 
   function openEditModal(product: ProductItem) {
+    if (!product.squareId) {
+      alert("Este produto e local e nao pode ser editado pelo painel. Cadastre-o no Square primeiro.");
+      return;
+    }
     setSelectedProduct(product);
     setEditName(product.name);
     setEditDescription("");
@@ -159,6 +165,10 @@ export default function AdminDashboardPage() {
   }
 
   function openStockModal(product: ProductItem) {
+    if (!product.squareId) {
+      alert("Este produto e local e nao pode ter estoque ajustado pelo painel. Cadastre-o no Square primeiro.");
+      return;
+    }
     setSelectedProduct(product);
     const sizes = sortSizes(product.sizes ?? []);
     setStockSize(sizes[0] ?? "");
@@ -197,7 +207,8 @@ export default function AdminDashboardPage() {
     setSaleError("");
     setSaleSuccess("");
     try {
-      const productId = selectedProduct.sourceProductId ?? selectedProduct.id;
+      // Usa squareId quando disponivel, senao tenta sourceProductId, senao id
+      const productId = selectedProduct.squareId ?? selectedProduct.sourceProductId ?? selectedProduct.id;
       const res = await fetch("/api/admin/register-sale", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -208,7 +219,7 @@ export default function AdminDashboardPage() {
         setSaleSuccess("Venda registrada! Estoque atualizado no Square.");
         setProducts((prev) =>
           prev.map((p) => {
-            if ((p.sourceProductId ?? p.id) !== productId) return p;
+            if ((p.squareId ?? p.sourceProductId ?? p.id) !== productId) return p;
             const updated = { ...p, inventoryBySize: { ...p.inventoryBySize } };
             if (selectedSize && updated.inventoryBySize[selectedSize] !== undefined) {
               updated.inventoryBySize[selectedSize] = Math.max(
@@ -230,22 +241,22 @@ export default function AdminDashboardPage() {
   }
 
   async function handleEditProduct() {
-    if (!selectedProduct) return;
+    if (!selectedProduct || !selectedProduct.squareId) return;
     setEditLoading(true);
     setEditError("");
     setEditSuccess("");
     try {
-      const productId = selectedProduct.sourceProductId ?? selectedProduct.id;
+      const squareId = selectedProduct.squareId;
 
-      // Upload de imagem se houver
+      // Upload de imagem PRIMEIRO se houver
       if (editImageFile) {
         const fd = new FormData();
         fd.append("image", editImageFile);
-        fd.append("productId", productId);
+        fd.append("productId", squareId);
         const imgRes = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+        const imgData = await imgRes.json().catch(() => ({}));
         if (!imgRes.ok) {
-          const imgErr = await imgRes.json().catch(() => ({}));
-          setEditError("Erro ao enviar foto: " + (imgErr.error || imgRes.status));
+          setEditError("Erro ao enviar foto: " + (imgData.error || imgRes.status));
           setEditLoading(false);
           return;
         }
@@ -256,9 +267,9 @@ export default function AdminDashboardPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productId,
+          productId: squareId,
           name: editName,
-          description: editDescription,
+          description: editDescription || undefined,
           price: parseFloat(editPrice) || undefined,
         }),
       });
@@ -267,7 +278,7 @@ export default function AdminDashboardPage() {
         setEditSuccess("Produto atualizado com sucesso!");
         setProducts((prev) =>
           prev.map((p) =>
-            (p.sourceProductId ?? p.id) === productId
+            p.squareId === squareId
               ? { ...p, name: editName, price: parseFloat(editPrice) || p.price }
               : p
           )
@@ -283,23 +294,23 @@ export default function AdminDashboardPage() {
   }
 
   async function handleAdjustStock() {
-    if (!selectedProduct) return;
+    if (!selectedProduct || !selectedProduct.squareId) return;
     setStockLoading(true);
     setStockError("");
     setStockSuccess("");
     try {
-      const productId = selectedProduct.sourceProductId ?? selectedProduct.id;
+      const squareId = selectedProduct.squareId;
       const res = await fetch("/api/admin/adjust-stock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, size: stockSize, quantity: stockQty, action: stockAction }),
+        body: JSON.stringify({ productId: squareId, size: stockSize, quantity: stockQty, action: stockAction }),
       });
       const data = await res.json();
       if (res.ok) {
         setStockSuccess(data.message || "Estoque atualizado no Square!");
         setProducts((prev) =>
           prev.map((p) => {
-            if ((p.sourceProductId ?? p.id) !== productId) return p;
+            if (p.squareId !== squareId) return p;
             const updated = { ...p, inventoryBySize: { ...p.inventoryBySize } };
             if (stockSize) {
               if (stockAction === "set") {
@@ -343,14 +354,19 @@ export default function AdminDashboardPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        // Upload de imagem se houver
+        // Upload de imagem usando o ID real retornado pelo Square
         if (createImageFile && data.productId) {
           const fd = new FormData();
           fd.append("image", createImageFile);
           fd.append("productId", data.productId);
-          await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+          const imgRes = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+          if (!imgRes.ok) {
+            setCreateSuccess("Produto cadastrado! Mas a foto nao foi enviada — use o botao Editar depois.");
+            setTimeout(() => loadProducts(), 2000);
+            return;
+          }
         }
-        setCreateSuccess("Produto cadastrado com sucesso! Aparecerá na loja em instantes.");
+        setCreateSuccess("Produto cadastrado com sucesso! Aparecera na loja em instantes.");
         setTimeout(() => loadProducts(), 2000);
       } else {
         setCreateError(data.error || "Erro ao cadastrar produto.");
@@ -384,71 +400,40 @@ export default function AdminDashboardPage() {
     return matchSearch;
   });
 
-  // Styles
   const s = {
     page: { minHeight: "100vh", background: "#f5f0eb", fontFamily: "Georgia, serif" } as React.CSSProperties,
     header: {
-      background: "#2C1810",
-      color: "#fff",
-      padding: "14px 20px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
+      background: "#2C1810", color: "#fff", padding: "14px 20px",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
     } as React.CSSProperties,
     headerTitle: { fontSize: 16, fontWeight: 600, letterSpacing: "0.05em" } as React.CSSProperties,
     headerRight: { display: "flex", gap: 10, alignItems: "center" } as React.CSSProperties,
     addBtn: {
-      background: "#8B6914",
-      border: "none",
-      color: "#fff",
-      padding: "7px 16px",
-      borderRadius: 6,
-      fontSize: 13,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      background: "#8B6914", border: "none", color: "#fff",
+      padding: "7px 16px", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
     } as React.CSSProperties,
     logoutBtn: {
-      background: "transparent",
-      border: "1px solid rgba(255,255,255,0.4)",
-      color: "#fff",
-      padding: "6px 14px",
-      borderRadius: 6,
-      fontSize: 13,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      background: "transparent", border: "1px solid rgba(255,255,255,0.4)", color: "#fff",
+      padding: "6px 14px", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
     } as React.CSSProperties,
     controls: { padding: "16px 16px 0", display: "flex", gap: 10, flexWrap: "wrap" as const } as React.CSSProperties,
     searchInput: {
-      flex: 1,
-      minWidth: 180,
-      padding: "9px 12px",
-      border: "1px solid #ddd",
-      borderRadius: 8,
-      fontSize: 14,
-      outline: "none",
-      background: "#fff",
+      flex: 1, minWidth: 180, padding: "9px 12px", border: "1px solid #ddd",
+      borderRadius: 8, fontSize: 14, outline: "none", background: "#fff",
     } as React.CSSProperties,
     filterBtn: (active: boolean): React.CSSProperties => ({
-      padding: "8px 14px",
-      border: "1px solid",
+      padding: "8px 14px", border: "1px solid",
       borderColor: active ? "#8B6914" : "#ddd",
       background: active ? "#8B6914" : "#fff",
       color: active ? "#fff" : "#555",
-      borderRadius: 8,
-      fontSize: 13,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      borderRadius: 8, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
     }),
     grid: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-      gap: 14,
-      padding: 16,
+      display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+      gap: 14, padding: 16,
     } as React.CSSProperties,
     card: {
-      background: "#fff",
-      borderRadius: 10,
-      overflow: "hidden",
+      background: "#fff", borderRadius: 10, overflow: "hidden",
       boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
     } as React.CSSProperties,
     cardImg: { width: "100%", aspectRatio: "3/4", objectFit: "cover" as const, display: "block" } as React.CSSProperties,
@@ -456,256 +441,135 @@ export default function AdminDashboardPage() {
     cardName: { fontSize: 13, fontWeight: 600, color: "#2C1810", marginBottom: 4, lineHeight: 1.3 } as React.CSSProperties,
     cardPrice: { fontSize: 12, color: "#8B6914", marginBottom: 6 } as React.CSSProperties,
     stockBadge: (total: number): React.CSSProperties => ({
-      display: "inline-block",
-      fontSize: 11,
-      padding: "2px 8px",
-      borderRadius: 20,
+      display: "inline-block", fontSize: 11, padding: "2px 8px", borderRadius: 20,
       background: total === 0 ? "#fee2e2" : total <= 3 ? "#fef9c3" : "#dcfce7",
       color: total === 0 ? "#dc2626" : total <= 3 ? "#a16207" : "#166534",
       fontWeight: 600,
     }),
+    manualBadge: {
+      display: "inline-block", fontSize: 10, padding: "1px 5px",
+      borderRadius: 10, background: "#f3f4f6", color: "#9ca3af", marginLeft: 4,
+    } as React.CSSProperties,
     cardActions: { display: "flex", gap: 6, marginTop: 8 } as React.CSSProperties,
     saleBtn: {
-      flex: 1,
-      padding: "7px 0",
-      background: "#8B6914",
-      color: "#fff",
-      border: "none",
-      borderRadius: 6,
-      fontSize: 11,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      flex: 1, padding: "7px 0", background: "#8B6914", color: "#fff",
+      border: "none", borderRadius: 6, fontSize: 11, cursor: "pointer", fontFamily: "Georgia, serif",
     } as React.CSSProperties,
-    editBtn: {
+    iconBtn: (enabled: boolean): React.CSSProperties => ({
       padding: "7px 10px",
-      background: "#fff",
-      color: "#2C1810",
-      border: "1px solid #ddd",
-      borderRadius: 6,
-      fontSize: 11,
-      cursor: "pointer",
+      background: enabled ? "#fff" : "#f9f9f9",
+      color: enabled ? "#2C1810" : "#ccc",
+      border: "1px solid",
+      borderColor: enabled ? "#ddd" : "#eee",
+      borderRadius: 6, fontSize: 11,
+      cursor: enabled ? "pointer" : "not-allowed",
       fontFamily: "Georgia, serif",
-    } as React.CSSProperties,
-    stockBtn: {
-      padding: "7px 10px",
-      background: "#fff",
-      color: "#2C1810",
-      border: "1px solid #ddd",
-      borderRadius: 6,
-      fontSize: 11,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
-    } as React.CSSProperties,
+    }),
     overlay: {
-      position: "fixed" as const,
-      inset: 0,
-      background: "rgba(0,0,0,0.5)",
-      display: "flex",
-      alignItems: "flex-end",
-      justifyContent: "center",
-      zIndex: 1000,
+      position: "fixed" as const, inset: 0, background: "rgba(0,0,0,0.5)",
+      display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 1000,
     } as React.CSSProperties,
     modal: {
-      background: "#fff",
-      borderRadius: "16px 16px 0 0",
-      padding: "24px 20px 32px",
-      width: "100%",
-      maxWidth: 480,
-      maxHeight: "90vh",
-      overflowY: "auto" as const,
+      background: "#fff", borderRadius: "16px 16px 0 0",
+      padding: "24px 20px 32px", width: "100%", maxWidth: 480,
+      maxHeight: "90vh", overflowY: "auto" as const,
     } as React.CSSProperties,
     modalTitle: { fontSize: 16, fontWeight: 600, color: "#2C1810", marginBottom: 4 } as React.CSSProperties,
     modalSubtitle: { fontSize: 13, color: "#888", marginBottom: 20 } as React.CSSProperties,
     label: {
-      display: "block",
-      fontSize: 11,
-      letterSpacing: "0.08em",
-      color: "#666",
-      textTransform: "uppercase" as const,
-      marginBottom: 6,
-      marginTop: 14,
+      display: "block", fontSize: 11, letterSpacing: "0.08em", color: "#666",
+      textTransform: "uppercase" as const, marginBottom: 6, marginTop: 14,
     } as React.CSSProperties,
     input: {
-      width: "100%",
-      padding: "10px 12px",
-      border: "1px solid #ddd",
-      borderRadius: 8,
-      fontSize: 14,
-      fontFamily: "Georgia, serif",
-      outline: "none",
-      boxSizing: "border-box" as const,
+      width: "100%", padding: "10px 12px", border: "1px solid #ddd", borderRadius: 8,
+      fontSize: 14, fontFamily: "Georgia, serif", outline: "none", boxSizing: "border-box" as const,
     } as React.CSSProperties,
     textarea: {
-      width: "100%",
-      padding: "10px 12px",
-      border: "1px solid #ddd",
-      borderRadius: 8,
-      fontSize: 14,
-      fontFamily: "Georgia, serif",
-      outline: "none",
-      boxSizing: "border-box" as const,
-      minHeight: 80,
-      resize: "vertical" as const,
+      width: "100%", padding: "10px 12px", border: "1px solid #ddd", borderRadius: 8,
+      fontSize: 14, fontFamily: "Georgia, serif", outline: "none",
+      boxSizing: "border-box" as const, minHeight: 80, resize: "vertical" as const,
     } as React.CSSProperties,
     sizeGrid: { display: "flex", flexWrap: "wrap" as const, gap: 8 } as React.CSSProperties,
     sizeBtn: (active: boolean, stock: number): React.CSSProperties => ({
-      padding: "7px 14px",
-      border: "1px solid",
+      padding: "7px 14px", border: "1px solid",
       borderColor: active ? "#8B6914" : stock === 0 ? "#f0f0f0" : "#ddd",
       background: active ? "#8B6914" : stock === 0 ? "#fafafa" : "#fff",
       color: active ? "#fff" : stock === 0 ? "#ccc" : "#333",
-      borderRadius: 6,
-      fontSize: 13,
+      borderRadius: 6, fontSize: 13,
       cursor: stock === 0 ? "not-allowed" : "pointer",
       fontFamily: "Georgia, serif",
     }),
     sizeBtnSimple: (active: boolean): React.CSSProperties => ({
-      padding: "7px 14px",
-      border: "1px solid",
+      padding: "7px 14px", border: "1px solid",
       borderColor: active ? "#8B6914" : "#ddd",
       background: active ? "#8B6914" : "#fff",
       color: active ? "#fff" : "#333",
-      borderRadius: 6,
-      fontSize: 13,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
     }),
     qtyRow: { display: "flex", alignItems: "center", gap: 12 } as React.CSSProperties,
     qtyBtn: {
-      width: 36,
-      height: 36,
-      border: "1px solid #ddd",
-      background: "#fff",
-      borderRadius: 6,
-      fontSize: 18,
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
+      width: 36, height: 36, border: "1px solid #ddd", background: "#fff",
+      borderRadius: 6, fontSize: 18, cursor: "pointer",
+      display: "flex", alignItems: "center", justifyContent: "center",
     } as React.CSSProperties,
     qtyVal: { fontSize: 18, fontWeight: 600, color: "#2C1810", minWidth: 24, textAlign: "center" as const } as React.CSSProperties,
     paymentGrid: { display: "flex", flexWrap: "wrap" as const, gap: 8 } as React.CSSProperties,
     payBtn: (active: boolean): React.CSSProperties => ({
-      padding: "8px 16px",
-      border: "1px solid",
+      padding: "8px 16px", border: "1px solid",
       borderColor: active ? "#8B6914" : "#ddd",
       background: active ? "#8B6914" : "#fff",
       color: active ? "#fff" : "#333",
-      borderRadius: 6,
-      fontSize: 13,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
     }),
     confirmBtn: {
-      width: "100%",
-      marginTop: 24,
-      padding: "13px",
-      background: "#8B6914",
-      color: "#fff",
-      border: "none",
-      borderRadius: 8,
-      fontSize: 15,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
-      letterSpacing: "0.05em",
+      width: "100%", marginTop: 24, padding: "13px", background: "#8B6914",
+      color: "#fff", border: "none", borderRadius: 8, fontSize: 15,
+      cursor: "pointer", fontFamily: "Georgia, serif", letterSpacing: "0.05em",
     } as React.CSSProperties,
     cancelBtn: {
-      width: "100%",
-      marginTop: 10,
-      padding: "11px",
-      background: "transparent",
-      color: "#888",
-      border: "1px solid #ddd",
-      borderRadius: 8,
-      fontSize: 14,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      width: "100%", marginTop: 10, padding: "11px", background: "transparent",
+      color: "#888", border: "1px solid #ddd", borderRadius: 8,
+      fontSize: 14, cursor: "pointer", fontFamily: "Georgia, serif",
     } as React.CSSProperties,
     successMsg: {
-      background: "#dcfce7",
-      border: "1px solid #86efac",
-      borderRadius: 8,
-      padding: "12px 14px",
-      fontSize: 14,
-      color: "#166534",
-      marginTop: 16,
+      background: "#dcfce7", border: "1px solid #86efac", borderRadius: 8,
+      padding: "12px 14px", fontSize: 14, color: "#166534", marginTop: 16,
     } as React.CSSProperties,
     errorMsg: {
-      background: "#fef2f2",
-      border: "1px solid #fca5a5",
-      borderRadius: 8,
-      padding: "12px 14px",
-      fontSize: 14,
-      color: "#dc2626",
-      marginTop: 16,
+      background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 8,
+      padding: "12px 14px", fontSize: 14, color: "#dc2626", marginTop: 16,
     } as React.CSSProperties,
     imagePreview: {
-      width: "100%",
-      height: 180,
-      objectFit: "cover" as const,
-      borderRadius: 8,
-      marginBottom: 8,
-      display: "block",
+      width: "100%", height: 180, objectFit: "cover" as const,
+      borderRadius: 8, marginBottom: 8, display: "block",
     } as React.CSSProperties,
     uploadBtn: {
-      width: "100%",
-      padding: "10px",
-      background: "#f5f0eb",
-      border: "1px dashed #8B6914",
-      borderRadius: 8,
-      fontSize: 13,
-      color: "#8B6914",
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      width: "100%", padding: "10px", background: "#f5f0eb",
+      border: "1px dashed #8B6914", borderRadius: 8, fontSize: 13,
+      color: "#8B6914", cursor: "pointer", fontFamily: "Georgia, serif",
       textAlign: "center" as const,
     } as React.CSSProperties,
     select: {
-      width: "100%",
-      padding: "10px 12px",
-      border: "1px solid #ddd",
-      borderRadius: 8,
-      fontSize: 14,
-      fontFamily: "Georgia, serif",
-      outline: "none",
-      background: "#fff",
+      width: "100%", padding: "10px 12px", border: "1px solid #ddd",
+      borderRadius: 8, fontSize: 14, fontFamily: "Georgia, serif",
+      outline: "none", background: "#fff",
     } as React.CSSProperties,
-    sizeRow: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      marginBottom: 8,
-    } as React.CSSProperties,
+    sizeRow: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 } as React.CSSProperties,
     removeBtn: {
-      padding: "6px 10px",
-      background: "#fef2f2",
-      border: "1px solid #fca5a5",
-      borderRadius: 6,
-      fontSize: 12,
-      color: "#dc2626",
-      cursor: "pointer",
+      padding: "6px 10px", background: "#fef2f2", border: "1px solid #fca5a5",
+      borderRadius: 6, fontSize: 12, color: "#dc2626", cursor: "pointer",
     } as React.CSSProperties,
     addSizeBtn: {
-      padding: "8px 14px",
-      background: "#fff",
-      border: "1px dashed #8B6914",
-      borderRadius: 6,
-      fontSize: 13,
-      color: "#8B6914",
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
-      marginTop: 4,
+      padding: "8px 14px", background: "#fff", border: "1px dashed #8B6914",
+      borderRadius: 6, fontSize: 13, color: "#8B6914", cursor: "pointer",
+      fontFamily: "Georgia, serif", marginTop: 4,
     } as React.CSSProperties,
     actionToggle: (active: boolean): React.CSSProperties => ({
-      flex: 1,
-      padding: "9px",
-      border: "1px solid",
+      flex: 1, padding: "9px", border: "1px solid",
       borderColor: active ? "#8B6914" : "#ddd",
       background: active ? "#8B6914" : "#fff",
       color: active ? "#fff" : "#555",
-      borderRadius: 6,
-      fontSize: 13,
-      cursor: "pointer",
-      fontFamily: "Georgia, serif",
+      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "Georgia, serif",
     }),
   };
 
@@ -714,12 +578,8 @@ export default function AdminDashboardPage() {
       <div style={s.header}>
         <span style={s.headerTitle}>Virtuosa USA — Painel da Loja</span>
         <div style={s.headerRight}>
-          <button style={s.addBtn} onClick={openCreateModal}>
-            + Nova peça
-          </button>
-          <button style={s.logoutBtn} onClick={handleLogout}>
-            Sair
-          </button>
+          <button style={s.addBtn} onClick={openCreateModal}>+ Nova peca</button>
+          <button style={s.logoutBtn} onClick={handleLogout}>Sair</button>
         </div>
       </div>
 
@@ -757,6 +617,7 @@ export default function AdminDashboardPage() {
           )}
           {filtered.map((product) => {
             const total = getTotalStock(product);
+            const hasSquare = !!product.squareId;
             return (
               <div key={product.id} style={s.card}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -764,24 +625,31 @@ export default function AdminDashboardPage() {
                   src={product.image}
                   alt={product.name}
                   style={s.cardImg}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
-                  }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = "/images/placeholder.jpg"; }}
                 />
                 <div style={s.cardBody}>
-                  <div style={s.cardName}>{product.name}</div>
+                  <div style={s.cardName}>
+                    {product.name}
+                    {!hasSquare && <span style={s.manualBadge}>local</span>}
+                  </div>
                   <div style={s.cardPrice}>${product.price.toFixed(2)}</div>
                   <span style={s.stockBadge(total)}>
                     {total === 0 ? "Esgotado" : total <= 3 ? `${total} restantes` : `${total} em estoque`}
                   </span>
                   <div style={s.cardActions}>
-                    <button style={s.saleBtn} onClick={() => openSaleModal(product)}>
-                      Venda
-                    </button>
-                    <button style={s.stockBtn} onClick={() => openStockModal(product)} title="Ajustar estoque">
+                    <button style={s.saleBtn} onClick={() => openSaleModal(product)}>Venda</button>
+                    <button
+                      style={s.iconBtn(hasSquare)}
+                      onClick={() => openStockModal(product)}
+                      title={hasSquare ? "Ajustar estoque" : "Produto local — cadastre no Square"}
+                    >
                       📦
                     </button>
-                    <button style={s.editBtn} onClick={() => openEditModal(product)} title="Editar produto">
+                    <button
+                      style={s.iconBtn(hasSquare)}
+                      onClick={() => openEditModal(product)}
+                      title={hasSquare ? "Editar produto" : "Produto local — cadastre no Square"}
+                    >
                       ✏️
                     </button>
                   </div>
@@ -792,12 +660,12 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Modal de Venda */}
+      {/* ===== MODAL DE VENDA ===== */}
       {activeModal === "sale" && selectedProduct && (
         <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={s.modal}>
             <div style={s.modalTitle}>{selectedProduct.name}</div>
-            <div style={s.modalSubtitle}>${selectedProduct.price.toFixed(2)} &nbsp;|&nbsp; Registrar venda manual</div>
+            <div style={s.modalSubtitle}>${selectedProduct.price.toFixed(2)} | Registrar venda manual</div>
 
             {(selectedProduct.sizes?.length ?? 0) > 0 && (
               <>
@@ -849,8 +717,8 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Modal de Edição */}
-      {activeModal === "edit" && selectedProduct && (
+      {/* ===== MODAL DE EDICAO ===== */}
+      {activeModal === "edit" && selectedProduct && selectedProduct.squareId && (
         <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={s.modal}>
             <div style={s.modalTitle}>Editar produto</div>
@@ -858,7 +726,12 @@ export default function AdminDashboardPage() {
 
             {editImagePreview && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={editImagePreview} alt="preview" style={s.imagePreview} />
+              <img
+                src={editImagePreview}
+                alt="preview"
+                style={s.imagePreview}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
             )}
             <input
               ref={editFileRef}
@@ -867,10 +740,7 @@ export default function AdminDashboardPage() {
               style={{ display: "none" }}
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) {
-                  setEditImageFile(f);
-                  setEditImagePreview(URL.createObjectURL(f));
-                }
+                if (f) { setEditImageFile(f); setEditImagePreview(URL.createObjectURL(f)); }
               }}
             />
             <button style={s.uploadBtn} onClick={() => editFileRef.current?.click()}>
@@ -880,10 +750,10 @@ export default function AdminDashboardPage() {
             <label style={s.label}>Nome</label>
             <input style={s.input} value={editName} onChange={(e) => setEditName(e.target.value)} />
 
-            <label style={s.label}>Descrição</label>
+            <label style={s.label}>Descricao (opcional)</label>
             <textarea style={s.textarea} value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Deixe em branco para manter a atual" />
 
-            <label style={s.label}>Preço (USD)</label>
+            <label style={s.label}>Preco (USD)</label>
             <input style={s.input} type="number" step="0.01" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} />
 
             {editSuccess && <div style={s.successMsg}>{editSuccess}</div>}
@@ -891,7 +761,7 @@ export default function AdminDashboardPage() {
 
             {!editSuccess && (
               <button style={{ ...s.confirmBtn, opacity: editLoading ? 0.7 : 1 }} onClick={handleEditProduct} disabled={editLoading}>
-                {editLoading ? "Salvando..." : "Salvar alterações"}
+                {editLoading ? "Salvando..." : "Salvar alteracoes"}
               </button>
             )}
             <button style={s.cancelBtn} onClick={closeModal}>{editSuccess ? "Fechar" : "Cancelar"}</button>
@@ -899,14 +769,14 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Modal de Ajuste de Estoque */}
-      {activeModal === "stock" && selectedProduct && (
+      {/* ===== MODAL DE AJUSTE DE ESTOQUE ===== */}
+      {activeModal === "stock" && selectedProduct && selectedProduct.squareId && (
         <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={s.modal}>
             <div style={s.modalTitle}>Ajustar estoque</div>
             <div style={s.modalSubtitle}>{selectedProduct.name}</div>
 
-            <label style={s.label}>Ação</label>
+            <label style={s.label}>Acao</label>
             <div style={{ display: "flex", gap: 8 }}>
               <button style={s.actionToggle(stockAction === "add")} onClick={() => setStockAction("add")}>
                 Adicionar unidades
@@ -956,12 +826,12 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Modal de Cadastro de Nova Peça */}
+      {/* ===== MODAL DE CADASTRO ===== */}
       {activeModal === "create" && (
         <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={s.modal}>
-            <div style={s.modalTitle}>Cadastrar nova peça</div>
-            <div style={s.modalSubtitle}>O produto será criado no Square e aparecerá na loja</div>
+            <div style={s.modalTitle}>Cadastrar nova peca</div>
+            <div style={s.modalSubtitle}>O produto sera criado no Square e aparecera na loja</div>
 
             {createImagePreview && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -974,28 +844,25 @@ export default function AdminDashboardPage() {
               style={{ display: "none" }}
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) {
-                  setCreateImageFile(f);
-                  setCreateImagePreview(URL.createObjectURL(f));
-                }
+                if (f) { setCreateImageFile(f); setCreateImagePreview(URL.createObjectURL(f)); }
               }}
             />
             <button style={s.uploadBtn} onClick={() => createFileRef.current?.click()}>
               {createImageFile ? "Foto selecionada — clique para trocar" : "Adicionar foto do produto"}
             </button>
 
-            <label style={s.label}>Nome da peça *</label>
+            <label style={s.label}>Nome da peca *</label>
             <input style={s.input} value={createName} onChange={(e) => setCreateName(e.target.value)} placeholder="Ex: Vestido Midi Floral" />
 
-            <label style={s.label}>Descrição</label>
+            <label style={s.label}>Descricao</label>
             <textarea style={s.textarea} value={createDescription} onChange={(e) => setCreateDescription(e.target.value)} placeholder="Descreva o produto..." />
 
-            <label style={s.label}>Preço (USD) *</label>
+            <label style={s.label}>Preco (USD) *</label>
             <input style={s.input} type="number" step="0.01" value={createPrice} onChange={(e) => setCreatePrice(e.target.value)} placeholder="0.00" />
 
             <label style={s.label}>Categoria</label>
             <select style={s.select} value={createCategory} onChange={(e) => setCreateCategory(e.target.value)}>
-              {["Vestidos", "Blusas", "Saias", "Calças", "Conjuntos", "Acessórios", "Outros"].map((c) => (
+              {["Vestidos", "Blusas", "Saias", "Calcas", "Conjuntos", "Acessorios", "Outros"].map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
@@ -1022,7 +889,7 @@ export default function AdminDashboardPage() {
                 />
                 <span style={{ fontSize: 11, color: "#888", whiteSpace: "nowrap" }}>unid.</span>
                 {createSizes.length > 1 && (
-                  <button style={s.removeBtn} onClick={() => removeCreateSize(idx)}>✕</button>
+                  <button style={s.removeBtn} onClick={() => removeCreateSize(idx)}>x</button>
                 )}
               </div>
             ))}
