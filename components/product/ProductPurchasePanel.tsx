@@ -69,11 +69,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
                   aria-pressed={size === option}
                 >
                   <span>{option}</span>
-                  {!requiresColor && quantity !== undefined && quantity > 0 ? (
-                    <span className="mt-0.5 text-[9px] font-medium normal-case tracking-normal opacity-75">
-                      {quantity} disp.
-                    </span>
-                  ) : null}
+                  {null}
                 </button>
               );
             })}

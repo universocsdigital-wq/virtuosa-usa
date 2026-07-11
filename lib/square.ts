@@ -98,6 +98,41 @@ function applyProductOverrides(product: Product): Product {
     };
   }
 
+  if (normalizedName.includes("lese") && normalizedName.includes("algodao")) {
+    return {
+      ...product,
+      name: "Vestido em Lese 100% Algodão",
+      slug: "vestido-em-lese-100-algodao",
+      price: 140,
+      category: "vestidos",
+      sizes: ["P", "M", "GG"],
+      colors: ["Nude"],
+      inventoryBySize: { P: 3, M: 2, GG: 1 },
+      inventoryByColorSize: {
+        Nude: { P: 3, M: 2, GG: 1 },
+      },
+      inStock: true,
+    };
+  }
+
+  if (normalizedName.includes("verde") && normalizedName.includes("algodao") && normalizedName.includes("bordado")) {
+    return {
+      ...product,
+      name: "Vestido Midi Verde em Algodão Bordado",
+      slug: "vestido-midi-verde-em-algodao-bordado",
+      price: 145,
+      category: "vestidos",
+      sizes: ["P", "M", "G", "GG"],
+      colors: ["Verde", "Verde Lima"],
+      inventoryBySize: { P: 6, M: 3, G: 1, GG: 1 },
+      inventoryByColorSize: {
+        Verde: { P: 3, M: 1 },
+        "Verde Lima": { P: 3, M: 2, G: 1, GG: 1 },
+      },
+      inStock: true,
+    };
+  }
+
   return product;
 }
 
@@ -358,6 +393,29 @@ export async function getSquareProducts(): Promise<Product[]> {
       inStock: variations.some((v) => (inventoryMap.get(v.id) || 0) > 0),
     } satisfies Product);
   });
+
+  if (!products.some((product) => normalizeProductName(product.name).includes("lana"))) {
+    products.push({
+      id: "manual-vestido-lana",
+      name: "Vestido Lana",
+      slug: "vestido-lana",
+      price: 140,
+      rating: 4.9,
+      reviewCount: 0,
+      image: "/images/products/vestido-lana.png",
+      images: ["/images/products/vestido-lana.png"],
+      category: "vestidos",
+      description: "Vestido Lana em modelagem feminina e delicada.",
+      sizes: ["P", "M", "G"],
+      colors: ["Rose", "Laranja"],
+      inventoryBySize: { P: 2, M: 3, G: 6 },
+      inventoryByColorSize: {
+        Rose: { M: 1, G: 3 },
+        Laranja: { P: 2, M: 2, G: 3 },
+      },
+      inStock: true,
+    });
+  }
 
   // Ordenar: vestidos primeiro, depois saias, conjuntos, blusas
   const categoryOrder: ProductCategory[] = ["vestidos", "saias", "conjuntos", "blusas", "calcas"];
