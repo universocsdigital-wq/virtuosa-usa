@@ -149,54 +149,6 @@ function applyProductOverrides(product: Product): Product {
   return product;
 }
 
-function createManualProducts(existingProducts: Product[]): Product[] {
-  const existingSlugs = new Set(existingProducts.map((product) => product.slug));
-  const manualProducts: Product[] = [];
-
-  if (!existingSlugs.has("conjunto-soney-verde")) {
-    manualProducts.push({
-      id: "manual-conjunto-soney-verde",
-      name: "Conjunto Soney Verde",
-      slug: "conjunto-soney-verde",
-      price: 320,
-      rating: 4.9,
-      reviewCount: 0,
-      image: "/images/products/conjunto-soney-verde.jpeg",
-      images: ["/images/products/conjunto-soney-verde.jpeg"],
-      category: "conjuntos",
-      description: "Conjunto Soney em verde.",
-      badge: "new",
-      sizes: ["M"],
-      colors: ["Verde"],
-      inventoryBySize: { M: 1 },
-      inventoryByColorSize: { Verde: { M: 1 } },
-      inStock: true,
-    });
-  }
-
-  if (!existingSlugs.has("t-shirt-aplicacao-de-flores-branca")) {
-    manualProducts.push({
-      id: "manual-t-shirt-aplicacao-de-flores-branca",
-      name: "T-shirt Aplicação de Flores Branca",
-      slug: "t-shirt-aplicacao-de-flores-branca",
-      price: 49,
-      rating: 4.9,
-      reviewCount: 0,
-      image: "/images/products/t-shirt-aplicacao-flores-branca.jpeg",
-      images: ["/images/products/t-shirt-aplicacao-flores-branca.jpeg"],
-      category: "blusas",
-      description: "T-shirt branca com aplicacao de flores.",
-      badge: "new",
-      sizes: ["P", "M", "G"],
-      colors: ["Branca"],
-      inventoryBySize: { P: 1, M: 1, G: 1 },
-      inventoryByColorSize: { Branca: { P: 1, M: 1, G: 1 } },
-      inStock: true,
-    });
-  }
-
-  return manualProducts;
-}
 
 function expandProductColorCards(products: Product[]): Product[] {
   return products.flatMap((product) => {
@@ -253,8 +205,6 @@ function getCategory(name: string): ProductCategory {
   if (n.includes("saia")) return "saias";
   if (
     n.includes("casaco") ||
-    n.includes("casaqueto") ||
-    n.includes("casaquinho") ||
     n.includes("casquinho") ||
     n.includes("casqueto") ||
     n.includes("jaqueta") ||
@@ -565,7 +515,6 @@ export async function getSquareProducts(): Promise<Product[]> {
     } satisfies Product);
   });
 
-  products.push(...createManualProducts(products));
   const displayProducts = expandProductColorCards(products);
 
   const categoryOrder: ProductCategory[] = [

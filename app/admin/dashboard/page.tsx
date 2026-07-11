@@ -446,10 +446,7 @@ export default function AdminDashboardPage() {
       color: total === 0 ? "#dc2626" : total <= 3 ? "#a16207" : "#166534",
       fontWeight: 600,
     }),
-    manualBadge: {
-      display: "inline-block", fontSize: 10, padding: "1px 5px",
-      borderRadius: 10, background: "#f3f4f6", color: "#9ca3af", marginLeft: 4,
-    } as React.CSSProperties,
+
     cardActions: { display: "flex", gap: 6, marginTop: 8 } as React.CSSProperties,
     saleBtn: {
       flex: 1, padding: "7px 0", background: "#8B6914", color: "#fff",
@@ -630,7 +627,6 @@ export default function AdminDashboardPage() {
                 <div style={s.cardBody}>
                   <div style={s.cardName}>
                     {product.name}
-                    {!hasSquare && <span style={s.manualBadge}>local</span>}
                   </div>
                   <div style={s.cardPrice}>${product.price.toFixed(2)}</div>
                   <span style={s.stockBadge(total)}>
@@ -854,8 +850,8 @@ export default function AdminDashboardPage() {
       {activeModal === "create" && (
         <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={s.modal}>
-            <div style={s.modalTitle}>Cadastrar nova peca</div>
-            <div style={s.modalSubtitle}>O produto sera criado no Square e aparecera na loja</div>
+            <div style={s.modalTitle}>Cadastrar nova peca no Square</div>
+            <div style={s.modalSubtitle}>Preencha os dados abaixo. O produto sera criado diretamente no Square e ja aparecera na loja.</div>
 
             {createImagePreview && (
               // eslint-disable-next-line @next/next/no-img-element
