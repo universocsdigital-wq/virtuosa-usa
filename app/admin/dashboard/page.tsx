@@ -636,6 +636,30 @@ export default function AdminDashboardPage() {
                   <span style={s.stockBadge(total)}>
                     {total === 0 ? "Esgotado" : total <= 3 ? `${total} restantes` : `${total} em estoque`}
                   </span>
+                  {(product.sizes?.length ?? 0) > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                      {sortSizes(product.sizes).map((size) => {
+                        const qty = getStockForSize(product, size);
+                        return (
+                          <span
+                            key={size}
+                            style={{
+                              fontSize: 10,
+                              padding: "2px 6px",
+                              borderRadius: 4,
+                              border: "1px solid",
+                              borderColor: qty === 0 ? "#f0f0f0" : "#ddd",
+                              background: qty === 0 ? "#fafafa" : "#fff",
+                              color: qty === 0 ? "#ccc" : "#444",
+                              fontFamily: "Georgia, serif",
+                            }}
+                          >
+                            {size} <strong style={{ color: qty === 0 ? "#ccc" : "#8B6914" }}>{qty}</strong>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                   <div style={s.cardActions}>
                     <button style={s.saleBtn} onClick={() => openSaleModal(product)}>Venda</button>
                     <button
