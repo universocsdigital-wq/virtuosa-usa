@@ -155,16 +155,25 @@ function expandProductColorCards(products: Product[]): Product[] {
     const colors = product.colors ?? [];
     if (colors.length <= 1) return [product];
 
-    const colorCards = colors.map((color) => {
+    const seenImageKeys = new Set<string>();
+    const colorCards = colors.flatMap((color) => {
       const colorImages = [
         ...getLocalColorImages(product.name, color),
         ...(product.imagesByColor?.[color] ?? []),
       ];
-      const images = Array.from(
-        new Set(colorImages.length > 0 ? colorImages : product.images ?? [product.image])
-      );
-      return { color, images };
+
+      if (colorImages.length === 0) return [];
+
+      const images = Array.from(new Set(colorImages));
+      const imageKey = normalizeImageKey(images[0] ?? "");
+
+      if (!imageKey || seenImageKeys.has(imageKey)) return [];
+
+      seenImageKeys.add(imageKey);
+      return [{ color, images }];
     });
+
+    if (colorCards.length === 0) return [product];
 
     return colorCards.map(({ color, images }) => {
       const inventoryBySize = product.inventoryByColorSize?.[color] ?? product.inventoryBySize;
