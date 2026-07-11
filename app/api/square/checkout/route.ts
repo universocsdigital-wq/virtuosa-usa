@@ -89,6 +89,12 @@ export async function POST(request: Request) {
     note?: string;
     base_price_money: { amount: number; currency: "USD" };
   }> = [];
+  const serviceCharges: Array<{
+    name: string;
+    amount_money: { amount: number; currency: "USD" };
+    calculation_phase: "TOTAL_PHASE";
+    taxable: boolean;
+  }> = [];
 
   for (const item of body.items) {
     const product = allProducts.find(
@@ -147,10 +153,11 @@ export async function POST(request: Request) {
   }
 
   if (body.fulfillmentType === "shipping") {
-    lineItems.push({
+    serviceCharges.push({
       name: "Frete USPS â€” envio com rastreamento",
-      quantity: "1",
-      base_price_money: { amount: SHIPPING_CENTS, currency: "USD" },
+      amount_money: { amount: SHIPPING_CENTS, currency: "USD" },
+      calculation_phase: "TOTAL_PHASE",
+      taxable: false,
     });
   }
 
@@ -182,6 +189,7 @@ export async function POST(request: Request) {
         order: {
           location_id: locationId,
           line_items: lineItems,
+          ...(serviceCharges.length > 0 ? { service_charges: serviceCharges } : {}),
         },
         checkout_options: {
           ask_for_shipping_address: body.fulfillmentType === "shipping",

@@ -32,6 +32,7 @@ function normalizeProductName(name: string): string {
 
 function cleanVariationLabel(value: string): string {
   return value
+    .replace(/\b\d+\b/g, "")
     .replace(/\s*[-–—/|]\s*$/g, "")
     .replace(/^\s*[-–—/|]\s*/g, "")
     .replace(/\s+/g, " ")
@@ -40,6 +41,18 @@ function cleanVariationLabel(value: string): string {
 
 function colorToSlug(color: string): string {
   return toSlug(color || "cor");
+}
+
+const SIZE_PATTERN = /\b(PP|P|M|G|GG|XG|XGG|U)\b/i;
+
+function getVariationSize(name: string): string | null {
+  const sizeMatch = name.match(SIZE_PATTERN);
+  return sizeMatch ? sizeMatch[1].toUpperCase() : null;
+}
+
+function getVariationColor(name: string): string | null {
+  const color = cleanVariationLabel(name.replace(SIZE_PATTERN, ""));
+  return color || null;
 }
 
 const LOCAL_COLOR_IMAGE_OVERRIDES = [
@@ -157,15 +170,22 @@ function expandProductColorCards(products: Product[]): Product[] {
 
     const seenImageKeys = new Set<string>();
     const colorCards = colors.flatMap((color) => {
-      const colorImages = [
+      const colorSpecificImages = [
         ...getLocalColorImages(product.name, color),
         ...(product.imagesByColor?.[color] ?? []),
       ];
+      const fallbackImages = product.images?.length ? product.images : [product.image];
+      const colorHasStock = product.inventoryByColorSize?.[color]
+        ? Object.values(product.inventoryByColorSize[color]).some((qty) => qty > 0)
+        : false;
 
-      if (colorImages.length === 0) return [];
+      if (colorSpecificImages.length === 0 && !colorHasStock) return [];
 
-      const images = Array.from(new Set(colorImages));
-      const imageKey = normalizeImageKey(images[0] ?? "");
+      const images = Array.from(new Set(colorSpecificImages.length > 0 ? colorSpecificImages : fallbackImages));
+      const imageKey =
+        colorSpecificImages.length > 0
+          ? normalizeImageKey(images[0] ?? "")
+          : `${product.id}:${colorToSlug(color)}`;
 
       if (!imageKey || seenImageKeys.has(imageKey)) return [];
 
@@ -420,8 +440,7 @@ export async function getSquareProducts(): Promise<Product[]> {
           .map((v) => {
             const vname = v.item_variation_data?.name || "";
             // Extrair tamanho do nome da variação (ex: "Branca P" → "P", "Caramelo M" → "M")
-            const sizeMatch = vname.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i);
-            return sizeMatch ? sizeMatch[1].toUpperCase() : null;
+            return getVariationSize(vname);
           })
           .filter(Boolean) as string[]
       )
@@ -434,10 +453,7 @@ export async function getSquareProducts(): Promise<Product[]> {
           .map((v) => {
             const vname = v.item_variation_data?.name || "";
             // Remover o tamanho para obter a cor
-            const color = cleanVariationLabel(
-              vname.replace(/\b(PP|P|M|G|GG|XG|XGG|U)\b/gi, "")
-            );
-            return color || null;
+            return getVariationColor(vname);
           })
           .filter(Boolean) as string[]
       )
@@ -446,22 +462,18 @@ export async function getSquareProducts(): Promise<Product[]> {
     // Preço da primeira variação
     const inventoryBySize = variations.reduce<Record<string, number>>((acc, variation) => {
       const vname = variation.item_variation_data?.name || "";
-      const sizeMatch = vname.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i);
-      if (!sizeMatch) return acc;
-      const size = sizeMatch[1].toUpperCase();
+      const size = getVariationSize(vname);
+      if (!size) return acc;
       acc[size] = (acc[size] || 0) + (inventoryMap.get(variation.id) || 0);
       return acc;
     }, {});
 
     const inventoryByColorSize = variations.reduce<Record<string, Record<string, number>>>((acc, variation) => {
       const vname = variation.item_variation_data?.name || "";
-      const sizeMatch = vname.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i);
-      if (!sizeMatch) return acc;
+      const size = getVariationSize(vname);
+      if (!size) return acc;
 
-      const size = sizeMatch[1].toUpperCase();
-      const color = cleanVariationLabel(
-        vname.replace(/\b(PP|P|M|G|GG|XG|XGG|U)\b/gi, "")
-      );
+      const color = getVariationColor(vname);
 
       if (!color) return acc;
 
@@ -472,9 +484,7 @@ export async function getSquareProducts(): Promise<Product[]> {
 
     const imagesByColor = variations.reduce<Record<string, string[]>>((acc, variation) => {
       const vname = variation.item_variation_data?.name || "";
-      const color = cleanVariationLabel(
-        vname.replace(/\b(PP|P|M|G|GG|XG|XGG|U)\b/gi, "")
-      );
+      const color = getVariationColor(vname);
 
       if (!color) return acc;
 
