@@ -14,7 +14,7 @@ const navLinks = [
   { label: "Conjuntos", href: "/shop#conjuntos", filter: "conjuntos" },
   { label: "Saias", href: "/shop#saias", filter: "saias" },
   { label: "Casacos", href: "/shop#casacos", filter: "casacos" },
-  { label: "MacacÃ£o", href: "/shop#macacao", filter: "macacao" },
+  { label: "Macacão", href: "/shop#macacao", filter: "macacao" },
   { label: "Calças", href: "/shop#calcas", filter: "calcas" },
   { label: "Grupo VIP", href: "https://chat.whatsapp.com/BYkfi3grimA4RvQspUTVFL", external: true },
 ];

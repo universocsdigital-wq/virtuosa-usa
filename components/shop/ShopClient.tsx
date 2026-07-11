@@ -28,7 +28,7 @@ const categoryOptions: { id: CategoryFilter; label: string }[] = [
   { id: "conjuntos", label: "Conjuntos" },
   { id: "saias", label: "Saias" },
   { id: "casacos", label: "Casacos" },
-  { id: "macacao", label: "MacacÃ£o" },
+  { id: "macacao", label: "Macacão" },
   { id: "calcas", label: "Calças" },
 ];
 const sizeOptions = ["P", "M", "G", "GG"];
