@@ -10,8 +10,11 @@ const navLinks = [
   { label: "Lançamentos", href: "/shop#lancamentos", filter: "lancamentos" },
   { label: "Vestidos", href: "/shop#vestidos", filter: "vestidos" },
   { label: "Blusas", href: "/shop#blusas", filter: "blusas" },
+  { label: "Camisas", href: "/shop#camisas", filter: "camisas" },
   { label: "Conjuntos", href: "/shop#conjuntos", filter: "conjuntos" },
   { label: "Saias", href: "/shop#saias", filter: "saias" },
+  { label: "Casacos", href: "/shop#casacos", filter: "casacos" },
+  { label: "MacacÃ£o", href: "/shop#macacao", filter: "macacao" },
   { label: "Calças", href: "/shop#calcas", filter: "calcas" },
   { label: "Grupo VIP", href: "https://chat.whatsapp.com/BYkfi3grimA4RvQspUTVFL", external: true },
 ];
@@ -73,7 +76,7 @@ export function Navbar() {
             </div>
           </div>
 
-          <nav className="hidden h-[42px] items-center justify-center gap-7 border-t border-white/10 lg:flex xl:gap-9" aria-label="Categorias">
+          <nav className="hidden h-[42px] items-center justify-center gap-4 border-t border-white/10 lg:flex xl:gap-5" aria-label="Categorias">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
@@ -81,7 +84,7 @@ export function Navbar() {
                 target={link.external ? "_blank" : undefined}
                 rel={link.external ? "noopener noreferrer" : undefined}
                 onClick={(event) => handleNavClick(event, link)}
-                className="whitespace-nowrap font-sans text-[10.5px] font-bold uppercase tracking-[0.13em] text-[#F1DDC1] transition-colors hover:text-[#F5D58A]"
+                className="whitespace-nowrap font-sans text-[9.5px] font-bold uppercase tracking-[0.11em] text-[#F1DDC1] transition-colors hover:text-[#F5D58A] xl:text-[10px]"
               >
                 {link.label}
               </Link>

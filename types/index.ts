@@ -21,7 +21,15 @@ export interface Product {
   checkoutUrl?: string;
 }
 
-export type ProductCategory = "vestidos" | "saias" | "conjuntos" | "blusas" | "calcas";
+export type ProductCategory =
+  | "vestidos"
+  | "saias"
+  | "conjuntos"
+  | "blusas"
+  | "camisas"
+  | "casacos"
+  | "macacao"
+  | "calcas";
 
 export interface Review {
   id: string;

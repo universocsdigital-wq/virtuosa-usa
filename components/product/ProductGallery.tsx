@@ -8,10 +8,17 @@ interface ProductGalleryProps {
 }
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
-  const galleryImages = images.length > 0 ? images : ["/images/placeholder.jpg"];
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+  const validImages = images.filter((image) => image && !failedImages.includes(image));
+  const galleryImages = validImages.length > 0 ? validImages : ["/images/placeholder.jpg"];
   const selectedImage = galleryImages[selectedIndex] || galleryImages[0];
+  const handleImageError = (image: string) => {
+    if (image === "/images/placeholder.jpg") return;
+    setFailedImages((current) => (current.includes(image) ? current : [...current, image]));
+    setSelectedIndex(0);
+  };
 
   return (
     <div>
@@ -26,6 +33,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           <img
             src={selectedImage}
             alt={productName}
+            onError={() => handleImageError(selectedImage)}
             className="absolute inset-0 h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-[1.02]"
           />
           <div className="absolute inset-0 texture-linen opacity-20" aria-hidden />
@@ -56,6 +64,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 <img
                   src={image}
                   alt={`${productName} - foto ${index + 1}`}
+                  onError={() => handleImageError(image)}
                   className="absolute inset-0 h-full w-full object-contain p-1"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
@@ -79,6 +88,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           <img
             src={selectedImage}
             alt={productName}
+            onError={() => handleImageError(selectedImage)}
             className="max-h-[88vh] max-w-[94vw] rounded-[10px] object-contain shadow-[0_30px_90px_rgba(0,0,0,0.45)]"
           />
         </button>

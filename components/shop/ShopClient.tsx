@@ -8,14 +8,27 @@ import type { Product, ProductCategory } from "@/types";
 type CategoryFilter = "todos" | "lancamentos" | ProductCategory;
 type PriceFilter = "todos" | "ate-150" | "150-250" | "250-350" | "350-plus";
 
-const validCategoryFilters = ["lancamentos", "vestidos", "blusas", "conjuntos", "saias", "calcas"] as const;
+const validCategoryFilters = [
+  "lancamentos",
+  "vestidos",
+  "blusas",
+  "camisas",
+  "conjuntos",
+  "saias",
+  "calcas",
+  "casacos",
+  "macacao",
+] as const;
 const categoryOptions: { id: CategoryFilter; label: string }[] = [
   { id: "todos", label: "Todos" },
   { id: "lancamentos", label: "Lançamentos" },
   { id: "vestidos", label: "Vestidos" },
   { id: "blusas", label: "Blusas" },
+  { id: "camisas", label: "Camisas" },
   { id: "conjuntos", label: "Conjuntos" },
   { id: "saias", label: "Saias" },
+  { id: "casacos", label: "Casacos" },
+  { id: "macacao", label: "MacacÃ£o" },
   { id: "calcas", label: "Calças" },
 ];
 const sizeOptions = ["P", "M", "G", "GG"];
