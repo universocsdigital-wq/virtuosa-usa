@@ -161,8 +161,8 @@ function createManualProducts(existingProducts: Product[]): Product[] {
       price: 320,
       rating: 4.9,
       reviewCount: 0,
-      image: "/images/placeholder.jpg",
-      images: ["/images/placeholder.jpg"],
+      image: "/images/products/conjunto-soney-verde.jpeg",
+      images: ["/images/products/conjunto-soney-verde.jpeg"],
       category: "conjuntos",
       description: "Conjunto Soney em verde.",
       badge: "new",
@@ -182,8 +182,8 @@ function createManualProducts(existingProducts: Product[]): Product[] {
       price: 49,
       rating: 4.9,
       reviewCount: 0,
-      image: "/images/placeholder.jpg",
-      images: ["/images/placeholder.jpg"],
+      image: "/images/products/t-shirt-aplicacao-flores-branca.jpeg",
+      images: ["/images/products/t-shirt-aplicacao-flores-branca.jpeg"],
       category: "blusas",
       description: "T-shirt branca com aplicacao de flores.",
       badge: "new",
@@ -253,6 +253,8 @@ function getCategory(name: string): ProductCategory {
   if (n.includes("saia")) return "saias";
   if (
     n.includes("casaco") ||
+    n.includes("casaqueto") ||
+    n.includes("casaquinho") ||
     n.includes("casquinho") ||
     n.includes("casqueto") ||
     n.includes("jaqueta") ||
