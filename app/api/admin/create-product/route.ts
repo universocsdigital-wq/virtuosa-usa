@@ -4,23 +4,6 @@ import { getAdminSession } from "@/lib/admin-auth";
 const SQUARE_BASE_URL = "https://connect.squareup.com/v2";
 const SQUARE_VERSION = "2024-01-18";
 
-// Categorias reais do Square — Virtuosa USA
-const CATEGORY_MAP: Record<string, string> = {
-  vestidos:  "UD3ZVWMU77NJADQD2NYAPAV3",
-  blusas:    "62F573XPBPCONBST54YVYB2S",
-  conjuntos: "NN36IJ7XILTRUK5ECOONXUDT",
-  saias:     "VCWVRPQKMGEKRUHFX6DKAB5C",
-  calcas:    "AUIRQLYJUOMSXP5SWJSFMEHH",
-  camisas:   "KRQTWZXAASI7ICCSPVD6QENW",
-  casacos:   "NWB45JWJIHOWFFJ2C5HN6DWM",
-  macacao:   "7GXK66KBOFA4PUWTUHTT4VIZ",
-  lancamentos: "6WYVBDYKRO4C3B3K3HM2VJ6R",
-  live:      "OKAXNQGTJCBMDA3QO53DHPPT",
-};
-
-// Item Option de Tamanho do Square — ID fixo da loja
-const SIZE_OPTION_ID = "AJZKUIYMBALMYJ3E6BTQ7ROG";
-
 function getSquareToken(): string | null {
   return process.env.SQUARE_ACCESS_TOKEN || null;
 }
@@ -29,50 +12,38 @@ function getLocationId(): string | null {
   return process.env.SQUARE_LOCATION_ID || process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID || null;
 }
 
-function normalizeCategory(cat: string): string {
-  return cat
-    .toLowerCase()
+function normalizeCategoryName(value: string): string {
+  return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z]/g, "");
+    .toLowerCase()
+    .trim();
 }
 
-// Busca o item_option_value_id para um tamanho específico, ou cria se não existir
-async function getOrCreateSizeOptionValue(
-  token: string,
-  sizeName: string,
-  existingValues: Array<{ id: string; name: string }>
-): Promise<string | null> {
-  const existing = existingValues.find(
-    (v) => v.name.toLowerCase() === sizeName.toLowerCase()
-  );
-  if (existing) return existing.id;
+async function resolveSquareCategoryId(categoryName: string, token: string): Promise<string | undefined> {
+  if (!categoryName) return undefined;
 
-  // Criar novo valor de opção
-  const res = await fetch(`${SQUARE_BASE_URL}/catalog/object`, {
-    method: "POST",
+  const response = await fetch(`${SQUARE_BASE_URL}/catalog/list?types=CATEGORY`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Square-Version": SQUARE_VERSION,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      idempotency_key: `size-val-${sizeName}-${Date.now()}`,
-      object: {
-        type: "ITEM_OPTION_VAL",
-        id: `#size-val-${sizeName}`,
-        item_option_value_data: {
-          item_option_id: SIZE_OPTION_ID,
-          name: sizeName,
-        },
-      },
-    }),
     cache: "no-store",
   });
 
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.catalog_object?.id ?? null;
+  if (!response.ok) {
+    console.warn("[admin/create-product] Categoria nao localizada no Square", await response.text().catch(() => ""));
+    return undefined;
+  }
+
+  const data = await response.json();
+  const target = normalizeCategoryName(categoryName);
+  const match = (data.objects ?? []).find((object: { id?: string; category_data?: { name?: string } }) =>
+    normalizeCategoryName(object.category_data?.name ?? "") === target
+  );
+
+  return match?.id;
 }
 
 export async function POST(req: NextRequest) {
@@ -100,51 +71,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Nome, preco e tamanhos sao obrigatorios." }, { status: 400 });
     }
 
-    // Resolver category_id
-    const catKey = normalizeCategory(category || "");
-    const categoryId = CATEGORY_MAP[catKey] ?? null;
-
-    // Buscar valores de opção de tamanho existentes
-    const optionRes = await fetch(
-      `${SQUARE_BASE_URL}/catalog/object/${SIZE_OPTION_ID}?include_related_objects=true`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Square-Version": SQUARE_VERSION,
-        },
-        cache: "no-store",
-      }
-    );
-
-    let existingValues: Array<{ id: string; name: string }> = [];
-    if (optionRes.ok) {
-      const optionData = await optionRes.json();
-      const vals = optionData.related_objects?.filter(
-        (o: { type: string }) => o.type === "ITEM_OPTION_VAL"
-      ) ?? [];
-      existingValues = vals.map((v: { id: string; item_option_value_data?: { name?: string } }) => ({
-        id: v.id,
-        name: v.item_option_value_data?.name ?? "",
-      }));
-    }
-
     const idempotencyKey = `admin-create-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const priceInCents = Math.round(parseFloat(price) * 100);
+    const categoryId = await resolveSquareCategoryId(category, token);
 
-    // Resolver item_option_value_id para cada tamanho
-    const variationsWithOptionValues: Array<{
-      size: string;
-      quantity: number;
-      optionValueId: string | null;
-    }> = await Promise.all(
-      sizes.map(async (s: { size: string; quantity: number }) => {
-        const optionValueId = await getOrCreateSizeOptionValue(token, s.size, existingValues);
-        return { ...s, optionValueId };
-      })
-    );
-
-    // Criar variações no formato correto do Square
-    const variations = variationsWithOptionValues.map((s, i) => ({
+    // Criar variações para cada tamanho
+    const variations = sizes.map((s: { size: string; quantity: number }, i: number) => ({
       type: "ITEM_VARIATION",
       id: `#variation-${i}`,
       item_variation_data: {
@@ -158,36 +90,10 @@ export async function POST(req: NextRequest) {
           {
             location_id: locationId,
             track_inventory: true,
-            inventory_alert_type: "LOW_QUANTITY",
-            inventory_alert_threshold: 1,
           },
         ],
-        ...(s.optionValueId
-          ? {
-              item_option_values: [
-                {
-                  item_option_id: SIZE_OPTION_ID,
-                  item_option_value_id: s.optionValueId,
-                },
-              ],
-            }
-          : {}),
       },
     }));
-
-    // Montar item_data com categoria e item_options
-    const itemData: Record<string, unknown> = {
-      name,
-      description: description || "",
-      variations,
-      item_options: [{ item_option_id: SIZE_OPTION_ID }],
-      ecom_visibility: "VISIBLE",
-    };
-
-    if (categoryId) {
-      itemData.categories = [{ id: categoryId }];
-      itemData.reporting_category = { id: categoryId };
-    }
 
     // Criar o produto no Square
     const upsertResponse = await fetch(`${SQUARE_BASE_URL}/catalog/object`, {
@@ -202,8 +108,12 @@ export async function POST(req: NextRequest) {
         object: {
           type: "ITEM",
           id: "#new-item",
-          present_at_location_ids: [locationId],
-          item_data: itemData,
+          item_data: {
+            name,
+            description: description || "",
+            category_id: categoryId,
+            variations,
+          },
         },
       }),
       cache: "no-store",

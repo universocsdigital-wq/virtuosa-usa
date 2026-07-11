@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface ProductItem {
   id: string;
   name: string;
+  slug?: string;
   price: number;
   image: string;
   category: string;
@@ -26,6 +27,49 @@ const PAYMENT_METHODS = [
 ];
 
 const SIZE_OPTIONS = ["PP", "P", "M", "G", "GG", "XG", "XGG", "U"];
+const STORE_CATEGORIES = [
+  "Lançamentos",
+  "Vestidos",
+  "Blusas",
+  "Camisas",
+  "Conjuntos",
+  "Saias",
+  "Casacos",
+  "Macacão",
+  "Calças",
+  "Live",
+];
+
+const CATEGORY_LABEL_BY_ID: Record<string, string> = {
+  lancamentos: "Lançamentos",
+  vestidos: "Vestidos",
+  blusas: "Blusas",
+  camisas: "Camisas",
+  conjuntos: "Conjuntos",
+  saias: "Saias",
+  casacos: "Casacos",
+  macacao: "Macacão",
+  calcas: "Calças",
+  live: "Live",
+};
+
+function normalizeCategory(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function getCategoryLabel(category: string): string {
+  if (!category) return "Vestidos";
+  const normalized = normalizeCategory(category);
+  return (
+    CATEGORY_LABEL_BY_ID[normalized] ??
+    STORE_CATEGORIES.find((item) => normalizeCategory(item) === normalized) ??
+    "Vestidos"
+  );
+}
 
 function sortSizes(sizes: string[]): string[] {
   return [...sizes].sort((a, b) => {
@@ -72,6 +116,7 @@ export default function AdminDashboardPage() {
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editPrice, setEditPrice] = useState("");
+  const [editCategory, setEditCategory] = useState("Vestidos");
   const [editLoading, setEditLoading] = useState(false);
   const [editSuccess, setEditSuccess] = useState("");
   const [editError, setEditError] = useState("");
@@ -157,6 +202,7 @@ export default function AdminDashboardPage() {
     setEditName(product.name);
     setEditDescription("");
     setEditPrice(product.price.toFixed(2));
+    setEditCategory(getCategoryLabel(product.category));
     setEditSuccess("");
     setEditError("");
     setEditImageFile(null);
@@ -271,6 +317,7 @@ export default function AdminDashboardPage() {
           name: editName,
           description: editDescription || undefined,
           price: parseFloat(editPrice) || undefined,
+          category: editCategory,
         }),
       });
       const data = await res.json();
@@ -279,7 +326,7 @@ export default function AdminDashboardPage() {
         setProducts((prev) =>
           prev.map((p) =>
             p.squareId === squareId
-              ? { ...p, name: editName, price: parseFloat(editPrice) || p.price }
+              ? { ...p, name: editName, price: parseFloat(editPrice) || p.price, category: editCategory }
               : p
           )
         );
@@ -392,6 +439,21 @@ export default function AdminDashboardPage() {
     setCreateSizes((prev) => prev.map((s, i) => (i === idx ? { ...s, [field]: value } : s)));
   }
 
+  async function copyProductLink(product: ProductItem) {
+    if (!product.slug) {
+      alert("Link da peça ainda não está disponível. Recarregue os produtos e tente novamente.");
+      return;
+    }
+
+    const url = `${window.location.origin}/shop/${product.slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      alert("Link da peça copiado para enviar na live.");
+    } catch {
+      window.prompt("Copie o link da peça:", url);
+    }
+  }
+
   const filtered = products.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const total = getTotalStock(p);
@@ -429,18 +491,17 @@ export default function AdminDashboardPage() {
       borderRadius: 8, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
     grid: {
-      display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-      gap: 20, padding: "20px 24px",
+      display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+      gap: 14, padding: 16,
     } as React.CSSProperties,
     card: {
-      background: "#fff", borderRadius: 12, overflow: "hidden",
-      boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-      display: "flex", flexDirection: "column" as const,
+      background: "#fff", borderRadius: 10, overflow: "hidden",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
     } as React.CSSProperties,
-    cardImg: { width: "100%", aspectRatio: "3/4", objectFit: "cover" as const, display: "block", flexShrink: 0 } as React.CSSProperties,
-    cardBody: { padding: "12px 14px 16px", display: "flex", flexDirection: "column" as const, flex: 1 } as React.CSSProperties,
-    cardName: { fontSize: 14, fontWeight: 600, color: "#2C1810", marginBottom: 6, lineHeight: 1.4, wordBreak: "break-word" as const } as React.CSSProperties,
-    cardPrice: { fontSize: 13, color: "#8B6914", marginBottom: 8, fontWeight: 500 } as React.CSSProperties,
+    cardImg: { width: "100%", aspectRatio: "3/4", objectFit: "cover" as const, display: "block" } as React.CSSProperties,
+    cardBody: { padding: "10px 10px 12px" } as React.CSSProperties,
+    cardName: { fontSize: 13, fontWeight: 600, color: "#2C1810", marginBottom: 4, lineHeight: 1.3 } as React.CSSProperties,
+    cardPrice: { fontSize: 12, color: "#8B6914", marginBottom: 6 } as React.CSSProperties,
     stockBadge: (total: number): React.CSSProperties => ({
       display: "inline-block", fontSize: 11, padding: "2px 8px", borderRadius: 20,
       background: total === 0 ? "#fee2e2" : total <= 3 ? "#fef9c3" : "#dcfce7",
@@ -448,11 +509,21 @@ export default function AdminDashboardPage() {
       fontWeight: 600,
     }),
 
-    cardActions: { display: "flex", gap: 8, marginTop: 8, alignItems: "center" } as React.CSSProperties,
+    cardActions: { display: "flex", gap: 6, marginTop: 8 } as React.CSSProperties,
     saleBtn: {
-      flex: 1, padding: "9px 0", background: "#8B6914", color: "#fff",
-      border: "none", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-      fontWeight: 500,
+      flex: 1, padding: "7px 0", background: "#8B6914", color: "#fff",
+      border: "none", borderRadius: 6, fontSize: 11, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    } as React.CSSProperties,
+    linkBtn: {
+      padding: "7px 10px",
+      background: "#f5f0eb",
+      color: "#8B6914",
+      border: "1px solid #d7c6ae",
+      borderRadius: 6,
+      fontSize: 11,
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+      fontWeight: 600,
     } as React.CSSProperties,
     iconBtn: (enabled: boolean): React.CSSProperties => ({
       padding: "7px 10px",
@@ -658,17 +729,24 @@ export default function AdminDashboardPage() {
                       })}
                     </div>
                   )}
-                  <div style={{ ...s.cardActions, marginTop: "auto", paddingTop: 10 }}>
+                  <div style={s.cardActions}>
                     <button style={s.saleBtn} onClick={() => openSaleModal(product)}>Venda</button>
                     <button
-                      style={{ ...s.iconBtn(hasSquare), fontSize: 16, padding: "7px 12px" }}
+                      style={s.linkBtn}
+                      onClick={() => copyProductLink(product)}
+                      title="Copiar link da peça para enviar na live"
+                    >
+                      Link
+                    </button>
+                    <button
+                      style={s.iconBtn(hasSquare)}
                       onClick={() => openStockModal(product)}
                       title={hasSquare ? "Ajustar estoque" : "Produto local — cadastre no Square"}
                     >
                       📦
                     </button>
                     <button
-                      style={{ ...s.iconBtn(hasSquare), fontSize: 16, padding: "7px 12px" }}
+                      style={s.iconBtn(hasSquare)}
                       onClick={() => openEditModal(product)}
                       title={hasSquare ? "Editar produto" : "Produto local — cadastre no Square"}
                     >
@@ -778,6 +856,13 @@ export default function AdminDashboardPage() {
             <label style={s.label}>Preco (USD)</label>
             <input style={s.input} type="number" step="0.01" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} />
 
+            <label style={s.label}>Categoria</label>
+            <select style={s.select} value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
+              {STORE_CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
             {editSuccess && <div style={s.successMsg}>{editSuccess}</div>}
             {editError && <div style={s.errorMsg}>{editError}</div>}
 
@@ -884,7 +969,7 @@ export default function AdminDashboardPage() {
 
             <label style={s.label}>Categoria</label>
             <select style={s.select} value={createCategory} onChange={(e) => setCreateCategory(e.target.value)}>
-              {["Vestidos", "Blusas", "Saias", "Calcas", "Conjuntos", "Acessorios", "Outros"].map((c) => (
+              {STORE_CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
