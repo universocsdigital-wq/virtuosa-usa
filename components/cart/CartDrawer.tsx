@@ -124,10 +124,15 @@ export function CartDrawer() {
                 <span className="font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Total</span>
                 <span className="font-serif text-2xl text-[#2A1712]">{formatPrice(totalPrice + shippingPrice)}</span>
               </div>
-              <p className="mb-3 font-sans text-[10px] leading-relaxed text-[#6F5547]">Pagamento protegido pela Square. Endereço solicitado apenas para envio.</p>
+              <p className="mb-3 font-sans text-[10px] leading-relaxed text-[#6F5547]">
+                O checkout abre em uma página segura da Square. Depois do pagamento, você retorna para a Virtuosa.
+              </p>
               {error && <p className="mb-4 border border-red-300 bg-red-50 px-3 py-2 font-sans text-[12px] text-red-800">{error}</p>}
               <button type="button" onClick={checkout} disabled={loading} className="flex min-h-[48px] w-full items-center justify-center bg-[#8A5A36] px-6 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_8px_20px_rgba(42,23,18,0.16)] transition-colors hover:bg-[#6F452C] disabled:cursor-wait disabled:opacity-60">
                 {loading ? "Preparando checkout..." : "Finalizar compra \u2192"}
+              </button>
+              <button type="button" onClick={closeCart} className="mt-3 flex min-h-[42px] w-full items-center justify-center border border-[#D9C8B5] bg-white/45 px-6 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-[#4F3527] transition-colors hover:border-[#B88A62] hover:bg-white/70">
+                Continuar vendo peças \u2192
               </button>
             </footer>
           </>

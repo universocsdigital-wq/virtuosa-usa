@@ -126,7 +126,7 @@ function createManualProducts(existingProducts: Product[]): Product[] {
   if (!normalizedNames.some((name) => name.includes("soney"))) {
     manualProducts.push({
       id: "manual-conjunto-soney-verde",
-      name: "Conjunto Soney",
+      name: "Conjunto Soney Verde",
       slug: "conjunto-soney-verde",
       price: 320,
       rating: 4.9,
@@ -135,6 +135,7 @@ function createManualProducts(existingProducts: Product[]): Product[] {
       images: ["/images/placeholder.jpg"],
       category: "conjuntos",
       description: "Conjunto Soney em verde.",
+      badge: "new",
       sizes: ["M"],
       colors: ["Verde"],
       inventoryBySize: { M: 1 },
@@ -146,7 +147,7 @@ function createManualProducts(existingProducts: Product[]): Product[] {
   if (!normalizedNames.some((name) => name.includes("t shirt") && name.includes("flores"))) {
     manualProducts.push({
       id: "manual-t-shirt-aplicacao-de-flores-branca",
-      name: "T-shirt Aplicacao de Flores",
+      name: "T-shirt Aplicação de Flores Branca",
       slug: "t-shirt-aplicacao-de-flores-branca",
       price: 49,
       rating: 4.9,
@@ -155,6 +156,7 @@ function createManualProducts(existingProducts: Product[]): Product[] {
       images: ["/images/placeholder.jpg"],
       category: "blusas",
       description: "T-shirt branca com aplicacao de flores.",
+      badge: "new",
       sizes: ["P", "M", "G"],
       colors: ["Branca"],
       inventoryBySize: { P: 1, M: 1, G: 1 },
