@@ -88,6 +88,24 @@ function normalizeImageKey(image: string): string {
 function applyProductOverrides(product: Product): Product {
   const normalizedName = normalizeProductName(product.name);
 
+  if (normalizedName.includes("vestido lana")) {
+    return {
+      ...product,
+      name: "Vestido Lana",
+      slug: "vestido-lana",
+      price: 140,
+      category: "vestidos",
+      sizes: ["P", "M", "G"],
+      colors: ["Rose", "Laranja"],
+      inventoryBySize: { P: 2, M: 3, G: 6 },
+      inventoryByColorSize: {
+        Rose: { M: 1, G: 3 },
+        Laranja: { P: 2, M: 2, G: 3 },
+      },
+      inStock: true,
+    };
+  }
+
   if (normalizedName.includes("richelieu")) {
     return {
       ...product,
@@ -163,9 +181,15 @@ function applyProductOverrides(product: Product): Product {
 }
 
 
+function shouldForceColorCards(productName: string): boolean {
+  const normalizedName = normalizeProductName(productName);
+  return normalizedName.includes("vestido lana");
+}
+
 function expandProductColorCards(products: Product[]): Product[] {
   return products.flatMap((product) => {
     const colors = product.colors ?? [];
+    const forceColorCards = shouldForceColorCards(product.name);
     const displayColors = colors.filter((color) => {
       const inventory = product.inventoryByColorSize?.[color];
       return !inventory || Object.values(inventory).some((qty) => qty > 0);
@@ -180,10 +204,14 @@ function expandProductColorCards(products: Product[]): Product[] {
         ...(product.imagesByColor?.[color] ?? []),
       ];
 
-      if (colorSpecificImages.length === 0) return [];
+      if (colorSpecificImages.length === 0 && !forceColorCards) return [];
 
-      const images = Array.from(new Set(colorSpecificImages));
-      const imageKey = normalizeImageKey(images[0] ?? "");
+      const fallbackImages = Array.from(new Set(product.images?.length ? product.images : [product.image]));
+      const images = Array.from(new Set(colorSpecificImages.length > 0 ? colorSpecificImages : fallbackImages));
+      const imageKey =
+        colorSpecificImages.length > 0
+          ? normalizeImageKey(images[0] ?? "")
+          : `${product.id}:${colorToSlug(color)}`;
 
       if (!imageKey || seenImageKeys.has(imageKey)) return [];
 
@@ -191,7 +219,8 @@ function expandProductColorCards(products: Product[]): Product[] {
       return [{ color, images }];
     });
 
-    if (colorCards.length !== displayColors.length) return [product];
+    if (colorCards.length !== displayColors.length && !forceColorCards) return [product];
+    if (colorCards.length === 0) return [product];
 
     return colorCards.map(({ color, images }) => {
       const inventoryBySize = product.inventoryByColorSize?.[color] ?? product.inventoryBySize;
