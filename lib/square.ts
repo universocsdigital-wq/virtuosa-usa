@@ -42,6 +42,36 @@ function colorToSlug(color: string): string {
   return toSlug(color || "cor");
 }
 
+const LOCAL_COLOR_IMAGE_OVERRIDES = [
+  {
+    productIncludes: ["linho boho floral"],
+    colorExact: "verde",
+    images: ["/images/products/vestido-linho-boho-floral-verde.png"],
+  },
+] satisfies Array<{
+  productIncludes: string[];
+  colorExact: string;
+  images: string[];
+}>;
+
+function getLocalColorImages(productName: string, color: string): string[] {
+  const normalizedProduct = normalizeProductName(productName);
+  const normalizedColor = normalizeProductName(color);
+
+  const override = LOCAL_COLOR_IMAGE_OVERRIDES.find((item) => {
+    return (
+      item.productIncludes.every((term) => normalizedProduct.includes(term)) &&
+      normalizedColor === item.colorExact
+    );
+  });
+
+  return override?.images ?? [];
+}
+
+function normalizeImageKey(image: string): string {
+  return image.split("?")[0].trim();
+}
+
 function applyProductOverrides(product: Product): Product {
   const normalizedName = normalizeProductName(product.name);
 
@@ -173,15 +203,26 @@ function expandProductColorCards(products: Product[]): Product[] {
     const colors = product.colors ?? [];
     if (colors.length <= 1) return [product];
 
-    return colors.map((color, index) => {
-      const colorImages = product.imagesByColor?.[color] ?? [];
-      const fallbackImage = product.images?.[index] ?? product.image;
-      const images =
-        colorImages.length > 0
-          ? colorImages
-          : fallbackImage
-          ? [fallbackImage, ...(product.images ?? []).filter((image) => image !== fallbackImage)]
-          : product.images;
+    const colorCards = colors
+      .map((color) => {
+        const colorImages = [
+          ...getLocalColorImages(product.name, color),
+          ...(product.imagesByColor?.[color] ?? []),
+        ];
+        return { color, images: Array.from(new Set(colorImages)) };
+      })
+      .filter(({ images }) => images.length > 0);
+
+    if (colorCards.length !== colors.length) {
+      return [product];
+    }
+
+    const primaryImageKeys = colorCards.map(({ images }) => normalizeImageKey(images[0]));
+    if (new Set(primaryImageKeys).size !== primaryImageKeys.length) {
+      return [product];
+    }
+
+    return colorCards.map(({ color, images }) => {
       const inventoryBySize = product.inventoryByColorSize?.[color] ?? product.inventoryBySize;
       const colorSlug = colorToSlug(color);
 
@@ -191,7 +232,7 @@ function expandProductColorCards(products: Product[]): Product[] {
         sourceProductId: product.sourceProductId ?? product.id,
         slug: `${product.slug}-${colorSlug}`,
         name: `${product.name} ${color}`,
-        image: images?.[0] ?? fallbackImage,
+        image: images[0],
         images,
         colors: [color],
         inventoryBySize,
