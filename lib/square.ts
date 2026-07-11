@@ -246,16 +246,36 @@ function expandProductColorCards(products: Product[]): Product[] {
 }
 
 function getCategory(name: string): ProductCategory {
-  const n = name.toLowerCase();
-  if (n.includes("vestido")) return "vestidos";
+  const n = normalizeProductName(name);
+
+  if (n.includes("macacao") || n.includes("jumpsuit")) return "macacao";
+  if (n.includes("calca") || n.includes("pantalona")) return "calcas";
   if (n.includes("saia")) return "saias";
-  if (n.includes("calça") || n.includes("calca")) return "calcas";
-  if (n.includes("conjunto")) return "conjuntos";
   if (
+    n.includes("casaco") ||
+    n.includes("casquinho") ||
+    n.includes("casqueto") ||
+    n.includes("jaqueta") ||
     n.includes("blazer") ||
     n.includes("cardigan") ||
-    n.includes("colete")
-  ) return "conjuntos";
+    n.includes("colete") ||
+    n.includes("tweed")
+  ) return "casacos";
+  if (n.includes("conjunto")) return "conjuntos";
+  if (n.includes("camisa")) return "camisas";
+  if (
+    n.includes("blusa") ||
+    n.includes("t-shirt") ||
+    n.includes("t shirt") ||
+    n.includes("tee")
+  ) return "blusas";
+  if (n.includes("vestido")) return "vestidos";
+  if (
+    n.includes("body") ||
+    n.includes("cropped") ||
+    n.includes("regata")
+  ) return "blusas";
+
   return "blusas";
 }
 
@@ -546,8 +566,16 @@ export async function getSquareProducts(): Promise<Product[]> {
   products.push(...createManualProducts(products));
   const displayProducts = expandProductColorCards(products);
 
-  // Ordenar: vestidos primeiro, depois saias, conjuntos, blusas
-  const categoryOrder: ProductCategory[] = ["vestidos", "saias", "conjuntos", "blusas", "calcas"];
+  const categoryOrder: ProductCategory[] = [
+    "vestidos",
+    "blusas",
+    "camisas",
+    "conjuntos",
+    "saias",
+    "casacos",
+    "macacao",
+    "calcas",
+  ];
   return displayProducts.sort(
     (a, b) => categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category)
   );
