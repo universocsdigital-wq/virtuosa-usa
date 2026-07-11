@@ -166,26 +166,24 @@ function applyProductOverrides(product: Product): Product {
 function expandProductColorCards(products: Product[]): Product[] {
   return products.flatMap((product) => {
     const colors = product.colors ?? [];
-    if (colors.length <= 1) return [product];
+    const displayColors = colors.filter((color) => {
+      const inventory = product.inventoryByColorSize?.[color];
+      return !inventory || Object.values(inventory).some((qty) => qty > 0);
+    });
+
+    if (displayColors.length <= 1) return [product];
 
     const seenImageKeys = new Set<string>();
-    const colorCards = colors.flatMap((color) => {
+    const colorCards = displayColors.flatMap((color) => {
       const colorSpecificImages = [
         ...getLocalColorImages(product.name, color),
         ...(product.imagesByColor?.[color] ?? []),
       ];
-      const fallbackImages = product.images?.length ? product.images : [product.image];
-      const colorHasStock = product.inventoryByColorSize?.[color]
-        ? Object.values(product.inventoryByColorSize[color]).some((qty) => qty > 0)
-        : false;
 
-      if (colorSpecificImages.length === 0 && !colorHasStock) return [];
+      if (colorSpecificImages.length === 0) return [];
 
-      const images = Array.from(new Set(colorSpecificImages.length > 0 ? colorSpecificImages : fallbackImages));
-      const imageKey =
-        colorSpecificImages.length > 0
-          ? normalizeImageKey(images[0] ?? "")
-          : `${product.id}:${colorToSlug(color)}`;
+      const images = Array.from(new Set(colorSpecificImages));
+      const imageKey = normalizeImageKey(images[0] ?? "");
 
       if (!imageKey || seenImageKeys.has(imageKey)) return [];
 
@@ -193,7 +191,7 @@ function expandProductColorCards(products: Product[]): Product[] {
       return [{ color, images }];
     });
 
-    if (colorCards.length === 0) return [product];
+    if (colorCards.length !== displayColors.length) return [product];
 
     return colorCards.map(({ color, images }) => {
       const inventoryBySize = product.inventoryByColorSize?.[color] ?? product.inventoryBySize;
