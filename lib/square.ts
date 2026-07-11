@@ -1,14 +1,14 @@
-﻿import type { Product, ProductCategory } from "@/types";
+import type { Product, ProductCategory } from "@/types";
 import { products as staticProducts } from "@/lib/data/products";
 
 const SQUARE_BASE_URL = "https://connect.squareup.com/v2";
 const SQUARE_VERSION = "2024-01-18";
 
 function getSquareToken(): string | null {
-  // Suporta tanto SQUARE_ACCESS_TOKEN quanto o nome em portuguÃªs configurado na Vercel
+  // Suporta tanto SQUARE_ACCESS_TOKEN quanto o nome em português configurado na Vercel
   const token =
     process.env.SQUARE_ACCESS_TOKEN ||
-    process.env["LOCALIZAÃ‡ÃƒO_QUADRADA_"] ||
+    process.env["LOCALIZAÇÃO_QUADRADA_"] ||
     process.env.LOCALIZACAO_QUADRADA_;
   return token || null;
 }
@@ -32,38 +32,14 @@ function normalizeProductName(name: string): string {
 
 function cleanVariationLabel(value: string): string {
   return value
-    .replace(/\s*[\-–—/|]+\s*$/g, "")
-    .replace(/^\s*[\-–—/|]+\s*/g, "")
+    .replace(/\s*[-–—/|]\s*$/g, "")
+    .replace(/^\s*[-–—/|]\s*/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 function colorToSlug(color: string): string {
   return toSlug(color || "cor");
-}
-
-function getColorImages(product: Product, color: string, index: number): string[] {
-  const normalizedName = normalizeProductName(product.name);
-  const normalizedColor = normalizeProductName(color);
-  const squareColorImages = product.imagesByColor?.[color] ?? [];
-
-  if (normalizedName.includes("lady like")) {
-    const images = product.images ?? [];
-    const colorIndexMap: Record<string, number> = {
-      rosa: 0,
-      azul: 1,
-      branco: 2,
-    };
-    const colorKey = Object.keys(colorIndexMap).find((key) => normalizedColor.includes(key));
-    const imageIndex = colorKey ? colorIndexMap[colorKey] : index;
-    const colorImage = images[imageIndex];
-
-    if (colorImage) {
-      return [colorImage, ...images.filter((image) => image !== colorImage)];
-    }
-  }
-
-  return squareColorImages;
 }
 
 function applyProductOverrides(product: Product): Product {
@@ -108,7 +84,7 @@ function applyProductOverrides(product: Product): Product {
   if (normalizedName.includes("lese") && normalizedName.includes("algodao")) {
     return {
       ...product,
-      name: "Vestido em Lese 100% AlgodÃ£o",
+      name: "Vestido em Lese 100% Algodão",
       slug: "vestido-em-lese-100-algodao",
       price: 140,
       category: "vestidos",
@@ -125,7 +101,7 @@ function applyProductOverrides(product: Product): Product {
   if (normalizedName.includes("verde") && normalizedName.includes("algodao") && normalizedName.includes("bordado")) {
     return {
       ...product,
-      name: "Vestido Midi Verde em AlgodÃ£o Bordado",
+      name: "Vestido Midi Verde em Algodão Bordado",
       slug: "vestido-midi-verde-em-algodao-bordado",
       price: 145,
       category: "vestidos",
@@ -142,18 +118,70 @@ function applyProductOverrides(product: Product): Product {
 
   return product;
 }
+
+function createManualProducts(existingProducts: Product[]): Product[] {
+  const existingSlugs = new Set(existingProducts.map((product) => product.slug));
+  const manualProducts: Product[] = [];
+
+  if (!existingSlugs.has("conjunto-soney-verde")) {
+    manualProducts.push({
+      id: "manual-conjunto-soney-verde",
+      name: "Conjunto Soney Verde",
+      slug: "conjunto-soney-verde",
+      price: 320,
+      rating: 4.9,
+      reviewCount: 0,
+      image: "/images/placeholder.jpg",
+      images: ["/images/placeholder.jpg"],
+      category: "conjuntos",
+      description: "Conjunto Soney em verde.",
+      badge: "new",
+      sizes: ["M"],
+      colors: ["Verde"],
+      inventoryBySize: { M: 1 },
+      inventoryByColorSize: { Verde: { M: 1 } },
+      inStock: true,
+    });
+  }
+
+  if (!existingSlugs.has("t-shirt-aplicacao-de-flores-branca")) {
+    manualProducts.push({
+      id: "manual-t-shirt-aplicacao-de-flores-branca",
+      name: "T-shirt Aplicação de Flores Branca",
+      slug: "t-shirt-aplicacao-de-flores-branca",
+      price: 49,
+      rating: 4.9,
+      reviewCount: 0,
+      image: "/images/placeholder.jpg",
+      images: ["/images/placeholder.jpg"],
+      category: "blusas",
+      description: "T-shirt branca com aplicacao de flores.",
+      badge: "new",
+      sizes: ["P", "M", "G"],
+      colors: ["Branca"],
+      inventoryBySize: { P: 1, M: 1, G: 1 },
+      inventoryByColorSize: { Branca: { P: 1, M: 1, G: 1 } },
+      inStock: true,
+    });
+  }
+
+  return manualProducts;
+}
+
 function expandProductColorCards(products: Product[]): Product[] {
-  const expandedProducts = products.flatMap((product) => {
+  return products.flatMap((product) => {
     const colors = product.colors ?? [];
     if (colors.length <= 1) return [product];
 
-    const colorCards = colors
-      .map((color, index) => ({ color, images: getColorImages(product, color, index) }))
-      .filter(({ images }) => images.length > 0);
-
-    if (colorCards.length !== colors.length) return [product];
-
-    return colorCards.map(({ color, images }) => {
+    return colors.map((color, index) => {
+      const colorImages = product.imagesByColor?.[color] ?? [];
+      const fallbackImage = product.images?.[index] ?? product.image;
+      const images =
+        colorImages.length > 0
+          ? colorImages
+          : fallbackImage
+          ? [fallbackImage, ...(product.images ?? []).filter((image) => image !== fallbackImage)]
+          : product.images;
       const inventoryBySize = product.inventoryByColorSize?.[color] ?? product.inventoryBySize;
       const colorSlug = colorToSlug(color);
 
@@ -163,7 +191,7 @@ function expandProductColorCards(products: Product[]): Product[] {
         sourceProductId: product.sourceProductId ?? product.id,
         slug: `${product.slug}-${colorSlug}`,
         name: `${product.name} ${color}`,
-        image: images[0] ?? product.image,
+        image: images?.[0] ?? fallbackImage,
         images,
         colors: [color],
         inventoryBySize,
@@ -174,44 +202,13 @@ function expandProductColorCards(products: Product[]): Product[] {
       } satisfies Product;
     });
   });
-
-  const seenProducts = new Set<string>();
-
-  return expandedProducts.filter((product) => {
-    const color = product.colors?.[0] ?? "";
-    const imageKey = product.image?.split("?")[0] ?? "";
-    const key = [
-      normalizeProductName(product.name),
-      normalizeProductName(color),
-      product.price,
-      imageKey,
-    ].join("|");
-
-    if (seenProducts.has(key)) return false;
-    seenProducts.add(key);
-    return true;
-  });
 }
 
 function getCategory(name: string): ProductCategory {
-  const n = normalizeProductName(name);
+  const n = name.toLowerCase();
   if (n.includes("vestido")) return "vestidos";
   if (n.includes("saia")) return "saias";
-  if (n.includes("macacao")) return "macacao";
-  if (
-    n.includes("casaco") ||
-    n.includes("casaquinho") ||
-    n.includes("tweed") ||
-    n.includes("jaqueta") ||
-    n.includes("cardigan") ||
-    n.includes("blazer")
-  ) return "casacos";
-  if (
-    n.includes("camisa") ||
-    n.includes("t shirt") ||
-    n.includes("t-shirt")
-  ) return "camisas";
-  if (n.includes("calÃ§a") || n.includes("calca")) return "calcas";
+  if (n.includes("calça") || n.includes("calca")) return "calcas";
   if (n.includes("conjunto")) return "conjuntos";
   if (
     n.includes("blazer") ||
@@ -229,8 +226,8 @@ interface SquareInventoryCount {
 }
 
 /**
- * Busca contagens de estoque do Square para uma lista de IDs de variaÃ§Ãµes.
- * Retorna um Map de variationId â†’ quantidade total em estoque.
+ * Busca contagens de estoque do Square para uma lista de IDs de variações.
+ * Retorna um Map de variationId → quantidade total em estoque.
  */
 async function getInventoryCounts(
   token: string,
@@ -259,7 +256,7 @@ async function getInventoryCounts(
 
     if (!response.ok) {
       console.error(`Square Inventory API error: ${response.status}`);
-      // Em caso de erro, assume que todos os produtos estÃ£o em estoque
+      // Em caso de erro, assume que todos os produtos estão em estoque
       for (const id of variationIds) {
         inventoryMap.set(id, 1);
       }
@@ -278,7 +275,7 @@ async function getInventoryCounts(
     }
   } catch (err) {
     console.error("Erro ao buscar estoque do Square:", err);
-    // Em caso de erro, assume que todos os produtos estÃ£o em estoque
+    // Em caso de erro, assume que todos os produtos estão em estoque
     for (const id of variationIds) {
       inventoryMap.set(id, 1);
     }
@@ -373,7 +370,7 @@ export async function getSquareProducts(): Promise<Product[]> {
     objects.filter((o) => o.type === "IMAGE").map((o) => [o.id, o])
   );
 
-  // Coletar todos os IDs de variaÃ§Ãµes para consultar estoque em lote
+  // Coletar todos os IDs de variações para consultar estoque em lote
   const allVariationIds: string[] = [];
   for (const item of items) {
     const variations = item.item_data?.variations || [];
@@ -382,7 +379,7 @@ export async function getSquareProducts(): Promise<Product[]> {
     }
   }
 
-  // Buscar estoque de todas as variaÃ§Ãµes de uma vez
+  // Buscar estoque de todas as variações de uma vez
   const inventoryMap = await getInventoryCounts(token, allVariationIds);
 
   const products: Product[] = items.map((item) => {
@@ -402,13 +399,13 @@ export async function getSquareProducts(): Promise<Product[]> {
 
     const imageUrl = allImages[0] || "/images/placeholder.jpg";
 
-    // Extrair tamanhos Ãºnicos das variaÃ§Ãµes
+    // Extrair tamanhos únicos das variações
     const sizes = Array.from(
       new Set(
         variations
           .map((v) => {
             const vname = v.item_variation_data?.name || "";
-            // Extrair tamanho do nome da variaÃ§Ã£o (ex: "Branca P" â†’ "P", "Caramelo M" â†’ "M")
+            // Extrair tamanho do nome da variação (ex: "Branca P" → "P", "Caramelo M" → "M")
             const sizeMatch = vname.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i);
             return sizeMatch ? sizeMatch[1].toUpperCase() : null;
           })
@@ -416,7 +413,7 @@ export async function getSquareProducts(): Promise<Product[]> {
       )
     );
 
-    // Extrair cores Ãºnicas das variaÃ§Ãµes
+    // Extrair cores únicas das variações
     const colors = Array.from(
       new Set(
         variations
@@ -432,7 +429,7 @@ export async function getSquareProducts(): Promise<Product[]> {
       )
     );
 
-    // PreÃ§o da primeira variaÃ§Ã£o
+    // Preço da primeira variação
     const inventoryBySize = variations.reduce<Record<string, number>>((acc, variation) => {
       const vname = variation.item_variation_data?.name || "";
       const sizeMatch = vname.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i);
@@ -500,23 +497,16 @@ export async function getSquareProducts(): Promise<Product[]> {
       inventoryBySize: Object.keys(inventoryBySize).length > 0 ? inventoryBySize : undefined,
       inventoryByColorSize: Object.keys(inventoryByColorSize).length > 0 ? inventoryByColorSize : undefined,
       imagesByColor: Object.keys(imagesByColor).length > 0 ? imagesByColor : undefined,
-      // Produto estÃ¡ em estoque se QUALQUER variaÃ§Ã£o tiver quantidade > 0
+      // Produto está em estoque se QUALQUER variação tiver quantidade > 0
       inStock: variations.some((v) => (inventoryMap.get(v.id) || 0) > 0),
     } satisfies Product);
   });
+
+  products.push(...createManualProducts(products));
   const displayProducts = expandProductColorCards(products);
 
-  // Ordenar por leitura natural da loja.
-  const categoryOrder: ProductCategory[] = [
-    "vestidos",
-    "conjuntos",
-    "blusas",
-    "camisas",
-    "saias",
-    "calcas",
-    "casacos",
-    "macacao",
-  ];
+  // Ordenar: vestidos primeiro, depois saias, conjuntos, blusas
+  const categoryOrder: ProductCategory[] = ["vestidos", "saias", "conjuntos", "blusas", "calcas"];
   return displayProducts.sort(
     (a, b) => categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category)
   );
@@ -527,4 +517,89 @@ export async function getSquareProductBySlug(slug: string): Promise<Product | nu
   return products.find((p) => p.slug === slug) ?? null;
 }
 
+/**
+ * Busca o ID de variacao do Square para um produto e tamanho especificos.
+ * Usado pelo painel admin para registrar vendas manuais e baixar estoque.
+ */
+export async function getSquareVariationId(
+  productId: string,
+  size: string
+): Promise<string | null> {
+  const token = getSquareToken();
+  if (!token) return null;
 
+  try {
+    const response = await fetch(`${SQUARE_BASE_URL}/catalog/object/${productId}?include_related_objects=true`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Square-Version": SQUARE_VERSION,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const variations: SquareCatalogObject[] = data.object?.item_data?.variations || [];
+    const sizeUpper = size.toUpperCase();
+    for (const v of variations) {
+      const vname = (v.item_variation_data?.name || "").toUpperCase();
+      if (vname.includes(sizeUpper)) {
+        return v.id;
+      }
+    }
+    if (variations.length === 1) return variations[0].id;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Ajusta o estoque de uma variacao no Square (decrementa pela quantidade vendida).
+ * Usado para registrar vendas por Zelle, dinheiro ou outros meios externos.
+ */
+export async function decrementSquareInventory(
+  variationId: string,
+  quantity: number,
+  locationId: string
+): Promise<{ ok: boolean; error?: string }> {
+  const token = getSquareToken();
+  if (!token) return { ok: false, error: "Token do Square nao configurado." };
+
+  try {
+    const idempotencyKey = `admin-sale-${variationId}-${Date.now()}`;
+    const response = await fetch(`${SQUARE_BASE_URL}/inventory/changes/batch-create`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Square-Version": SQUARE_VERSION,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        idempotency_key: idempotencyKey,
+        changes: [
+          {
+            type: "ADJUSTMENT",
+            adjustment: {
+              catalog_object_id: variationId,
+              location_id: locationId,
+              from_state: "IN_STOCK",
+              to_state: "SOLD",
+              quantity: String(quantity),
+              occurred_at: new Date().toISOString(),
+            },
+          },
+        ],
+      }),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return { ok: false, error: JSON.stringify(err) };
+    }
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: String(err) };
+  }
+}
