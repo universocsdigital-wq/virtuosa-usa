@@ -58,10 +58,10 @@ function applyProductOverrides(product: Product): Product {
   if (normalizeProductName(product.name).includes("elisama")) {
     return {
       ...product,
-      name: "Conjunto Elisama",
-      slug: "conjunto-elisama",
+      name: "Vestido Elisama",
+      slug: "vestido-elisama",
       price: 310,
-      category: "conjuntos",
+      category: "vestidos",
       sizes: ["P", "G"],
       colors: ["Nude"],
       inventoryBySize: { P: 1, G: 1 },
@@ -78,23 +78,6 @@ function applyProductOverrides(product: Product): Product {
       sizes: ["PP", "P", "M", "G", "GG"],
       colors: ["Azul"],
       inventoryBySize: { PP: 2, P: 2, M: 1, GG: 1 },
-    };
-  }
-
-  if (normalizedName.includes("lana")) {
-    return {
-      ...product,
-      name: "Vestido Lana",
-      slug: "vestido-lana",
-      price: 140,
-      category: "vestidos",
-      sizes: ["P", "M", "G"],
-      colors: ["Rose", "Laranja"],
-      inventoryBySize: { P: 2, M: 3, G: 6 },
-      inventoryByColorSize: {
-        Rose: { M: 1, G: 3 },
-        Laranja: { P: 2, M: 2, G: 3 },
-      },
     };
   }
 
@@ -393,29 +376,6 @@ export async function getSquareProducts(): Promise<Product[]> {
       inStock: variations.some((v) => (inventoryMap.get(v.id) || 0) > 0),
     } satisfies Product);
   });
-
-  if (!products.some((product) => normalizeProductName(product.name).includes("lana"))) {
-    products.push({
-      id: "manual-vestido-lana",
-      name: "Vestido Lana",
-      slug: "vestido-lana",
-      price: 140,
-      rating: 4.9,
-      reviewCount: 0,
-      image: "/images/products/vestido-lana.png",
-      images: ["/images/products/vestido-lana.png"],
-      category: "vestidos",
-      description: "Vestido Lana em modelagem feminina e delicada.",
-      sizes: ["P", "M", "G"],
-      colors: ["Rose", "Laranja"],
-      inventoryBySize: { P: 2, M: 3, G: 6 },
-      inventoryByColorSize: {
-        Rose: { M: 1, G: 3 },
-        Laranja: { P: 2, M: 2, G: 3 },
-      },
-      inStock: true,
-    });
-  }
 
   // Ordenar: vestidos primeiro, depois saias, conjuntos, blusas
   const categoryOrder: ProductCategory[] = ["vestidos", "saias", "conjuntos", "blusas", "calcas"];
