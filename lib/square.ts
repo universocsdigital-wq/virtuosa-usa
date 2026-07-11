@@ -186,10 +186,28 @@ function shouldForceColorCards(productName: string): boolean {
   return normalizedName.includes("vestido lana");
 }
 
+function shouldSplitGalleryByColorOrder(productName: string): boolean {
+  const normalizedName = normalizeProductName(productName);
+  return normalizedName.includes("cr lavinia");
+}
+
+function getGallerySliceForColor(product: Product, colorIndex: number, colorCount: number): string[] {
+  const gallery = Array.from(new Set(product.images?.length ? product.images : [product.image])).filter(Boolean);
+
+  if (gallery.length < colorCount) return [];
+
+  const chunkSize = Math.max(1, Math.floor(gallery.length / colorCount));
+  const start = Math.min(colorIndex * chunkSize, gallery.length - 1);
+  const end = colorIndex === colorCount - 1 ? gallery.length : start + chunkSize;
+
+  return gallery.slice(start, end);
+}
+
 function expandProductColorCards(products: Product[]): Product[] {
   return products.flatMap((product) => {
     const colors = product.colors ?? [];
     const forceColorCards = shouldForceColorCards(product.name);
+    const splitGalleryByColorOrder = shouldSplitGalleryByColorOrder(product.name);
     const displayColors = colors.filter((color) => {
       const inventory = product.inventoryByColorSize?.[color];
       return !inventory || Object.values(inventory).some((qty) => qty > 0);
@@ -198,10 +216,11 @@ function expandProductColorCards(products: Product[]): Product[] {
     if (displayColors.length <= 1) return [product];
 
     const seenImageKeys = new Set<string>();
-    const colorCards = displayColors.flatMap((color) => {
+    const colorCards = displayColors.flatMap((color, colorIndex) => {
       const colorSpecificImages = [
         ...getLocalColorImages(product.name, color),
         ...(product.imagesByColor?.[color] ?? []),
+        ...(splitGalleryByColorOrder ? getGallerySliceForColor(product, colorIndex, displayColors.length) : []),
       ];
 
       if (colorSpecificImages.length === 0 && !forceColorCards) return [];
