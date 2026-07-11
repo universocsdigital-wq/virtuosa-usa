@@ -91,7 +91,9 @@ export async function POST(request: Request) {
   }> = [];
 
   for (const item of body.items) {
-    const product = allProducts.find((candidate) => candidate.id === item.productId);
+    const product = allProducts.find(
+      (candidate) => candidate.id === item.productId || candidate.sourceProductId === item.productId
+    );
 
     if (!product) {
       return NextResponse.json(

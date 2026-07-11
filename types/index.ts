@@ -15,6 +15,8 @@ export interface Product {
   colors?: string[];
   inventoryBySize?: Record<string, number>;
   inventoryByColorSize?: Record<string, Record<string, number>>;
+  sourceProductId?: string;
+  imagesByColor?: Record<string, string[]>;
   inStock: boolean;
   checkoutUrl?: string;
 }

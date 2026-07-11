@@ -38,6 +38,10 @@ function cleanVariationLabel(value: string): string {
     .trim();
 }
 
+function colorToSlug(color: string): string {
+  return toSlug(color || "cor");
+}
+
 function applyProductOverrides(product: Product): Product {
   const normalizedName = normalizeProductName(product.name);
 
@@ -58,13 +62,9 @@ function applyProductOverrides(product: Product): Product {
   if (normalizeProductName(product.name).includes("elisama")) {
     return {
       ...product,
-      name: "Vestido Elisama",
-      slug: "vestido-elisama",
-      price: 310,
-      category: "vestidos",
-      sizes: ["P", "G"],
-      colors: ["Nude"],
-      inventoryBySize: { P: 1, G: 1 },
+      name: "Conjunto Elisama",
+      slug: "conjunto-elisama",
+      category: "conjuntos",
     };
   }
 
@@ -117,6 +117,83 @@ function applyProductOverrides(product: Product): Product {
   }
 
   return product;
+}
+
+function createManualProducts(existingProducts: Product[]): Product[] {
+  const normalizedNames = existingProducts.map((product) => normalizeProductName(product.name));
+  const manualProducts: Product[] = [];
+
+  if (!normalizedNames.some((name) => name.includes("soney"))) {
+    manualProducts.push({
+      id: "manual-conjunto-soney-verde",
+      name: "Conjunto Soney",
+      slug: "conjunto-soney-verde",
+      price: 320,
+      rating: 4.9,
+      reviewCount: 0,
+      image: "/images/placeholder.jpg",
+      images: ["/images/placeholder.jpg"],
+      category: "conjuntos",
+      description: "Conjunto Soney em verde.",
+      sizes: ["M"],
+      colors: ["Verde"],
+      inventoryBySize: { M: 1 },
+      inventoryByColorSize: { Verde: { M: 1 } },
+      inStock: true,
+    });
+  }
+
+  if (!normalizedNames.some((name) => name.includes("t shirt") && name.includes("flores"))) {
+    manualProducts.push({
+      id: "manual-t-shirt-aplicacao-de-flores-branca",
+      name: "T-shirt Aplicacao de Flores",
+      slug: "t-shirt-aplicacao-de-flores-branca",
+      price: 49,
+      rating: 4.9,
+      reviewCount: 0,
+      image: "/images/placeholder.jpg",
+      images: ["/images/placeholder.jpg"],
+      category: "blusas",
+      description: "T-shirt branca com aplicacao de flores.",
+      sizes: ["P", "M", "G"],
+      colors: ["Branca"],
+      inventoryBySize: { P: 1, M: 1, G: 1 },
+      inventoryByColorSize: { Branca: { P: 1, M: 1, G: 1 } },
+      inStock: true,
+    });
+  }
+
+  return manualProducts;
+}
+
+function expandProductColorCards(products: Product[]): Product[] {
+  return products.flatMap((product) => {
+    const colors = product.colors ?? [];
+    if (colors.length <= 1) return [product];
+
+    return colors.map((color) => {
+      const colorImages = product.imagesByColor?.[color] ?? [];
+      const images = colorImages.length > 0 ? colorImages : product.images;
+      const inventoryBySize = product.inventoryByColorSize?.[color] ?? product.inventoryBySize;
+      const colorSlug = colorToSlug(color);
+
+      return {
+        ...product,
+        id: `${product.id}::${colorSlug}`,
+        sourceProductId: product.sourceProductId ?? product.id,
+        slug: `${product.slug}-${colorSlug}`,
+        name: `${product.name} ${color}`,
+        image: images?.[0] ?? product.image,
+        images,
+        colors: [color],
+        inventoryBySize,
+        inventoryByColorSize: product.inventoryByColorSize?.[color]
+          ? { [color]: product.inventoryByColorSize[color] }
+          : product.inventoryByColorSize,
+        inStock: inventoryBySize ? Object.values(inventoryBySize).some((qty) => qty > 0) : product.inStock,
+      } satisfies Product;
+    });
+  });
 }
 
 function getCategory(name: string): ProductCategory {
@@ -354,6 +431,44 @@ export async function getSquareProducts(): Promise<Product[]> {
       return acc;
     }, {});
 
+    const inventoryByColorSize = variations.reduce<Record<string, Record<string, number>>>((acc, variation) => {
+      const vname = variation.item_variation_data?.name || "";
+      const sizeMatch = vname.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i);
+      if (!sizeMatch) return acc;
+
+      const size = sizeMatch[1].toUpperCase();
+      const color = cleanVariationLabel(
+        vname.replace(/\b(PP|P|M|G|GG|XG|XGG|U)\b/gi, "")
+      );
+
+      if (!color) return acc;
+
+      acc[color] ??= {};
+      acc[color][size] = (acc[color][size] || 0) + (inventoryMap.get(variation.id) || 0);
+      return acc;
+    }, {});
+
+    const imagesByColor = variations.reduce<Record<string, string[]>>((acc, variation) => {
+      const vname = variation.item_variation_data?.name || "";
+      const color = cleanVariationLabel(
+        vname.replace(/\b(PP|P|M|G|GG|XG|XGG|U)\b/gi, "")
+      );
+
+      if (!color) return acc;
+
+      const variationImages = getImageUrlsFromIds(
+        variation.item_variation_data?.image_ids || [],
+        imageMap
+      );
+
+      if (variationImages.length > 0) {
+        acc[color] ??= [];
+        addUnique(acc[color], variationImages);
+      }
+
+      return acc;
+    }, {});
+
     const firstVariation = variations[0];
     const priceAmount = firstVariation?.item_variation_data?.price_money?.amount || 0;
     const price = priceAmount / 100;
@@ -372,14 +487,19 @@ export async function getSquareProducts(): Promise<Product[]> {
       sizes: sizes.length > 0 ? sizes : undefined,
       colors: colors.length > 0 ? colors : undefined,
       inventoryBySize: Object.keys(inventoryBySize).length > 0 ? inventoryBySize : undefined,
+      inventoryByColorSize: Object.keys(inventoryByColorSize).length > 0 ? inventoryByColorSize : undefined,
+      imagesByColor: Object.keys(imagesByColor).length > 0 ? imagesByColor : undefined,
       // Produto está em estoque se QUALQUER variação tiver quantidade > 0
       inStock: variations.some((v) => (inventoryMap.get(v.id) || 0) > 0),
     } satisfies Product);
   });
 
+  products.push(...createManualProducts(products));
+  const displayProducts = expandProductColorCards(products);
+
   // Ordenar: vestidos primeiro, depois saias, conjuntos, blusas
   const categoryOrder: ProductCategory[] = ["vestidos", "saias", "conjuntos", "blusas", "calcas"];
-  return products.sort(
+  return displayProducts.sort(
     (a, b) => categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category)
   );
 }
