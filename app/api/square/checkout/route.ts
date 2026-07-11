@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+﻿import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { durableRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getSquareProducts } from "@/lib/square";
@@ -40,12 +40,12 @@ export async function POST(request: Request) {
 
   const accessToken =
     process.env.SQUARE_ACCESS_TOKEN ||
-    process.env["LOCALIZAÇÃO_QUADRADA_"] ||
+    process.env["LOCALIZAÃ‡ÃƒO_QUADRADA_"] ||
     process.env.LOCALIZACAO_QUADRADA_;
 
   const locationId =
     process.env.SQUARE_LOCATION_ID ||
-    process.env["IO_DA_LOCALIZAÇÃO_QUADRADA"] ||
+    process.env["IO_DA_LOCALIZAÃ‡ÃƒO_QUADRADA"] ||
     process.env.IO_DA_LOCALIZACAO_QUADRADA;
 
   const environment =
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
   if (!accessToken || !locationId) {
     return NextResponse.json(
-      { error: "O checkout da Square está aguardando a configuração da loja." },
+      { error: "O checkout da Square estÃ¡ aguardando a configuraÃ§Ã£o da loja." },
       { status: 503 },
     );
   }
@@ -64,10 +64,10 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as CheckoutRequest;
   } catch {
-    return NextResponse.json({ error: "Sacola inválida." }, { status: 400 });
+    return NextResponse.json({ error: "Sacola invÃ¡lida." }, { status: 400 });
   }
 
-  if (!body.items?.length) return NextResponse.json({ error: "A sacola está vazia." }, { status: 400 });
+  if (!body.items?.length) return NextResponse.json({ error: "A sacola estÃ¡ vazia." }, { status: 400 });
   if (body.items.length > 20) return NextResponse.json({ error: "A sacola possui itens demais." }, { status: 400 });
   if (body.fulfillmentType !== "shipping" && body.fulfillmentType !== "pickup") {
     return NextResponse.json({ error: "Escolha envio ou retirada local." }, { status: 400 });
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     allProducts = await getSquareProducts();
   } catch {
     return NextResponse.json(
-      { error: "Não foi possível verificar os produtos. Tente novamente." },
+      { error: "NÃ£o foi possÃ­vel verificar os produtos. Tente novamente." },
       { status: 502 },
     );
   }
@@ -95,25 +95,37 @@ export async function POST(request: Request) {
 
     if (!product) {
       return NextResponse.json(
-        { error: "Um produto da sacola não está mais disponível. Atualize a página e tente novamente." },
+        { error: "Um produto da sacola nÃ£o estÃ¡ mais disponÃ­vel. Atualize a pÃ¡gina e tente novamente." },
         { status: 400 },
       );
     }
 
     const quantity = Math.floor(item.quantity);
     if (!Number.isFinite(quantity) || quantity < 1 || quantity > 20) {
-      return NextResponse.json({ error: `Quantidade inválida para ${product.name}.` }, { status: 400 });
+      return NextResponse.json({ error: `Quantidade invÃ¡lida para ${product.name}.` }, { status: 400 });
     }
 
     if (product.sizes?.length && (!item.size || !product.sizes.includes(item.size))) {
-      return NextResponse.json({ error: `Escolha um tamanho válido para ${product.name}.` }, { status: 400 });
+      return NextResponse.json({ error: `Escolha um tamanho vÃ¡lido para ${product.name}.` }, { status: 400 });
     }
 
     if (product.colors?.length && (!item.color || !product.colors.includes(item.color))) {
-      return NextResponse.json({ error: `Escolha uma cor válida para ${product.name}.` }, { status: 400 });
+      return NextResponse.json({ error: `Escolha uma cor vÃ¡lida para ${product.name}.` }, { status: 400 });
+    }
+    if (product.inventoryBySize && item.size) {
+      const availableQuantity = product.inventoryBySize[item.size] ?? 0;
+      if (availableQuantity <= 0) {
+        return NextResponse.json({ error: `${product.name} está sem estoque no tamanho ${item.size}.` }, { status: 400 });
+      }
+      if (quantity > availableQuantity) {
+        return NextResponse.json(
+          { error: `Temos apenas ${availableQuantity} unidade(s) de ${product.name} no tamanho ${item.size}.` },
+          { status: 400 },
+        );
+      }
     }
 
-    const variation = [item.size && `Tamanho ${item.size}`, item.color].filter(Boolean).join(" · ");
+    const variation = [item.size && `Tamanho ${item.size}`, item.color].filter(Boolean).join(" Â· ");
 
     lineItems.push({
       name: product.name,
@@ -125,7 +137,7 @@ export async function POST(request: Request) {
 
   if (body.fulfillmentType === "shipping") {
     lineItems.push({
-      name: "Frete USPS — envio com rastreamento",
+      name: "Frete USPS â€” envio com rastreamento",
       quantity: "1",
       base_price_money: { amount: SHIPPING_CENTS, currency: "USD" },
     });
@@ -170,7 +182,7 @@ export async function POST(request: Request) {
             afterpay_clearpay: false,
           },
         },
-        payment_note: `Virtuosa USA — ${body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"}`,
+        payment_note: `Virtuosa USA â€” ${body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"}`,
       }),
       cache: "no-store",
     });
@@ -182,7 +194,7 @@ export async function POST(request: Request) {
 
     if (!squareResponse.ok || !squareData.payment_link?.url) {
       return NextResponse.json(
-        { error: squareData.errors?.[0]?.detail ?? "A Square não conseguiu criar o checkout." },
+        { error: squareData.errors?.[0]?.detail ?? "A Square nÃ£o conseguiu criar o checkout." },
         { status: 502 },
       );
     }
@@ -193,8 +205,9 @@ export async function POST(request: Request) {
     });
   } catch {
     return NextResponse.json(
-      { error: "Não foi possível conectar à Square. Tente novamente." },
+      { error: "NÃ£o foi possÃ­vel conectar Ã  Square. Tente novamente." },
       { status: 502 },
     );
   }
 }
+

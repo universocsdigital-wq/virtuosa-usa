@@ -9,11 +9,17 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
   const [size, setSize] = useState(product.sizes?.length === 1 ? product.sizes[0] : "");
   const [color, setColor] = useState(product.colors?.length === 1 ? product.colors[0] : "");
   const [error, setError] = useState("");
+  const selectedSizeQuantity = size ? product.inventoryBySize?.[size] : undefined;
+  const selectedSizeUnavailable = Boolean(size && product.inventoryBySize && (selectedSizeQuantity ?? 0) <= 0);
 
   function addToCart() {
     if (!product.inStock) return;
     if (product.sizes?.length && !size) {
       setError("Selecione um tamanho para continuar.");
+      return;
+    }
+    if (selectedSizeUnavailable) {
+      setError("Esse tamanho está sem estoque.");
       return;
     }
     if (product.colors?.length && !color) {
@@ -30,24 +36,34 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         <fieldset>
           <legend className="mb-3 font-sans text-[10px] font-bold uppercase tracking-[0.16em] text-[#8A5A36]">Escolha o tamanho</legend>
           <div className="flex flex-wrap gap-2">
-            {product.sizes.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setSize(option)}
-                disabled={!product.inStock}
-                className={`flex h-11 min-w-12 items-center justify-center border px-3 font-sans text-[12px] font-semibold transition-colors ${
-                  !product.inStock
-                    ? "border-[#D9C8B5] bg-[#F0EAE1] text-[#B0A090] cursor-not-allowed"
-                    : size === option
-                    ? "border-[#8A5A36] bg-[#8A5A36] text-white"
-                    : "border-[#CDB89F] bg-white/55 text-[#2A1712] hover:border-[#8A5A36]"
-                }`}
-                aria-pressed={size === option}
-              >
-                {option}
-              </button>
-            ))}
+            {product.sizes.map((option) => {
+              const quantity = product.inventoryBySize?.[option];
+              const unavailable = quantity !== undefined && quantity <= 0;
+
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setSize(option)}
+                  disabled={!product.inStock || unavailable}
+                  className={`flex min-h-11 min-w-12 flex-col items-center justify-center border px-3 font-sans text-[12px] font-semibold transition-colors ${
+                    !product.inStock || unavailable
+                      ? "cursor-not-allowed border-[#D9C8B5] bg-[#F0EAE1] text-[#B0A090]"
+                      : size === option
+                      ? "border-[#8A5A36] bg-[#8A5A36] text-white"
+                      : "border-[#CDB89F] bg-white/55 text-[#2A1712] hover:border-[#8A5A36]"
+                  }`}
+                  aria-pressed={size === option}
+                >
+                  <span>{option}</span>
+                  {quantity !== undefined && quantity > 0 ? (
+                    <span className="mt-0.5 text-[9px] font-medium normal-case tracking-normal opacity-75">
+                      {quantity} disp.
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
           </div>
         </fieldset>
       ) : null}

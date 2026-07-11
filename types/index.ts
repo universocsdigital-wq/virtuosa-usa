@@ -13,6 +13,7 @@ export interface Product {
   description?: string;
   sizes?: string[];
   colors?: string[];
+  inventoryBySize?: Record<string, number>;
   inStock: boolean;
   checkoutUrl?: string;
 }

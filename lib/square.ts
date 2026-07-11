@@ -41,6 +41,20 @@ function cleanVariationLabel(value: string): string {
 function applyProductOverrides(product: Product): Product {
   const normalizedName = normalizeProductName(product.name);
 
+  if (normalizedName.includes("richelieu")) {
+    return {
+      ...product,
+      name: "Vestido Richelieu Off White",
+      slug: "vestido-richelieu-off-white",
+      price: 300,
+      category: "vestidos",
+      sizes: ["P", "M", "G"],
+      colors: ["Off White"],
+      inventoryBySize: { P: 2, M: 1, G: 1 },
+      inStock: true,
+    };
+  }
+
   if (normalizeProductName(product.name).includes("elisama")) {
     return {
       ...product,
@@ -50,6 +64,7 @@ function applyProductOverrides(product: Product): Product {
       category: "conjuntos",
       sizes: ["P", "G"],
       colors: ["Nude"],
+      inventoryBySize: { P: 1, G: 1 },
     };
   }
 
@@ -62,6 +77,7 @@ function applyProductOverrides(product: Product): Product {
       price: 145,
       sizes: ["PP", "P", "M", "G", "GG"],
       colors: ["Azul"],
+      inventoryBySize: { PP: 2, P: 2, M: 1, GG: 1 },
     };
   }
 
@@ -74,6 +90,7 @@ function applyProductOverrides(product: Product): Product {
       category: "vestidos",
       sizes: ["P", "M", "G"],
       colors: ["Rose", "Laranja"],
+      inventoryBySize: { P: 2, M: 3, G: 6 },
     };
   }
 
@@ -306,6 +323,15 @@ export async function getSquareProducts(): Promise<Product[]> {
     );
 
     // Preço da primeira variação
+    const inventoryBySize = variations.reduce<Record<string, number>>((acc, variation) => {
+      const vname = variation.item_variation_data?.name || "";
+      const sizeMatch = vname.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i);
+      if (!sizeMatch) return acc;
+      const size = sizeMatch[1].toUpperCase();
+      acc[size] = (acc[size] || 0) + (inventoryMap.get(variation.id) || 0);
+      return acc;
+    }, {});
+
     const firstVariation = variations[0];
     const priceAmount = firstVariation?.item_variation_data?.price_money?.amount || 0;
     const price = priceAmount / 100;
@@ -323,6 +349,7 @@ export async function getSquareProducts(): Promise<Product[]> {
       description: idata.description || "",
       sizes: sizes.length > 0 ? sizes : undefined,
       colors: colors.length > 0 ? colors : undefined,
+      inventoryBySize: Object.keys(inventoryBySize).length > 0 ? inventoryBySize : undefined,
       // Produto está em estoque se QUALQUER variação tiver quantidade > 0
       inStock: variations.some((v) => (inventoryMap.get(v.id) || 0) > 0),
     } satisfies Product);
