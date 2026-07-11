@@ -171,9 +171,15 @@ function expandProductColorCards(products: Product[]): Product[] {
     const colors = product.colors ?? [];
     if (colors.length <= 1) return [product];
 
-    return colors.map((color) => {
+    return colors.map((color, index) => {
       const colorImages = product.imagesByColor?.[color] ?? [];
-      const images = colorImages.length > 0 ? colorImages : product.images;
+      const fallbackImage = product.images?.[index] ?? product.image;
+      const images =
+        colorImages.length > 0
+          ? colorImages
+          : fallbackImage
+          ? [fallbackImage, ...(product.images ?? []).filter((image) => image !== fallbackImage)]
+          : product.images;
       const inventoryBySize = product.inventoryByColorSize?.[color] ?? product.inventoryBySize;
       const colorSlug = colorToSlug(color);
 
@@ -183,7 +189,7 @@ function expandProductColorCards(products: Product[]): Product[] {
         sourceProductId: product.sourceProductId ?? product.id,
         slug: `${product.slug}-${colorSlug}`,
         name: `${product.name} ${color}`,
-        image: images?.[0] ?? product.image,
+        image: images?.[0] ?? fallbackImage,
         images,
         colors: [color],
         inventoryBySize,
