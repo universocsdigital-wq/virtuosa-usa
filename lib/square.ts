@@ -155,24 +155,16 @@ function expandProductColorCards(products: Product[]): Product[] {
     const colors = product.colors ?? [];
     if (colors.length <= 1) return [product];
 
-    const colorCards = colors
-      .map((color) => {
-        const colorImages = [
-          ...getLocalColorImages(product.name, color),
-          ...(product.imagesByColor?.[color] ?? []),
-        ];
-        return { color, images: Array.from(new Set(colorImages)) };
-      })
-      .filter(({ images }) => images.length > 0);
-
-    if (colorCards.length !== colors.length) {
-      return [product];
-    }
-
-    const primaryImageKeys = colorCards.map(({ images }) => normalizeImageKey(images[0]));
-    if (new Set(primaryImageKeys).size !== primaryImageKeys.length) {
-      return [product];
-    }
+    const colorCards = colors.map((color) => {
+      const colorImages = [
+        ...getLocalColorImages(product.name, color),
+        ...(product.imagesByColor?.[color] ?? []),
+      ];
+      const images = Array.from(
+        new Set(colorImages.length > 0 ? colorImages : product.images ?? [product.image])
+      );
+      return { color, images };
+    });
 
     return colorCards.map(({ color, images }) => {
       const inventoryBySize = product.inventoryByColorSize?.[color] ?? product.inventoryBySize;
@@ -203,6 +195,7 @@ function getCategory(name: string): ProductCategory {
   if (n.includes("macacao") || n.includes("jumpsuit")) return "macacao";
   if (n.includes("calca") || n.includes("pantalona")) return "calcas";
   if (n.includes("saia")) return "saias";
+  if (n.includes("conjunto")) return "conjuntos";
   if (
     n.includes("casaco") ||
     n.includes("casquinho") ||
@@ -213,7 +206,6 @@ function getCategory(name: string): ProductCategory {
     n.includes("colete") ||
     n.includes("tweed")
   ) return "casacos";
-  if (n.includes("conjunto")) return "conjuntos";
   if (n.includes("camisa")) return "camisas";
   if (
     n.includes("blusa") ||
