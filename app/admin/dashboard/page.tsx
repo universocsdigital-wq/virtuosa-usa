@@ -491,17 +491,18 @@ export default function AdminDashboardPage() {
       borderRadius: 8, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
     grid: {
-      display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-      gap: 14, padding: 16,
+      display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+      gap: 20, padding: "20px 24px",
     } as React.CSSProperties,
     card: {
-      background: "#fff", borderRadius: 10, overflow: "hidden",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+      background: "#fff", borderRadius: 12, overflow: "hidden",
+      boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+      display: "flex", flexDirection: "column" as const,
     } as React.CSSProperties,
-    cardImg: { width: "100%", aspectRatio: "3/4", objectFit: "cover" as const, display: "block" } as React.CSSProperties,
-    cardBody: { padding: "10px 10px 12px" } as React.CSSProperties,
-    cardName: { fontSize: 13, fontWeight: 600, color: "#2C1810", marginBottom: 4, lineHeight: 1.3 } as React.CSSProperties,
-    cardPrice: { fontSize: 12, color: "#8B6914", marginBottom: 6 } as React.CSSProperties,
+    cardImg: { width: "100%", aspectRatio: "3/4", objectFit: "cover" as const, display: "block", flexShrink: 0 } as React.CSSProperties,
+    cardBody: { padding: "12px 14px 16px", display: "flex", flexDirection: "column" as const, flex: 1 } as React.CSSProperties,
+    cardName: { fontSize: 14, fontWeight: 600, color: "#2C1810", marginBottom: 6, lineHeight: 1.4, wordBreak: "break-word" as const } as React.CSSProperties,
+    cardPrice: { fontSize: 13, color: "#8B6914", marginBottom: 8, fontWeight: 500 } as React.CSSProperties,
     stockBadge: (total: number): React.CSSProperties => ({
       display: "inline-block", fontSize: 11, padding: "2px 8px", borderRadius: 20,
       background: total === 0 ? "#fee2e2" : total <= 3 ? "#fef9c3" : "#dcfce7",
@@ -509,10 +510,11 @@ export default function AdminDashboardPage() {
       fontWeight: 600,
     }),
 
-    cardActions: { display: "flex", gap: 6, marginTop: 8 } as React.CSSProperties,
+    cardActions: { display: "flex", gap: 8, marginTop: "auto" as const, paddingTop: 10, alignItems: "center" } as React.CSSProperties,
     saleBtn: {
-      flex: 1, padding: "7px 0", background: "#8B6914", color: "#fff",
-      border: "none", borderRadius: 6, fontSize: 11, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      flex: 1, padding: "9px 0", background: "#8B6914", color: "#fff",
+      border: "none", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      fontWeight: 500,
     } as React.CSSProperties,
     linkBtn: {
       padding: "7px 10px",
