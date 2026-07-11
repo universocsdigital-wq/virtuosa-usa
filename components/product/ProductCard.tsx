@@ -15,13 +15,13 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="group overflow-hidden rounded-[8px] border border-[#D9C8B5]/70 bg-[#FFFDF8] shadow-[0_8px_22px_rgba(42,23,18,0.07)] transition-transform duration-300 hover:-translate-y-1 sm:rounded-[14px] sm:shadow-[0_12px_34px_rgba(42,23,18,0.08)]">
       <Link href={productHref} className="block" aria-label={`Ver peça ${product.name}`}>
-        <div className="relative aspect-[4/5] overflow-hidden bg-[#23110B]">
+        <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-[#F7F1E8] via-[#E8D9C6] to-[#8A7568]/35">
           {hasRealImage ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={product.image}
               alt={product.name}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="absolute inset-0 h-full w-full object-contain p-1.5 transition-opacity duration-500 group-hover:opacity-95"
               loading="lazy"
             />
           ) : (
