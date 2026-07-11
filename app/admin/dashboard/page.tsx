@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 interface ProductItem {
@@ -24,12 +24,12 @@ const PAYMENT_METHODS = [
   { value: "other", label: "Outro" },
 ];
 
-const SIZE_ORDER = ["PP", "P", "M", "G", "GG", "XG", "XGG", "U"];
+const SIZE_OPTIONS = ["PP", "P", "M", "G", "GG", "XG", "XGG", "U"];
 
 function sortSizes(sizes: string[]): string[] {
   return [...sizes].sort((a, b) => {
-    const ia = SIZE_ORDER.indexOf(a.toUpperCase());
-    const ib = SIZE_ORDER.indexOf(b.toUpperCase());
+    const ia = SIZE_OPTIONS.indexOf(a.toUpperCase());
+    const ib = SIZE_OPTIONS.indexOf(b.toUpperCase());
     if (ia === -1 && ib === -1) return a.localeCompare(b);
     if (ia === -1) return 1;
     if (ib === -1) return -1;
@@ -47,6 +47,8 @@ function getTotalStock(product: ProductItem): number {
   return vals.reduce((a, b) => a + b, 0);
 }
 
+type ModalType = "sale" | "edit" | "stock" | "create" | null;
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [products, setProducts] = useState<ProductItem[]>([]);
@@ -54,9 +56,10 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "out" | "low">("all");
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
 
   // Modal de venda
-  const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("zelle");
@@ -64,7 +67,49 @@ export default function AdminDashboardPage() {
   const [saleSuccess, setSaleSuccess] = useState("");
   const [saleError, setSaleError] = useState("");
 
+  // Modal de edição
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
+  const [editSuccess, setEditSuccess] = useState("");
+  const [editError, setEditError] = useState("");
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState("");
+
+  // Modal de ajuste de estoque
+  const [stockSize, setStockSize] = useState("");
+  const [stockQty, setStockQty] = useState(1);
+  const [stockAction, setStockAction] = useState<"add" | "set">("add");
+  const [stockLoading, setStockLoading] = useState(false);
+  const [stockSuccess, setStockSuccess] = useState("");
+  const [stockError, setStockError] = useState("");
+
+  // Modal de cadastro
+  const [createName, setCreateName] = useState("");
+  const [createDescription, setCreateDescription] = useState("");
+  const [createPrice, setCreatePrice] = useState("");
+  const [createCategory, setCreateCategory] = useState("Vestidos");
+  const [createSizes, setCreateSizes] = useState<{ size: string; quantity: number }[]>([
+    { size: "P", quantity: 1 },
+    { size: "M", quantity: 1 },
+    { size: "G", quantity: 1 },
+  ]);
+  const [createImageFile, setCreateImageFile] = useState<File | null>(null);
+  const [createImagePreview, setCreateImagePreview] = useState("");
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createSuccess, setCreateSuccess] = useState("");
+  const [createError, setCreateError] = useState("");
+
+  const editFileRef = useRef<HTMLInputElement>(null);
+  const createFileRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
+    loadProducts();
+  }, []);
+
+  function loadProducts() {
+    setLoading(true);
     fetch("/api/admin/products")
       .then((r) => {
         if (r.status === 401) {
@@ -75,18 +120,15 @@ export default function AdminDashboardPage() {
       })
       .then((data) => {
         if (!data) return;
-        if (data.error) {
-          setError(data.error);
-        } else {
-          setProducts(data.products ?? []);
-        }
+        if (data.error) setError(data.error);
+        else setProducts(data.products ?? []);
         setLoading(false);
       })
       .catch(() => {
         setError("Erro ao carregar produtos.");
         setLoading(false);
       });
-  }, [router]);
+  }
 
   async function handleLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -101,12 +143,52 @@ export default function AdminDashboardPage() {
     setPaymentMethod("zelle");
     setSaleSuccess("");
     setSaleError("");
+    setActiveModal("sale");
   }
 
-  function closeSaleModal() {
+  function openEditModal(product: ProductItem) {
+    setSelectedProduct(product);
+    setEditName(product.name);
+    setEditDescription("");
+    setEditPrice(product.price.toFixed(2));
+    setEditSuccess("");
+    setEditError("");
+    setEditImageFile(null);
+    setEditImagePreview(product.image);
+    setActiveModal("edit");
+  }
+
+  function openStockModal(product: ProductItem) {
+    setSelectedProduct(product);
+    const sizes = sortSizes(product.sizes ?? []);
+    setStockSize(sizes[0] ?? "");
+    setStockQty(1);
+    setStockAction("add");
+    setStockSuccess("");
+    setStockError("");
+    setActiveModal("stock");
+  }
+
+  function openCreateModal() {
+    setCreateName("");
+    setCreateDescription("");
+    setCreatePrice("");
+    setCreateCategory("Vestidos");
+    setCreateSizes([
+      { size: "P", quantity: 1 },
+      { size: "M", quantity: 1 },
+      { size: "G", quantity: 1 },
+    ]);
+    setCreateImageFile(null);
+    setCreateImagePreview("");
+    setCreateSuccess("");
+    setCreateError("");
+    setActiveModal("create");
+  }
+
+  function closeModal() {
+    setActiveModal(null);
     setSelectedProduct(null);
-    setSaleSuccess("");
-    setSaleError("");
   }
 
   async function handleRegisterSale() {
@@ -114,23 +196,16 @@ export default function AdminDashboardPage() {
     setSaleLoading(true);
     setSaleError("");
     setSaleSuccess("");
-
     try {
       const productId = selectedProduct.sourceProductId ?? selectedProduct.id;
       const res = await fetch("/api/admin/register-sale", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId,
-          size: selectedSize,
-          quantity,
-          paymentMethod,
-        }),
+        body: JSON.stringify({ productId, size: selectedSize, quantity, paymentMethod }),
       });
       const data = await res.json();
       if (res.ok) {
         setSaleSuccess("Venda registrada! Estoque atualizado no Square.");
-        // Atualizar estoque localmente
         setProducts((prev) =>
           prev.map((p) => {
             if ((p.sourceProductId ?? p.id) !== productId) return p;
@@ -154,6 +229,153 @@ export default function AdminDashboardPage() {
     }
   }
 
+  async function handleEditProduct() {
+    if (!selectedProduct) return;
+    setEditLoading(true);
+    setEditError("");
+    setEditSuccess("");
+    try {
+      const productId = selectedProduct.sourceProductId ?? selectedProduct.id;
+
+      // Upload de imagem se houver
+      if (editImageFile) {
+        const fd = new FormData();
+        fd.append("image", editImageFile);
+        fd.append("productId", productId);
+        const imgRes = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+        if (!imgRes.ok) {
+          const imgErr = await imgRes.json().catch(() => ({}));
+          setEditError("Erro ao enviar foto: " + (imgErr.error || imgRes.status));
+          setEditLoading(false);
+          return;
+        }
+      }
+
+      // Atualizar dados do produto
+      const res = await fetch("/api/admin/update-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          name: editName,
+          description: editDescription,
+          price: parseFloat(editPrice) || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEditSuccess("Produto atualizado com sucesso!");
+        setProducts((prev) =>
+          prev.map((p) =>
+            (p.sourceProductId ?? p.id) === productId
+              ? { ...p, name: editName, price: parseFloat(editPrice) || p.price }
+              : p
+          )
+        );
+      } else {
+        setEditError(data.error || "Erro ao atualizar produto.");
+      }
+    } catch {
+      setEditError("Erro de conexao. Tente novamente.");
+    } finally {
+      setEditLoading(false);
+    }
+  }
+
+  async function handleAdjustStock() {
+    if (!selectedProduct) return;
+    setStockLoading(true);
+    setStockError("");
+    setStockSuccess("");
+    try {
+      const productId = selectedProduct.sourceProductId ?? selectedProduct.id;
+      const res = await fetch("/api/admin/adjust-stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, size: stockSize, quantity: stockQty, action: stockAction }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStockSuccess(data.message || "Estoque atualizado no Square!");
+        setProducts((prev) =>
+          prev.map((p) => {
+            if ((p.sourceProductId ?? p.id) !== productId) return p;
+            const updated = { ...p, inventoryBySize: { ...p.inventoryBySize } };
+            if (stockSize) {
+              if (stockAction === "set") {
+                updated.inventoryBySize[stockSize] = stockQty;
+              } else {
+                updated.inventoryBySize[stockSize] = (updated.inventoryBySize[stockSize] ?? 0) + stockQty;
+              }
+            }
+            return updated;
+          })
+        );
+      } else {
+        setStockError(data.error || "Erro ao ajustar estoque.");
+      }
+    } catch {
+      setStockError("Erro de conexao. Tente novamente.");
+    } finally {
+      setStockLoading(false);
+    }
+  }
+
+  async function handleCreateProduct() {
+    if (!createName || !createPrice || createSizes.length === 0) {
+      setCreateError("Preencha nome, preco e pelo menos um tamanho.");
+      return;
+    }
+    setCreateLoading(true);
+    setCreateError("");
+    setCreateSuccess("");
+    try {
+      const res = await fetch("/api/admin/create-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: createName,
+          description: createDescription,
+          price: parseFloat(createPrice),
+          category: createCategory,
+          sizes: createSizes,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // Upload de imagem se houver
+        if (createImageFile && data.productId) {
+          const fd = new FormData();
+          fd.append("image", createImageFile);
+          fd.append("productId", data.productId);
+          await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+        }
+        setCreateSuccess("Produto cadastrado com sucesso! Aparecerá na loja em instantes.");
+        setTimeout(() => loadProducts(), 2000);
+      } else {
+        setCreateError(data.error || "Erro ao cadastrar produto.");
+      }
+    } catch {
+      setCreateError("Erro de conexao. Tente novamente.");
+    } finally {
+      setCreateLoading(false);
+    }
+  }
+
+  function addCreateSize() {
+    const used = createSizes.map((s) => s.size);
+    const next = SIZE_OPTIONS.find((s) => !used.includes(s));
+    if (next) setCreateSizes((prev) => [...prev, { size: next, quantity: 1 }]);
+  }
+
+  function removeCreateSize(idx: number) {
+    setCreateSizes((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function updateCreateSize(idx: number, field: "size" | "quantity", value: string | number) {
+    setCreateSizes((prev) => prev.map((s, i) => (i === idx ? { ...s, [field]: value } : s)));
+  }
+
   const filtered = products.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const total = getTotalStock(p);
@@ -162,12 +384,9 @@ export default function AdminDashboardPage() {
     return matchSearch;
   });
 
+  // Styles
   const s = {
-    page: {
-      minHeight: "100vh",
-      background: "#f5f0eb",
-      fontFamily: "Georgia, serif",
-    },
+    page: { minHeight: "100vh", background: "#f5f0eb", fontFamily: "Georgia, serif" } as React.CSSProperties,
     header: {
       background: "#2C1810",
       color: "#fff",
@@ -175,8 +394,19 @@ export default function AdminDashboardPage() {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-    },
-    headerTitle: { fontSize: 16, fontWeight: 600, letterSpacing: "0.05em" },
+    } as React.CSSProperties,
+    headerTitle: { fontSize: 16, fontWeight: 600, letterSpacing: "0.05em" } as React.CSSProperties,
+    headerRight: { display: "flex", gap: 10, alignItems: "center" } as React.CSSProperties,
+    addBtn: {
+      background: "#8B6914",
+      border: "none",
+      color: "#fff",
+      padding: "7px 16px",
+      borderRadius: 6,
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+    } as React.CSSProperties,
     logoutBtn: {
       background: "transparent",
       border: "1px solid rgba(255,255,255,0.4)",
@@ -186,13 +416,8 @@ export default function AdminDashboardPage() {
       fontSize: 13,
       cursor: "pointer",
       fontFamily: "Georgia, serif",
-    },
-    controls: {
-      padding: "16px 16px 0",
-      display: "flex",
-      gap: 10,
-      flexWrap: "wrap" as const,
-    },
+    } as React.CSSProperties,
+    controls: { padding: "16px 16px 0", display: "flex", gap: 10, flexWrap: "wrap" as const } as React.CSSProperties,
     searchInput: {
       flex: 1,
       minWidth: 180,
@@ -202,7 +427,7 @@ export default function AdminDashboardPage() {
       fontSize: 14,
       outline: "none",
       background: "#fff",
-    },
+    } as React.CSSProperties,
     filterBtn: (active: boolean): React.CSSProperties => ({
       padding: "8px 14px",
       border: "1px solid",
@@ -219,24 +444,17 @@ export default function AdminDashboardPage() {
       gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
       gap: 14,
       padding: 16,
-    },
+    } as React.CSSProperties,
     card: {
       background: "#fff",
       borderRadius: 10,
       overflow: "hidden",
       boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
-      cursor: "pointer",
-      transition: "transform 0.15s, box-shadow 0.15s",
-    },
-    cardImg: {
-      width: "100%",
-      aspectRatio: "3/4",
-      objectFit: "cover" as const,
-      display: "block",
-    },
-    cardBody: { padding: "10px 10px 12px" },
-    cardName: { fontSize: 13, fontWeight: 600, color: "#2C1810", marginBottom: 4, lineHeight: 1.3 },
-    cardPrice: { fontSize: 12, color: "#8B6914", marginBottom: 6 },
+    } as React.CSSProperties,
+    cardImg: { width: "100%", aspectRatio: "3/4", objectFit: "cover" as const, display: "block" } as React.CSSProperties,
+    cardBody: { padding: "10px 10px 12px" } as React.CSSProperties,
+    cardName: { fontSize: 13, fontWeight: 600, color: "#2C1810", marginBottom: 4, lineHeight: 1.3 } as React.CSSProperties,
+    cardPrice: { fontSize: 12, color: "#8B6914", marginBottom: 6 } as React.CSSProperties,
     stockBadge: (total: number): React.CSSProperties => ({
       display: "inline-block",
       fontSize: 11,
@@ -246,19 +464,38 @@ export default function AdminDashboardPage() {
       color: total === 0 ? "#dc2626" : total <= 3 ? "#a16207" : "#166534",
       fontWeight: 600,
     }),
+    cardActions: { display: "flex", gap: 6, marginTop: 8 } as React.CSSProperties,
     saleBtn: {
-      width: "100%",
-      marginTop: 8,
+      flex: 1,
       padding: "7px 0",
       background: "#8B6914",
       color: "#fff",
       border: "none",
       borderRadius: 6,
-      fontSize: 12,
+      fontSize: 11,
       cursor: "pointer",
       fontFamily: "Georgia, serif",
-      letterSpacing: "0.04em",
-    },
+    } as React.CSSProperties,
+    editBtn: {
+      padding: "7px 10px",
+      background: "#fff",
+      color: "#2C1810",
+      border: "1px solid #ddd",
+      borderRadius: 6,
+      fontSize: 11,
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+    } as React.CSSProperties,
+    stockBtn: {
+      padding: "7px 10px",
+      background: "#fff",
+      color: "#2C1810",
+      border: "1px solid #ddd",
+      borderRadius: 6,
+      fontSize: 11,
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+    } as React.CSSProperties,
     overlay: {
       position: "fixed" as const,
       inset: 0,
@@ -267,7 +504,7 @@ export default function AdminDashboardPage() {
       alignItems: "flex-end",
       justifyContent: "center",
       zIndex: 1000,
-    },
+    } as React.CSSProperties,
     modal: {
       background: "#fff",
       borderRadius: "16px 16px 0 0",
@@ -276,9 +513,9 @@ export default function AdminDashboardPage() {
       maxWidth: 480,
       maxHeight: "90vh",
       overflowY: "auto" as const,
-    },
-    modalTitle: { fontSize: 16, fontWeight: 600, color: "#2C1810", marginBottom: 4 },
-    modalSubtitle: { fontSize: 13, color: "#888", marginBottom: 20 },
+    } as React.CSSProperties,
+    modalTitle: { fontSize: 16, fontWeight: 600, color: "#2C1810", marginBottom: 4 } as React.CSSProperties,
+    modalSubtitle: { fontSize: 13, color: "#888", marginBottom: 20 } as React.CSSProperties,
     label: {
       display: "block",
       fontSize: 11,
@@ -287,8 +524,30 @@ export default function AdminDashboardPage() {
       textTransform: "uppercase" as const,
       marginBottom: 6,
       marginTop: 14,
-    },
-    sizeGrid: { display: "flex", flexWrap: "wrap" as const, gap: 8 },
+    } as React.CSSProperties,
+    input: {
+      width: "100%",
+      padding: "10px 12px",
+      border: "1px solid #ddd",
+      borderRadius: 8,
+      fontSize: 14,
+      fontFamily: "Georgia, serif",
+      outline: "none",
+      boxSizing: "border-box" as const,
+    } as React.CSSProperties,
+    textarea: {
+      width: "100%",
+      padding: "10px 12px",
+      border: "1px solid #ddd",
+      borderRadius: 8,
+      fontSize: 14,
+      fontFamily: "Georgia, serif",
+      outline: "none",
+      boxSizing: "border-box" as const,
+      minHeight: 80,
+      resize: "vertical" as const,
+    } as React.CSSProperties,
+    sizeGrid: { display: "flex", flexWrap: "wrap" as const, gap: 8 } as React.CSSProperties,
     sizeBtn: (active: boolean, stock: number): React.CSSProperties => ({
       padding: "7px 14px",
       border: "1px solid",
@@ -300,7 +559,18 @@ export default function AdminDashboardPage() {
       cursor: stock === 0 ? "not-allowed" : "pointer",
       fontFamily: "Georgia, serif",
     }),
-    qtyRow: { display: "flex", alignItems: "center", gap: 12 },
+    sizeBtnSimple: (active: boolean): React.CSSProperties => ({
+      padding: "7px 14px",
+      border: "1px solid",
+      borderColor: active ? "#8B6914" : "#ddd",
+      background: active ? "#8B6914" : "#fff",
+      color: active ? "#fff" : "#333",
+      borderRadius: 6,
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+    }),
+    qtyRow: { display: "flex", alignItems: "center", gap: 12 } as React.CSSProperties,
     qtyBtn: {
       width: 36,
       height: 36,
@@ -312,9 +582,9 @@ export default function AdminDashboardPage() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-    },
-    qtyVal: { fontSize: 18, fontWeight: 600, color: "#2C1810", minWidth: 24, textAlign: "center" as const },
-    paymentGrid: { display: "flex", flexWrap: "wrap" as const, gap: 8 },
+    } as React.CSSProperties,
+    qtyVal: { fontSize: 18, fontWeight: 600, color: "#2C1810", minWidth: 24, textAlign: "center" as const } as React.CSSProperties,
+    paymentGrid: { display: "flex", flexWrap: "wrap" as const, gap: 8 } as React.CSSProperties,
     payBtn: (active: boolean): React.CSSProperties => ({
       padding: "8px 16px",
       border: "1px solid",
@@ -338,7 +608,7 @@ export default function AdminDashboardPage() {
       cursor: "pointer",
       fontFamily: "Georgia, serif",
       letterSpacing: "0.05em",
-    },
+    } as React.CSSProperties,
     cancelBtn: {
       width: "100%",
       marginTop: 10,
@@ -350,7 +620,7 @@ export default function AdminDashboardPage() {
       fontSize: 14,
       cursor: "pointer",
       fontFamily: "Georgia, serif",
-    },
+    } as React.CSSProperties,
     successMsg: {
       background: "#dcfce7",
       border: "1px solid #86efac",
@@ -359,7 +629,7 @@ export default function AdminDashboardPage() {
       fontSize: 14,
       color: "#166534",
       marginTop: 16,
-    },
+    } as React.CSSProperties,
     errorMsg: {
       background: "#fef2f2",
       border: "1px solid #fca5a5",
@@ -368,16 +638,89 @@ export default function AdminDashboardPage() {
       fontSize: 14,
       color: "#dc2626",
       marginTop: 16,
-    },
+    } as React.CSSProperties,
+    imagePreview: {
+      width: "100%",
+      height: 180,
+      objectFit: "cover" as const,
+      borderRadius: 8,
+      marginBottom: 8,
+      display: "block",
+    } as React.CSSProperties,
+    uploadBtn: {
+      width: "100%",
+      padding: "10px",
+      background: "#f5f0eb",
+      border: "1px dashed #8B6914",
+      borderRadius: 8,
+      fontSize: 13,
+      color: "#8B6914",
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+      textAlign: "center" as const,
+    } as React.CSSProperties,
+    select: {
+      width: "100%",
+      padding: "10px 12px",
+      border: "1px solid #ddd",
+      borderRadius: 8,
+      fontSize: 14,
+      fontFamily: "Georgia, serif",
+      outline: "none",
+      background: "#fff",
+    } as React.CSSProperties,
+    sizeRow: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 8,
+    } as React.CSSProperties,
+    removeBtn: {
+      padding: "6px 10px",
+      background: "#fef2f2",
+      border: "1px solid #fca5a5",
+      borderRadius: 6,
+      fontSize: 12,
+      color: "#dc2626",
+      cursor: "pointer",
+    } as React.CSSProperties,
+    addSizeBtn: {
+      padding: "8px 14px",
+      background: "#fff",
+      border: "1px dashed #8B6914",
+      borderRadius: 6,
+      fontSize: 13,
+      color: "#8B6914",
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+      marginTop: 4,
+    } as React.CSSProperties,
+    actionToggle: (active: boolean): React.CSSProperties => ({
+      flex: 1,
+      padding: "9px",
+      border: "1px solid",
+      borderColor: active ? "#8B6914" : "#ddd",
+      background: active ? "#8B6914" : "#fff",
+      color: active ? "#fff" : "#555",
+      borderRadius: 6,
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+    }),
   };
 
   return (
     <div style={s.page}>
       <div style={s.header}>
         <span style={s.headerTitle}>Virtuosa USA — Painel da Loja</span>
-        <button style={s.logoutBtn} onClick={handleLogout}>
-          Sair
-        </button>
+        <div style={s.headerRight}>
+          <button style={s.addBtn} onClick={openCreateModal}>
+            + Nova peça
+          </button>
+          <button style={s.logoutBtn} onClick={handleLogout}>
+            Sair
+          </button>
+        </div>
       </div>
 
       <div style={s.controls}>
@@ -427,15 +770,21 @@ export default function AdminDashboardPage() {
                 />
                 <div style={s.cardBody}>
                   <div style={s.cardName}>{product.name}</div>
-                  <div style={s.cardPrice}>
-                    ${product.price.toFixed(2)}
-                  </div>
+                  <div style={s.cardPrice}>${product.price.toFixed(2)}</div>
                   <span style={s.stockBadge(total)}>
                     {total === 0 ? "Esgotado" : total <= 3 ? `${total} restantes` : `${total} em estoque`}
                   </span>
-                  <button style={s.saleBtn} onClick={() => openSaleModal(product)}>
-                    Registrar venda
-                  </button>
+                  <div style={s.cardActions}>
+                    <button style={s.saleBtn} onClick={() => openSaleModal(product)}>
+                      Venda
+                    </button>
+                    <button style={s.stockBtn} onClick={() => openStockModal(product)} title="Ajustar estoque">
+                      📦
+                    </button>
+                    <button style={s.editBtn} onClick={() => openEditModal(product)} title="Editar produto">
+                      ✏️
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -443,13 +792,12 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {selectedProduct && (
-        <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeSaleModal()}>
+      {/* Modal de Venda */}
+      {activeModal === "sale" && selectedProduct && (
+        <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={s.modal}>
             <div style={s.modalTitle}>{selectedProduct.name}</div>
-            <div style={s.modalSubtitle}>
-              ${selectedProduct.price.toFixed(2)} &nbsp;|&nbsp; Registrar venda manual
-            </div>
+            <div style={s.modalSubtitle}>${selectedProduct.price.toFixed(2)} &nbsp;|&nbsp; Registrar venda manual</div>
 
             {(selectedProduct.sizes?.length ?? 0) > 0 && (
               <>
@@ -464,8 +812,7 @@ export default function AdminDashboardPage() {
                         onClick={() => stock > 0 && setSelectedSize(size)}
                         disabled={stock === 0}
                       >
-                        {size}
-                        {stock === 0 && " (0)"}
+                        {size}{stock === 0 && " (0)"}
                       </button>
                     );
                   })}
@@ -475,23 +822,15 @@ export default function AdminDashboardPage() {
 
             <label style={s.label}>Quantidade</label>
             <div style={s.qtyRow}>
-              <button style={s.qtyBtn} onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
-                -
-              </button>
+              <button style={s.qtyBtn} onClick={() => setQuantity((q) => Math.max(1, q - 1))}>-</button>
               <span style={s.qtyVal}>{quantity}</span>
-              <button style={s.qtyBtn} onClick={() => setQuantity((q) => q + 1)}>
-                +
-              </button>
+              <button style={s.qtyBtn} onClick={() => setQuantity((q) => q + 1)}>+</button>
             </div>
 
             <label style={s.label}>Forma de pagamento</label>
             <div style={s.paymentGrid}>
               {PAYMENT_METHODS.map((m) => (
-                <button
-                  key={m.value}
-                  style={s.payBtn(paymentMethod === m.value)}
-                  onClick={() => setPaymentMethod(m.value)}
-                >
+                <button key={m.value} style={s.payBtn(paymentMethod === m.value)} onClick={() => setPaymentMethod(m.value)}>
                   {m.label}
                 </button>
               ))}
@@ -501,17 +840,205 @@ export default function AdminDashboardPage() {
             {saleError && <div style={s.errorMsg}>{saleError}</div>}
 
             {!saleSuccess && (
-              <button
-                style={{ ...s.confirmBtn, opacity: saleLoading ? 0.7 : 1 }}
-                onClick={handleRegisterSale}
-                disabled={saleLoading}
-              >
+              <button style={{ ...s.confirmBtn, opacity: saleLoading ? 0.7 : 1 }} onClick={handleRegisterSale} disabled={saleLoading}>
                 {saleLoading ? "Registrando..." : "Confirmar venda"}
               </button>
             )}
-            <button style={s.cancelBtn} onClick={closeSaleModal}>
-              {saleSuccess ? "Fechar" : "Cancelar"}
+            <button style={s.cancelBtn} onClick={closeModal}>{saleSuccess ? "Fechar" : "Cancelar"}</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição */}
+      {activeModal === "edit" && selectedProduct && (
+        <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
+          <div style={s.modal}>
+            <div style={s.modalTitle}>Editar produto</div>
+            <div style={s.modalSubtitle}>{selectedProduct.name}</div>
+
+            {editImagePreview && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={editImagePreview} alt="preview" style={s.imagePreview} />
+            )}
+            <input
+              ref={editFileRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  setEditImageFile(f);
+                  setEditImagePreview(URL.createObjectURL(f));
+                }
+              }}
+            />
+            <button style={s.uploadBtn} onClick={() => editFileRef.current?.click()}>
+              {editImageFile ? "Foto selecionada — clique para trocar" : "Clique para trocar a foto"}
             </button>
+
+            <label style={s.label}>Nome</label>
+            <input style={s.input} value={editName} onChange={(e) => setEditName(e.target.value)} />
+
+            <label style={s.label}>Descrição</label>
+            <textarea style={s.textarea} value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Deixe em branco para manter a atual" />
+
+            <label style={s.label}>Preço (USD)</label>
+            <input style={s.input} type="number" step="0.01" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} />
+
+            {editSuccess && <div style={s.successMsg}>{editSuccess}</div>}
+            {editError && <div style={s.errorMsg}>{editError}</div>}
+
+            {!editSuccess && (
+              <button style={{ ...s.confirmBtn, opacity: editLoading ? 0.7 : 1 }} onClick={handleEditProduct} disabled={editLoading}>
+                {editLoading ? "Salvando..." : "Salvar alterações"}
+              </button>
+            )}
+            <button style={s.cancelBtn} onClick={closeModal}>{editSuccess ? "Fechar" : "Cancelar"}</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Ajuste de Estoque */}
+      {activeModal === "stock" && selectedProduct && (
+        <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
+          <div style={s.modal}>
+            <div style={s.modalTitle}>Ajustar estoque</div>
+            <div style={s.modalSubtitle}>{selectedProduct.name}</div>
+
+            <label style={s.label}>Ação</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button style={s.actionToggle(stockAction === "add")} onClick={() => setStockAction("add")}>
+                Adicionar unidades
+              </button>
+              <button style={s.actionToggle(stockAction === "set")} onClick={() => setStockAction("set")}>
+                Definir quantidade
+              </button>
+            </div>
+
+            {(selectedProduct.sizes?.length ?? 0) > 0 && (
+              <>
+                <label style={s.label}>Tamanho</label>
+                <div style={s.sizeGrid}>
+                  {sortSizes(selectedProduct.sizes).map((size) => {
+                    const stock = getStockForSize(selectedProduct, size);
+                    return (
+                      <button
+                        key={size}
+                        style={s.sizeBtnSimple(stockSize === size)}
+                        onClick={() => setStockSize(size)}
+                      >
+                        {size} ({stock})
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            <label style={s.label}>{stockAction === "add" ? "Quantidade a adicionar" : "Nova quantidade total"}</label>
+            <div style={s.qtyRow}>
+              <button style={s.qtyBtn} onClick={() => setStockQty((q) => Math.max(0, q - 1))}>-</button>
+              <span style={s.qtyVal}>{stockQty}</span>
+              <button style={s.qtyBtn} onClick={() => setStockQty((q) => q + 1)}>+</button>
+            </div>
+
+            {stockSuccess && <div style={s.successMsg}>{stockSuccess}</div>}
+            {stockError && <div style={s.errorMsg}>{stockError}</div>}
+
+            {!stockSuccess && (
+              <button style={{ ...s.confirmBtn, opacity: stockLoading ? 0.7 : 1 }} onClick={handleAdjustStock} disabled={stockLoading}>
+                {stockLoading ? "Atualizando..." : "Confirmar ajuste"}
+              </button>
+            )}
+            <button style={s.cancelBtn} onClick={closeModal}>{stockSuccess ? "Fechar" : "Cancelar"}</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Cadastro de Nova Peça */}
+      {activeModal === "create" && (
+        <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
+          <div style={s.modal}>
+            <div style={s.modalTitle}>Cadastrar nova peça</div>
+            <div style={s.modalSubtitle}>O produto será criado no Square e aparecerá na loja</div>
+
+            {createImagePreview && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={createImagePreview} alt="preview" style={s.imagePreview} />
+            )}
+            <input
+              ref={createFileRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  setCreateImageFile(f);
+                  setCreateImagePreview(URL.createObjectURL(f));
+                }
+              }}
+            />
+            <button style={s.uploadBtn} onClick={() => createFileRef.current?.click()}>
+              {createImageFile ? "Foto selecionada — clique para trocar" : "Adicionar foto do produto"}
+            </button>
+
+            <label style={s.label}>Nome da peça *</label>
+            <input style={s.input} value={createName} onChange={(e) => setCreateName(e.target.value)} placeholder="Ex: Vestido Midi Floral" />
+
+            <label style={s.label}>Descrição</label>
+            <textarea style={s.textarea} value={createDescription} onChange={(e) => setCreateDescription(e.target.value)} placeholder="Descreva o produto..." />
+
+            <label style={s.label}>Preço (USD) *</label>
+            <input style={s.input} type="number" step="0.01" value={createPrice} onChange={(e) => setCreatePrice(e.target.value)} placeholder="0.00" />
+
+            <label style={s.label}>Categoria</label>
+            <select style={s.select} value={createCategory} onChange={(e) => setCreateCategory(e.target.value)}>
+              {["Vestidos", "Blusas", "Saias", "Calças", "Conjuntos", "Acessórios", "Outros"].map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
+            <label style={s.label}>Tamanhos e quantidades *</label>
+            {createSizes.map((item, idx) => (
+              <div key={idx} style={s.sizeRow}>
+                <select
+                  style={{ ...s.select, width: "auto", flex: "0 0 80px" }}
+                  value={item.size}
+                  onChange={(e) => updateCreateSize(idx, "size", e.target.value)}
+                >
+                  {SIZE_OPTIONS.map((sz) => (
+                    <option key={sz} value={sz}>{sz}</option>
+                  ))}
+                </select>
+                <input
+                  style={{ ...s.input, flex: 1 }}
+                  type="number"
+                  min={0}
+                  value={item.quantity}
+                  onChange={(e) => updateCreateSize(idx, "quantity", parseInt(e.target.value) || 0)}
+                  placeholder="Qtd"
+                />
+                <span style={{ fontSize: 11, color: "#888", whiteSpace: "nowrap" }}>unid.</span>
+                {createSizes.length > 1 && (
+                  <button style={s.removeBtn} onClick={() => removeCreateSize(idx)}>✕</button>
+                )}
+              </div>
+            ))}
+            {createSizes.length < SIZE_OPTIONS.length && (
+              <button style={s.addSizeBtn} onClick={addCreateSize}>+ Adicionar tamanho</button>
+            )}
+
+            {createSuccess && <div style={s.successMsg}>{createSuccess}</div>}
+            {createError && <div style={s.errorMsg}>{createError}</div>}
+
+            {!createSuccess && (
+              <button style={{ ...s.confirmBtn, opacity: createLoading ? 0.7 : 1 }} onClick={handleCreateProduct} disabled={createLoading}>
+                {createLoading ? "Cadastrando..." : "Cadastrar produto"}
+              </button>
+            )}
+            <button style={s.cancelBtn} onClick={closeModal}>{createSuccess ? "Fechar" : "Cancelar"}</button>
           </div>
         </div>
       )}
