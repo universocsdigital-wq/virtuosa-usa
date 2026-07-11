@@ -30,7 +30,17 @@ function normalizeProductName(name: string): string {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function cleanVariationLabel(value: string): string {
+  return value
+    .replace(/\s*[-–—/|]\s*$/g, "")
+    .replace(/^\s*[-–—/|]\s*/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function applyProductOverrides(product: Product): Product {
+  const normalizedName = normalizeProductName(product.name);
+
   if (normalizeProductName(product.name).includes("elisama")) {
     return {
       ...product,
@@ -40,6 +50,30 @@ function applyProductOverrides(product: Product): Product {
       category: "conjuntos",
       sizes: ["P", "G"],
       colors: ["Nude"],
+    };
+  }
+
+  if (
+    normalizedName.includes("doce maria") &&
+    (normalizedName.includes("midi elegante") || normalizedName.includes("lese"))
+  ) {
+    return {
+      ...product,
+      price: 145,
+      sizes: ["PP", "P", "M", "G", "GG"],
+      colors: ["Azul"],
+    };
+  }
+
+  if (normalizedName.includes("lana")) {
+    return {
+      ...product,
+      name: "Vestido Lana",
+      slug: "vestido-lana",
+      price: 140,
+      category: "vestidos",
+      sizes: ["P", "M", "G"],
+      colors: ["Rose", "Laranja"],
     };
   }
 
@@ -262,7 +296,9 @@ export async function getSquareProducts(): Promise<Product[]> {
           .map((v) => {
             const vname = v.item_variation_data?.name || "";
             // Remover o tamanho para obter a cor
-            const color = vname.replace(/\b(PP|P|M|G|GG|XG|XGG|U)\b/gi, "").trim();
+            const color = cleanVariationLabel(
+              vname.replace(/\b(PP|P|M|G|GG|XG|XGG|U)\b/gi, "")
+            );
             return color || null;
           })
           .filter(Boolean) as string[]
