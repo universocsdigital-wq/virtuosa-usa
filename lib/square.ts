@@ -33,6 +33,8 @@ function normalizeProductName(name: string): string {
 function cleanVariationLabel(value: string): string {
   return value
     .replace(/\b\d+\b/g, "")
+    .replace(/^\s*[,;:]+\s*/, "")
+    .replace(/\s*[,;:]+\s*$/, "")
     .replace(/\s*[-–—/|]\s*$/g, "")
     .replace(/^\s*[-–—/|]\s*/g, "")
     .replace(/\s+/g, " ")

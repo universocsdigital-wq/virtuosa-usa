@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { productId, name, description, price, category, color } = body;
+    const { productId, name, description, price, category, color: requestedColor } = body;
+    let color = requestedColor;
 
     if (!productId) {
       return NextResponse.json({ error: "productId e obrigatorio." }, { status: 400 });
@@ -86,6 +87,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Produto nao encontrado." }, { status: 404 });
     }
 
+    const existingVariations = (existingObject.item_data?.variations || []) as Array<{
+      id: string;
+      version: number;
+      item_variation_data: Record<string, unknown> & { item_option_values?: unknown[] };
+    }>;
+    if (color !== undefined && existingVariations.some((variation) => (variation.item_variation_data.item_option_values?.length ?? 0) > 0)) {
+      const requested = String(color).trim().replace(/\s+/g, " ").toLowerCase();
+      const existingColors = new Set(existingVariations.map((variation) =>
+        String(variation.item_variation_data.name || "")
+          .replace(/\b(PP|P|M|G|GG|XG|XGG|U)\b/gi, "")
+          .replace(/^\s*[,;:\-/]+\s*|\s*[,;:\-/]+\s*$/g, "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase()
+      ).filter(Boolean));
+      if (existingColors.size === 1 && existingColors.has(requested)) {
+        color = undefined;
+      } else {
+        return NextResponse.json(
+          { error: "Este produto usa opcoes de cor do Square. Para evitar inconsistencia, a cor nao pode ser substituida por um campo livre." },
+          { status: 409 }
+        );
+      }
+    }
+
     const updatedItemData: Record<string, unknown> = {
       ...existingObject.item_data,
       name: name || existingObject.item_data?.name,
@@ -110,12 +136,8 @@ export async function POST(req: NextRequest) {
     // Se preço foi informado, atualizar todas as variações
     if (price || color !== undefined) {
       const priceInCents = Math.round(parseFloat(price) * 100);
-      const variations = (existingObject.item_data?.variations || []) as Array<{
-        id: string;
-        version: number;
-        item_variation_data: Record<string, unknown>;
-      }>;
-      const normalizedColor = typeof color === "string" ? color.trim() : "";
+      const variations = existingVariations;
+      const normalizedColor = typeof color === "string" ? color.trim().replace(/\s+/g, " ") : "";
       (updatedObject.item_data as Record<string, unknown>).variations = variations.map((v) => {
         const currentName = String(v.item_variation_data.name || "");
         const size = currentName.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i)?.[1]?.toUpperCase() || currentName;

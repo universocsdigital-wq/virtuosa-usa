@@ -76,8 +76,16 @@ export async function POST(req: NextRequest) {
     const categoryId = await resolveSquareCategoryId(category, token);
 
     // Criar variações para cada tamanho
-    const normalizedColor = typeof color === "string" ? color.trim() : "";
-    const variations = sizes.map((s: { size: string; quantity: number }, i: number) => ({
+    const normalizedColor = typeof color === "string" ? color.trim().replace(/\s+/g, " ") : "";
+    const normalizedSizes = sizes.map((s: { size: string; quantity: number }) => ({
+      size: String(s.size || "").trim().toUpperCase(),
+      quantity: Number(s.quantity),
+    }));
+    const uniqueSizes = new Set(normalizedSizes.map((s: { size: string }) => s.size));
+    if (uniqueSizes.size !== normalizedSizes.length || normalizedSizes.some((s: { size: string; quantity: number }) => !s.size || !Number.isInteger(s.quantity) || s.quantity < 0)) {
+      return NextResponse.json({ error: "Tamanhos duplicados ou quantidades invalidas." }, { status: 400 });
+    }
+    const variations = normalizedSizes.map((s: { size: string; quantity: number }, i: number) => ({
       type: "ITEM_VARIATION",
       id: `#variation-${i}`,
       item_variation_data: {
@@ -132,7 +140,7 @@ export async function POST(req: NextRequest) {
     // Definir estoque inicial para cada variação
     const inventoryChanges = createdVariations
       .map((v: { id: string }, i: number) => {
-        const sizeEntry = sizes[i];
+        const sizeEntry = normalizedSizes[i];
         if (!sizeEntry || sizeEntry.quantity <= 0) return null;
         return {
           type: "PHYSICAL_COUNT",

@@ -915,7 +915,10 @@ export default function AdminDashboardPage() {
             </select>
 
             <label style={s.label}>Cor do produto</label>
-            <input style={s.input} value={editColor} onChange={(e) => setEditColor(e.target.value)} placeholder="Ex: Verde, Rose, Off White" />
+            <input list="virtuosa-colors-edit" style={s.input} value={editColor} onChange={(e) => setEditColor(e.target.value)} placeholder="Ex: Verde, Rose, Off White" />
+            <datalist id="virtuosa-colors-edit">
+              {Array.from(new Set(products.flatMap((product) => product.colors ?? []))).sort().map((color) => <option key={color} value={color} />)}
+            </datalist>
             {selectedProduct.colors?.length > 1 && !editColor && (
               <div style={{ marginTop: 6, fontSize: 12, color: "#8B6914" }}>
                 Cores atuais: {selectedProduct.colors.join(", ")}. Preencha apenas para substituir todas por uma unica cor.
@@ -1034,7 +1037,11 @@ export default function AdminDashboardPage() {
             </select>
 
             <label style={s.label}>Cor do produto</label>
-            <input style={s.input} value={createColor} onChange={(e) => setCreateColor(e.target.value)} placeholder="Ex: Verde, Rose, Off White" />
+            <input list="virtuosa-colors-create" style={s.input} value={createColor} onChange={(e) => setCreateColor(e.target.value)} placeholder="Ex: Verde, Rose, Off White" />
+            <datalist id="virtuosa-colors-create">
+              {Array.from(new Set(products.flatMap((product) => product.colors ?? []))).sort().map((color) => <option key={color} value={color} />)}
+            </datalist>
+            <div style={{ marginTop: 6, fontSize: 12, color: "#777" }}>Use uma cor ja existente na lista sempre que possivel para manter o mesmo nome no Square.</div>
 
             <label style={s.label}>Tamanhos e quantidades *</label>
             {createSizes.map((item, idx) => (
