@@ -41,6 +41,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    const numericQuantity = Number(quantity);
+    if (!Number.isInteger(numericQuantity) || numericQuantity < 1) {
+      return NextResponse.json({ error: "A quantidade deve ser um numero inteiro maior que zero." }, { status: 400 });
+    }
 
     const variationId = await getSquareVariationId(productId, size);
     if (!variationId) {
@@ -62,7 +66,7 @@ export async function POST(req: NextRequest) {
           catalog_object_id: variationId,
           location_id: locationId,
           state: "IN_STOCK",
-          quantity: String(Math.max(0, quantity)),
+          quantity: String(numericQuantity),
           occurred_at: new Date().toISOString(),
         },
       };
@@ -75,7 +79,7 @@ export async function POST(req: NextRequest) {
           location_id: locationId,
           from_state: "NONE",
           to_state: "IN_STOCK",
-          quantity: String(Math.max(1, quantity)),
+          quantity: String(numericQuantity),
           occurred_at: new Date().toISOString(),
         },
       };

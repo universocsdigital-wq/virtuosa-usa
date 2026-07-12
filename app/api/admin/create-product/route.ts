@@ -68,15 +68,12 @@ export async function POST(req: NextRequest) {
     // sizes: Array<{ size: string; quantity: number }>
 
     const numericPrice = Number(price);
-    if (!name || !Number.isFinite(numericPrice) || numericPrice <= 0 || !Array.isArray(sizes) || sizes.length === 0) {
+    if (typeof name !== "string" || !name.trim() || !Number.isFinite(numericPrice) || numericPrice <= 0 || !Array.isArray(sizes) || sizes.length === 0) {
       return NextResponse.json({ error: "Nome, preco e tamanhos sao obrigatorios." }, { status: 400 });
     }
 
     const idempotencyKey = `admin-create-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const priceInCents = Math.round(numericPrice * 100);
-    const categoryId = await resolveSquareCategoryId(category, token);
-
-    // Criar variações para cada tamanho
     const normalizedColor = typeof color === "string" ? color.trim().replace(/\s+/g, " ") : "";
     const normalizedSizes = sizes.map((s: { size: string; quantity: number }) => ({
       size: String(s.size || "").trim().toUpperCase(),
@@ -86,6 +83,9 @@ export async function POST(req: NextRequest) {
     if (uniqueSizes.size !== normalizedSizes.length || normalizedSizes.some((s: { size: string; quantity: number }) => !s.size || !Number.isInteger(s.quantity) || s.quantity < 0)) {
       return NextResponse.json({ error: "Tamanhos duplicados ou quantidades invalidas." }, { status: 400 });
     }
+    const categoryId = await resolveSquareCategoryId(category, token);
+
+    // Criar variações para cada tamanho somente depois de validar toda a entrada.
     const variations = normalizedSizes.map((s: { size: string; quantity: number }, i: number) => ({
       type: "ITEM_VARIATION",
       id: `#variation-${i}`,
