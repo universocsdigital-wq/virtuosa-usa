@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, description, price, category, sizes } = body;
+    const { name, description, price, category, color, sizes } = body;
     // sizes: Array<{ size: string; quantity: number }>
 
     if (!name || !price || !sizes || sizes.length === 0) {
@@ -76,11 +76,12 @@ export async function POST(req: NextRequest) {
     const categoryId = await resolveSquareCategoryId(category, token);
 
     // Criar variações para cada tamanho
+    const normalizedColor = typeof color === "string" ? color.trim() : "";
     const variations = sizes.map((s: { size: string; quantity: number }, i: number) => ({
       type: "ITEM_VARIATION",
       id: `#variation-${i}`,
       item_variation_data: {
-        name: s.size,
+        name: normalizedColor ? `${normalizedColor} ${s.size}` : s.size,
         pricing_type: "FIXED_PRICING",
         price_money: {
           amount: priceInCents,

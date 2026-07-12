@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { productId, name, description, price, category } = body;
+    const { productId, name, description, price, category, color } = body;
 
     if (!productId) {
       return NextResponse.json({ error: "productId e obrigatorio." }, { status: 400 });
@@ -108,26 +108,31 @@ export async function POST(req: NextRequest) {
     };
 
     // Se preço foi informado, atualizar todas as variações
-    if (price) {
+    if (price || color !== undefined) {
       const priceInCents = Math.round(parseFloat(price) * 100);
       const variations = (existingObject.item_data?.variations || []) as Array<{
         id: string;
         version: number;
         item_variation_data: Record<string, unknown>;
       }>;
-      (updatedObject.item_data as Record<string, unknown>).variations = variations.map((v) => ({
-        type: "ITEM_VARIATION",
-        id: v.id,
-        version: v.version,
-        item_variation_data: {
-          ...v.item_variation_data,
-          pricing_type: "FIXED_PRICING",
-          price_money: {
-            amount: priceInCents,
-            currency: "USD",
+      const normalizedColor = typeof color === "string" ? color.trim() : "";
+      (updatedObject.item_data as Record<string, unknown>).variations = variations.map((v) => {
+        const currentName = String(v.item_variation_data.name || "");
+        const size = currentName.match(/\b(PP|P|M|G|GG|XG|XGG|U)\b/i)?.[1]?.toUpperCase() || currentName;
+        return {
+          type: "ITEM_VARIATION",
+          id: v.id,
+          version: v.version,
+          item_variation_data: {
+            ...v.item_variation_data,
+            ...(color !== undefined ? { name: normalizedColor ? `${normalizedColor} ${size}` : size } : {}),
+            ...(price ? {
+              pricing_type: "FIXED_PRICING",
+              price_money: { amount: priceInCents, currency: "USD" },
+            } : {}),
           },
-        },
-      }));
+        };
+      });
     }
 
     const idempotencyKey = `admin-update-${productId}-${Date.now()}`;

@@ -118,6 +118,7 @@ export default function AdminDashboardPage() {
   const [editDescription, setEditDescription] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editCategory, setEditCategory] = useState("Vestidos");
+  const [editColor, setEditColor] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [editSuccess, setEditSuccess] = useState("");
@@ -138,6 +139,7 @@ export default function AdminDashboardPage() {
   const [createDescription, setCreateDescription] = useState("");
   const [createPrice, setCreatePrice] = useState("");
   const [createCategory, setCreateCategory] = useState("Vestidos");
+  const [createColor, setCreateColor] = useState("");
   const [createSizes, setCreateSizes] = useState<{ size: string; quantity: number }[]>([
     { size: "P", quantity: 1 },
     { size: "M", quantity: 1 },
@@ -205,6 +207,7 @@ export default function AdminDashboardPage() {
     setEditDescription(product.description ?? "");
     setEditPrice(product.price.toFixed(2));
     setEditCategory(getCategoryLabel(product.category));
+    setEditColor(product.colors?.length === 1 ? product.colors[0] : "");
     setEditSuccess("");
     setEditError("");
     setEditImageFile(null);
@@ -232,6 +235,7 @@ export default function AdminDashboardPage() {
     setCreateDescription("");
     setCreatePrice("");
     setCreateCategory("Vestidos");
+    setCreateColor("");
     setCreateSizes([
       { size: "P", quantity: 1 },
       { size: "M", quantity: 1 },
@@ -322,6 +326,7 @@ export default function AdminDashboardPage() {
           description: editDescription || undefined,
           price: parseFloat(editPrice) || undefined,
           category: editCategory,
+          color: selectedProduct.colors?.length > 1 && !editColor.trim() ? undefined : editColor,
         }),
       });
       const data = await res.json();
@@ -330,7 +335,7 @@ export default function AdminDashboardPage() {
         setProducts((prev) =>
           prev.map((p) =>
             p.squareId === squareId
-              ? { ...p, name: editName, description: editDescription, price: parseFloat(editPrice) || p.price, category: editCategory, image: uploadedImageUrl || p.image }
+              ? { ...p, name: editName, description: editDescription, price: parseFloat(editPrice) || p.price, category: editCategory, colors: editColor ? [editColor] : p.colors, image: uploadedImageUrl || p.image }
               : p
           )
         );
@@ -425,6 +430,7 @@ export default function AdminDashboardPage() {
           description: createDescription,
           price: parseFloat(createPrice),
           category: createCategory,
+          color: createColor,
           sizes: createSizes,
         }),
       });
@@ -908,6 +914,14 @@ export default function AdminDashboardPage() {
               ))}
             </select>
 
+            <label style={s.label}>Cor do produto</label>
+            <input style={s.input} value={editColor} onChange={(e) => setEditColor(e.target.value)} placeholder="Ex: Verde, Rose, Off White" />
+            {selectedProduct.colors?.length > 1 && !editColor && (
+              <div style={{ marginTop: 6, fontSize: 12, color: "#8B6914" }}>
+                Cores atuais: {selectedProduct.colors.join(", ")}. Preencha apenas para substituir todas por uma unica cor.
+              </div>
+            )}
+
             {editSuccess && <div style={s.successMsg}>{editSuccess}</div>}
             {editError && <div style={s.errorMsg}>{editError}</div>}
 
@@ -1018,6 +1032,9 @@ export default function AdminDashboardPage() {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
+
+            <label style={s.label}>Cor do produto</label>
+            <input style={s.input} value={createColor} onChange={(e) => setCreateColor(e.target.value)} placeholder="Ex: Verde, Rose, Off White" />
 
             <label style={s.label}>Tamanhos e quantidades *</label>
             {createSizes.map((item, idx) => (
