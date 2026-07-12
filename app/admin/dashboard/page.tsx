@@ -143,7 +143,6 @@ export default function AdminDashboardPage() {
   // Modal de ajuste de estoque
   const [stockSize, setStockSize] = useState("");
   const [stockQty, setStockQty] = useState(1);
-  const [stockAction, setStockAction] = useState<"add" | "set">("add");
   const [stockLoading, setStockLoading] = useState(false);
   const [stockSuccess, setStockSuccess] = useState("");
   const [stockError, setStockError] = useState("");
@@ -240,7 +239,6 @@ export default function AdminDashboardPage() {
     const sizes = sortSizes(product.sizes ?? []);
     setStockSize(sizes[0] ?? "");
     setStockQty(1);
-    setStockAction("add");
     setStockSuccess("");
     setStockError("");
     setActiveModal("stock");
@@ -406,7 +404,7 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/admin/adjust-stock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: squareId, size: stockSize, quantity: stockQty, action: stockAction }),
+        body: JSON.stringify({ productId: squareId, size: stockSize, quantity: stockQty, action: "add" }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -416,11 +414,7 @@ export default function AdminDashboardPage() {
             if (p.squareId !== squareId) return p;
             const updated = { ...p, inventoryBySize: { ...p.inventoryBySize } };
             if (stockSize) {
-              if (stockAction === "set") {
-                updated.inventoryBySize[stockSize] = stockQty;
-              } else {
-                updated.inventoryBySize[stockSize] = (updated.inventoryBySize[stockSize] ?? 0) + stockQty;
-              }
+              updated.inventoryBySize[stockSize] = (updated.inventoryBySize[stockSize] ?? 0) + stockQty;
             }
             return updated;
           })
@@ -703,13 +697,6 @@ export default function AdminDashboardPage() {
       borderRadius: 6, fontSize: 13, color: "#8B6914", cursor: "pointer",
       fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif", marginTop: 4,
     } as React.CSSProperties,
-    actionToggle: (active: boolean): React.CSSProperties => ({
-      flex: 1, padding: "9px", border: "1px solid",
-      borderColor: active ? "#8B6914" : "#ddd",
-      background: active ? "#8B6914" : "#fff",
-      color: active ? "#fff" : "#555",
-      borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-    }),
   };
 
   return (
@@ -968,18 +955,8 @@ export default function AdminDashboardPage() {
       {activeModal === "stock" && selectedProduct && selectedProduct.squareId && (
         <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={s.modal}>
-            <div style={s.modalTitle}>Ajustar estoque</div>
-            <div style={s.modalSubtitle}>{selectedProduct.name}</div>
-
-            <label style={s.label}>Acao</label>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button style={s.actionToggle(stockAction === "add")} onClick={() => setStockAction("add")}>
-                Adicionar unidades
-              </button>
-              <button style={s.actionToggle(stockAction === "set")} onClick={() => setStockAction("set")}>
-                Definir quantidade
-              </button>
-            </div>
+            <div style={s.modalTitle}>{selectedProduct.name}</div>
+            <div style={s.modalSubtitle}>Adicionar unidades ao estoque</div>
 
             {(selectedProduct.sizes?.length ?? 0) > 0 && (
               <>
@@ -1001,7 +978,7 @@ export default function AdminDashboardPage() {
               </>
             )}
 
-            <label style={s.label}>{stockAction === "add" ? "Quantidade a adicionar" : "Nova quantidade total"}</label>
+            <label style={s.label}>Quantidade a adicionar</label>
             <div style={s.qtyRow}>
               <button style={s.qtyBtn} onClick={() => setStockQty((q) => Math.max(0, q - 1))}>-</button>
               <span style={s.qtyVal}>{stockQty}</span>
