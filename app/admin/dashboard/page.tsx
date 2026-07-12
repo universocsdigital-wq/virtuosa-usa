@@ -545,37 +545,40 @@ export default function AdminDashboardPage() {
       fontWeight: 600,
     }),
 
-    cardActions: { display: "flex", gap: 8, marginTop: "auto" as const, paddingTop: 10, alignItems: "center" } as React.CSSProperties,
+    cardActions: {
+      display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+      gap: 8, marginTop: "auto" as const, paddingTop: 14,
+    } as React.CSSProperties,
     saleBtn: {
-      flex: 1, padding: "9px 0", background: "#8B6914", color: "#fff",
-      border: "none", borderRadius: 6, fontSize: 13, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      width: "100%", minHeight: 38, padding: "8px 10px", background: "#8B6914", color: "#fff",
+      border: "none", borderRadius: 7, fontSize: 12, cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
       fontWeight: 500,
     } as React.CSSProperties,
     linkBtn: {
-      padding: "7px 10px",
+      width: "100%", minHeight: 38, padding: "8px 10px",
       background: "#f5f0eb",
       color: "#8B6914",
       border: "1px solid #d7c6ae",
-      borderRadius: 6,
-      fontSize: 11,
+      borderRadius: 7,
+      fontSize: 12,
       cursor: "pointer",
       fontFamily: "Georgia, serif",
       fontWeight: 600,
     } as React.CSSProperties,
     iconBtn: (enabled: boolean): React.CSSProperties => ({
-      padding: "7px 10px",
+      width: "100%", minHeight: 38, padding: "8px 10px",
       background: enabled ? "#fff" : "#f9f9f9",
       color: enabled ? "#2C1810" : "#ccc",
       border: "1px solid",
       borderColor: enabled ? "#ddd" : "#eee",
-      borderRadius: 6, fontSize: 11,
+      borderRadius: 7, fontSize: 12,
       cursor: enabled ? "pointer" : "not-allowed",
       fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     }),
     deleteBtn: (enabled: boolean): React.CSSProperties => ({
-      padding: "7px 9px", background: enabled ? "#fff7f7" : "#f9f9f9",
+      gridColumn: "1 / -1", width: "100%", minHeight: 36, padding: "7px 10px", background: enabled ? "#fff7f7" : "#f9f9f9",
       color: enabled ? "#b42318" : "#ccc", border: "1px solid",
-      borderColor: enabled ? "#f2b8b5" : "#eee", borderRadius: 6, fontSize: 11,
+      borderColor: enabled ? "#f2b8b5" : "#eee", borderRadius: 7, fontSize: 11,
       cursor: enabled ? "pointer" : "not-allowed",
     }),
     overlay: {
@@ -786,14 +789,14 @@ export default function AdminDashboardPage() {
                       onClick={() => openStockModal(product)}
                       title={hasSquare ? "Ajustar estoque" : "Produto local — cadastre no Square"}
                     >
-                      📦
+                      Estoque
                     </button>
                     <button
                       style={s.iconBtn(hasSquare)}
                       onClick={() => openEditModal(product)}
                       title={hasSquare ? "Editar produto" : "Produto local — cadastre no Square"}
                     >
-                      ✏️
+                      Editar
                     </button>
                     <button
                       style={s.deleteBtn(hasSquare && deleteLoadingId !== product.squareId)}
