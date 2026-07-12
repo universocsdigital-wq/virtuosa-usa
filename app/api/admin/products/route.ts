@@ -19,6 +19,7 @@ export async function GET() {
       return {
         id: p.id,
         name: p.name,
+        description: p.description ?? "",
         slug: p.slug,
         price: p.price,
         image: p.image,

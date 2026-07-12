@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface ProductItem {
   id: string;
   name: string;
+  description: string;
   slug?: string;
   price: number;
   image: string;
@@ -118,6 +119,7 @@ export default function AdminDashboardPage() {
   const [editPrice, setEditPrice] = useState("");
   const [editCategory, setEditCategory] = useState("Vestidos");
   const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [editSuccess, setEditSuccess] = useState("");
   const [editError, setEditError] = useState("");
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
@@ -200,7 +202,7 @@ export default function AdminDashboardPage() {
     }
     setSelectedProduct(product);
     setEditName(product.name);
-    setEditDescription("");
+    setEditDescription(product.description ?? "");
     setEditPrice(product.price.toFixed(2));
     setEditCategory(getCategoryLabel(product.category));
     setEditSuccess("");
@@ -295,6 +297,7 @@ export default function AdminDashboardPage() {
       const squareId = selectedProduct.squareId;
 
       // Upload de imagem PRIMEIRO se houver
+      let uploadedImageUrl = "";
       if (editImageFile) {
         const fd = new FormData();
         fd.append("image", editImageFile);
@@ -306,6 +309,7 @@ export default function AdminDashboardPage() {
           setEditLoading(false);
           return;
         }
+        uploadedImageUrl = imgData.imageUrl || "";
       }
 
       // Atualizar dados do produto
@@ -326,7 +330,7 @@ export default function AdminDashboardPage() {
         setProducts((prev) =>
           prev.map((p) =>
             p.squareId === squareId
-              ? { ...p, name: editName, price: parseFloat(editPrice) || p.price, category: editCategory }
+              ? { ...p, name: editName, description: editDescription, price: parseFloat(editPrice) || p.price, category: editCategory, image: uploadedImageUrl || p.image }
               : p
           )
         );
@@ -337,6 +341,31 @@ export default function AdminDashboardPage() {
       setEditError("Erro de conexao. Tente novamente.");
     } finally {
       setEditLoading(false);
+    }
+  }
+
+  async function handleDeleteProduct(product: ProductItem) {
+    if (!product.squareId || deleteLoadingId) return;
+    if (!window.confirm(`Excluir "${product.name}"?\n\nEssa acao tambem exclui o produto e seus tamanhos no Square e nao pode ser desfeita.`)) return;
+
+    setDeleteLoadingId(product.squareId);
+    try {
+      const response = await fetch("/api/admin/delete-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.squareId }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        alert(data.error || "Nao foi possivel excluir o produto.");
+        return;
+      }
+      setProducts((current) => current.filter((item) => item.squareId !== product.squareId));
+      alert("Produto excluido do Square e removido da loja.");
+    } catch {
+      alert("Erro de conexao. Tente novamente.");
+    } finally {
+      setDeleteLoadingId(null);
     }
   }
 
@@ -536,6 +565,12 @@ export default function AdminDashboardPage() {
       borderRadius: 6, fontSize: 11,
       cursor: enabled ? "pointer" : "not-allowed",
       fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    }),
+    deleteBtn: (enabled: boolean): React.CSSProperties => ({
+      padding: "7px 9px", background: enabled ? "#fff7f7" : "#f9f9f9",
+      color: enabled ? "#b42318" : "#ccc", border: "1px solid",
+      borderColor: enabled ? "#f2b8b5" : "#eee", borderRadius: 6, fontSize: 11,
+      cursor: enabled ? "pointer" : "not-allowed",
     }),
     overlay: {
       position: "fixed" as const, inset: 0, background: "rgba(0,0,0,0.5)",
@@ -753,6 +788,14 @@ export default function AdminDashboardPage() {
                       title={hasSquare ? "Editar produto" : "Produto local — cadastre no Square"}
                     >
                       ✏️
+                    </button>
+                    <button
+                      style={s.deleteBtn(hasSquare && deleteLoadingId !== product.squareId)}
+                      onClick={() => handleDeleteProduct(product)}
+                      disabled={!hasSquare || deleteLoadingId === product.squareId}
+                      title={hasSquare ? "Excluir do Square e da loja" : "Produto local"}
+                    >
+                      {deleteLoadingId === product.squareId ? "..." : "Excluir"}
                     </button>
                   </div>
                 </div>

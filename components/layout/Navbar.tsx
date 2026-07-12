@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { User, ShoppingBag, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/components/cart/CartProvider";
 
@@ -24,13 +24,27 @@ export function Navbar() {
   const { totalItems: cartCount, openCart } = useCart();
   const pathname = usePathname();
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileOpen]);
+
   function handleNavClick(event: React.MouseEvent<HTMLAnchorElement>, link: (typeof navLinks)[number]) {
+    setMobileOpen(false);
     if (pathname !== "/shop" || !("filter" in link) || !link.filter) return;
 
     event.preventDefault();
     window.history.replaceState(null, "", `/shop#${link.filter}`);
     window.dispatchEvent(new CustomEvent("virtuosa-category-filter", { detail: link.filter }));
-    setMobileOpen(false);
   }
 
   return (
@@ -96,9 +110,9 @@ export function Navbar() {
       <div className="h-[76px] lg:h-[126px]" aria-hidden />
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-modal lg:hidden">
-          <div className="absolute inset-0 bg-black/45 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <nav className="absolute bottom-0 left-0 top-0 flex w-[290px] flex-col overflow-hidden" style={{ backgroundColor: "#3A1708" }}>
+        <div className="fixed inset-0 z-modal lg:hidden" role="dialog" aria-modal="true" aria-label="Menu principal">
+          <button type="button" className="absolute inset-0 bg-black/45 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-label="Fechar menu" />
+          <nav className="absolute bottom-0 left-0 top-0 flex w-[min(290px,86vw)] flex-col overflow-y-auto" style={{ backgroundColor: "#3A1708" }}>
             <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
               <span className="brand-logo-reference brand-logo-reference--drawer relative block h-12 w-[170px] overflow-visible" aria-label="Virtuosa USA" />
               <button onClick={() => setMobileOpen(false)} className="p-2 text-[#F1DDC1] transition-colors hover:text-[#F5D58A]" aria-label="Fechar menu">

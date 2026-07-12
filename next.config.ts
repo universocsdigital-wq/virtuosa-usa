@@ -65,13 +65,6 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
-        source: "/_next/static/(.*)",
-        headers: [
-          ...securityHeaders,
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
         source: "/api/(.*)",
         headers: [
           ...securityHeaders,

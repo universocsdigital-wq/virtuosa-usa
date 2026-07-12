@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     const requestJson = JSON.stringify({
       idempotency_key: idempotencyKey,
       object_id: productId,
+      is_primary: true,
       image: {
         type: "IMAGE",
         id: "#new-image",
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
     const imageUrl = data.image?.image_data?.url || null;
 
-    return NextResponse.json({ ok: true, imageUrl });
+    return NextResponse.json({ ok: true, imageUrl, imageId: data.image?.id || null });
   } catch (err) {
     console.error("[admin/upload-image]", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
