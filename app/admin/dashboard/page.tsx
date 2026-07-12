@@ -93,6 +93,19 @@ function getTotalStock(product: ProductItem): number {
   return vals.reduce((a, b) => a + b, 0);
 }
 
+function normalizeColor(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR");
+}
+
+function parseMoneyInput(value: string): number {
+  const cleaned = value.trim().replace(/\s/g, "");
+  if (!cleaned) return Number.NaN;
+  const normalized = cleaned.includes(",")
+    ? cleaned.replace(/\./g, "").replace(",", ".")
+    : cleaned;
+  return Number(normalized);
+}
+
 type ModalType = "sale" | "edit" | "stock" | "create" | null;
 
 export default function AdminDashboardPage() {
@@ -119,6 +132,7 @@ export default function AdminDashboardPage() {
   const [editPrice, setEditPrice] = useState("");
   const [editCategory, setEditCategory] = useState("Vestidos");
   const [editColor, setEditColor] = useState("");
+  const [editOriginalColor, setEditOriginalColor] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [editSuccess, setEditSuccess] = useState("");
@@ -207,7 +221,9 @@ export default function AdminDashboardPage() {
     setEditDescription(product.description ?? "");
     setEditPrice(product.price.toFixed(2));
     setEditCategory(getCategoryLabel(product.category));
-    setEditColor(product.colors?.length === 1 ? product.colors[0] : "");
+    const currentColor = product.colors?.length === 1 ? product.colors[0] : "";
+    setEditColor(currentColor);
+    setEditOriginalColor(currentColor);
     setEditSuccess("");
     setEditError("");
     setEditImageFile(null);
@@ -294,6 +310,12 @@ export default function AdminDashboardPage() {
 
   async function handleEditProduct() {
     if (!selectedProduct || !selectedProduct.squareId) return;
+    const parsedPrice = parseMoneyInput(editPrice);
+    if (!editName.trim() || !Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+      setEditError("Preencha um nome e um preco valido maior que zero.");
+      return;
+    }
+    const colorChanged = normalizeColor(editColor) !== normalizeColor(editOriginalColor);
     setEditLoading(true);
     setEditError("");
     setEditSuccess("");
@@ -324,9 +346,9 @@ export default function AdminDashboardPage() {
           productId: squareId,
           name: editName,
           description: editDescription || undefined,
-          price: parseFloat(editPrice) || undefined,
+          price: parsedPrice,
           category: editCategory,
-          color: selectedProduct.colors?.length > 1 && !editColor.trim() ? undefined : editColor,
+          color: colorChanged ? editColor : undefined,
         }),
       });
       const data = await res.json();
@@ -335,7 +357,7 @@ export default function AdminDashboardPage() {
         setProducts((prev) =>
           prev.map((p) =>
             p.squareId === squareId
-              ? { ...p, name: editName, description: editDescription, price: parseFloat(editPrice) || p.price, category: editCategory, colors: editColor ? [editColor] : p.colors, image: uploadedImageUrl || p.image }
+              ? { ...p, name: editName, description: editDescription, price: parsedPrice, category: editCategory, colors: colorChanged ? (editColor ? [editColor.trim()] : []) : p.colors, image: uploadedImageUrl || p.image }
               : p
           )
         );
@@ -414,7 +436,8 @@ export default function AdminDashboardPage() {
   }
 
   async function handleCreateProduct() {
-    if (!createName || !createPrice || createSizes.length === 0) {
+    const parsedPrice = parseMoneyInput(createPrice);
+    if (!createName.trim() || !Number.isFinite(parsedPrice) || parsedPrice <= 0 || createSizes.length === 0) {
       setCreateError("Preencha nome, preco e pelo menos um tamanho.");
       return;
     }
@@ -428,7 +451,7 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({
           name: createName,
           description: createDescription,
-          price: parseFloat(createPrice),
+          price: parsedPrice,
           category: createCategory,
           color: createColor,
           sizes: createSizes,

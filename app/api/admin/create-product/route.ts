@@ -67,12 +67,13 @@ export async function POST(req: NextRequest) {
     const { name, description, price, category, color, sizes } = body;
     // sizes: Array<{ size: string; quantity: number }>
 
-    if (!name || !price || !sizes || sizes.length === 0) {
+    const numericPrice = Number(price);
+    if (!name || !Number.isFinite(numericPrice) || numericPrice <= 0 || !Array.isArray(sizes) || sizes.length === 0) {
       return NextResponse.json({ error: "Nome, preco e tamanhos sao obrigatorios." }, { status: 400 });
     }
 
     const idempotencyKey = `admin-create-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const priceInCents = Math.round(parseFloat(price) * 100);
+    const priceInCents = Math.round(numericPrice * 100);
     const categoryId = await resolveSquareCategoryId(category, token);
 
     // Criar variações para cada tamanho

@@ -86,6 +86,10 @@ export async function POST(req: NextRequest) {
     if (!existingObject) {
       return NextResponse.json({ error: "Produto nao encontrado." }, { status: 404 });
     }
+    const numericPrice = price === undefined ? undefined : Number(price);
+    if (numericPrice !== undefined && (!Number.isFinite(numericPrice) || numericPrice <= 0)) {
+      return NextResponse.json({ error: "Preco invalido." }, { status: 400 });
+    }
 
     const existingVariations = (existingObject.item_data?.variations || []) as Array<{
       id: string;
@@ -135,7 +139,7 @@ export async function POST(req: NextRequest) {
 
     // Se preço foi informado, atualizar todas as variações
     if (price || color !== undefined) {
-      const priceInCents = Math.round(parseFloat(price) * 100);
+      const priceInCents = Math.round((numericPrice ?? 0) * 100);
       const variations = existingVariations;
       const normalizedColor = typeof color === "string" ? color.trim().replace(/\s+/g, " ") : "";
       (updatedObject.item_data as Record<string, unknown>).variations = variations.map((v) => {

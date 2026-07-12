@@ -18,6 +18,14 @@ function hashPassword(password: string): string {
   return createHash("sha256").update(password).digest("hex");
 }
 
+function getSessionSecret(): string {
+  const secret = process.env.ADMIN_SESSION_SECRET || process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("ADMIN_SESSION_SECRET deve ter pelo menos 32 caracteres");
+  }
+  return secret;
+}
+
 export function validateAdminCredentials(email: string, password: string): boolean {
   try {
     const creds = getAdminCredentials();
@@ -31,7 +39,7 @@ export function validateAdminCredentials(email: string, password: string): boole
 }
 
 export function createAdminSessionToken(): string {
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.JWT_SECRET || "virtuosa-admin-secret";
+  const secret = getSessionSecret();
   const expires = Date.now() + SESSION_DURATION_MS;
   const payload = `${expires}`;
   const sig = createHash("sha256").update(`${payload}:${secret}`).digest("hex");
@@ -40,7 +48,7 @@ export function createAdminSessionToken(): string {
 
 export function verifyAdminSession(token: string): boolean {
   try {
-    const secret = process.env.ADMIN_SESSION_SECRET || process.env.JWT_SECRET || "virtuosa-admin-secret";
+    const secret = getSessionSecret();
     const { expires, sig } = JSON.parse(Buffer.from(token, "base64url").toString());
     if (Date.now() > expires) return false;
     const expected = createHash("sha256").update(`${expires}:${secret}`).digest("hex");
