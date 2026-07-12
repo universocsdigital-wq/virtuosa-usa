@@ -41,6 +41,7 @@ const nextConfig: NextConfig = {
   images: {
     ...(process.env.STATIC_EXPORT === "1" ? { unoptimized: true } : {}),
     formats: ["image/avif", "image/webp"],
+    qualities: [75, 92],
     deviceSizes: [390, 768, 1024, 1280, 1920],
     imageSizes: [100, 300, 400, 600],
     remotePatterns: [
