@@ -53,12 +53,12 @@ export function HeroSection() {
 
         <div className="relative min-h-[420px] overflow-hidden bg-[#170B07] sm:min-h-[480px] lg:min-h-full">
           <Image
-            src="/images/hero/hero-virtuosa-final.png"
-            alt="Vestido branco elegante em atmosfera editorial Virtuosa"
+            src="/images/hero/elaine-hero.webp"
+            alt="Elaine Soares vestindo uma composição elegante da Virtuosa USA"
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 52vw"
-            className="object-cover object-[50%_0%]"
+            className="object-cover object-[50%_14%] lg:object-[50%_24%]"
             quality={92}
           />
           <div className="absolute inset-0 texture-linen opacity-20" aria-hidden />
