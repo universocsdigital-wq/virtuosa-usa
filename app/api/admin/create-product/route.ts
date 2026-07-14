@@ -146,7 +146,11 @@ export async function POST(req: NextRequest) {
           item_data: {
             name,
             description: description || "",
-            category_id: categoryId,
+            ...(categoryId ? {
+              category_id: categoryId,
+              categories: [{ id: categoryId }],
+              reporting_category: { id: categoryId },
+            } : {}),
             variations,
           },
         },

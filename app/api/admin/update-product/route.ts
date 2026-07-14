@@ -127,6 +127,8 @@ export async function POST(req: NextRequest) {
       const categoryId = await resolveSquareCategoryId(category, token);
       if (categoryId) {
         updatedItemData.category_id = categoryId;
+        updatedItemData.categories = [{ id: categoryId }];
+        updatedItemData.reporting_category = { id: categoryId };
       }
     }
 

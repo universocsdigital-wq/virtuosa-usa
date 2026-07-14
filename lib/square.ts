@@ -94,6 +94,14 @@ function normalizeImageKey(image: string): string {
 function applyProductOverrides(product: Product): Product {
   const normalizedName = normalizeProductName(product.name);
 
+  // Produto cadastrado como lancamento antes da migracao para CatalogItem.categories.
+  if (normalizedName.includes("vestido midi evase alfaiataria")) {
+    return {
+      ...product,
+      badge: "new",
+    };
+  }
+
   if (normalizedName.includes("vestido lana")) {
     return {
       ...product,
