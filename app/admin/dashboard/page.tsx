@@ -299,12 +299,60 @@ export default function AdminDashboardPage() {
     setCreateImagePreviews((previews) => previews.filter((_, currentIndex) => currentIndex !== index));
   }
 
+  async function prepareImageForUpload(file: File): Promise<File> {
+    const targetBytes = 3 * 1024 * 1024;
+    if (file.size <= targetBytes) return file;
+    if (file.type === "image/gif") {
+      throw new Error(`${file.name} excede 3 MB. Reduza o arquivo GIF antes de enviar.`);
+    }
+
+    const bitmap = await createImageBitmap(file);
+    try {
+      const maxDimension = 2200;
+      const initialScale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+      let width = Math.max(1, Math.round(bitmap.width * initialScale));
+      let height = Math.max(1, Math.round(bitmap.height * initialScale));
+      let quality = 0.86;
+      let result: Blob | null = null;
+
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Nao foi possivel preparar a foto.");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+        context.drawImage(bitmap, 0, 0, width, height);
+        result = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+        if (result && result.size <= targetBytes) break;
+
+        if (quality > 0.58) {
+          quality -= 0.1;
+        } else {
+          width = Math.max(1, Math.round(width * 0.82));
+          height = Math.max(1, Math.round(height * 0.82));
+        }
+      }
+
+      if (!result || result.size > targetBytes) {
+        throw new Error(`${file.name} nao pôde ser reduzida para envio.`);
+      }
+
+      const baseName = file.name.replace(/\.[^.]+$/, "") || "foto";
+      return new File([result], `${baseName}.jpg`, { type: "image/jpeg", lastModified: Date.now() });
+    } finally {
+      bitmap.close();
+    }
+  }
+
   async function uploadProductImages(files: File[], productId: string): Promise<string[]> {
     const uploadedUrls: string[] = [];
 
     for (let index = 0; index < files.length; index += 1) {
+      const preparedFile = await prepareImageForUpload(files[index]);
       const fd = new FormData();
-      fd.append("image", files[index]);
+      fd.append("image", preparedFile);
       fd.append("productId", productId);
       fd.append("isPrimary", String(index === 0));
       const response = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
