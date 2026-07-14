@@ -237,8 +237,9 @@ export default function AdminDashboardPage() {
     }
     setSelectedProduct(product);
     const sizes = sortSizes(product.sizes ?? []);
-    setStockSize(sizes[0] ?? "");
-    setStockQty(1);
+    const initialSize = sizes[0] ?? "";
+    setStockSize(initialSize);
+    setStockQty(initialSize ? getStockForSize(product, initialSize) : 0);
     setStockSuccess("");
     setStockError("");
     setActiveModal("stock");
@@ -404,20 +405,21 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/admin/adjust-stock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: squareId, size: stockSize, quantity: stockQty, action: "add" }),
+        body: JSON.stringify({ productId: squareId, size: stockSize, quantity: stockQty, action: "set" }),
       });
       const data = await res.json();
       if (res.ok) {
         setStockSuccess(data.message || "Estoque atualizado no Square!");
         const applyStockAdjustment = (product: ProductItem): ProductItem => {
           if (product.squareId !== squareId || !stockSize) return product;
+          const inventoryBySize = {
+            ...product.inventoryBySize,
+            [stockSize]: stockQty,
+          };
           return {
             ...product,
-            inStock: true,
-            inventoryBySize: {
-              ...product.inventoryBySize,
-              [stockSize]: (product.inventoryBySize[stockSize] ?? 0) + stockQty,
-            },
+            inStock: Object.values(inventoryBySize).some((quantity) => quantity > 0),
+            inventoryBySize,
           };
         };
 
@@ -960,7 +962,7 @@ export default function AdminDashboardPage() {
         <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={s.modal}>
             <div style={s.modalTitle}>{selectedProduct.name}</div>
-            <div style={s.modalSubtitle}>Adicionar unidades ao estoque</div>
+            <div style={s.modalSubtitle}>Defina a quantidade atual no estoque</div>
 
             {(selectedProduct.sizes?.length ?? 0) > 0 && (
               <>
@@ -972,7 +974,10 @@ export default function AdminDashboardPage() {
                       <button
                         key={size}
                         style={s.sizeBtnSimple(stockSize === size)}
-                        onClick={() => setStockSize(size)}
+                        onClick={() => {
+                          setStockSize(size);
+                          setStockQty(stock);
+                        }}
                       >
                         {size} ({stock})
                       </button>
@@ -982,7 +987,7 @@ export default function AdminDashboardPage() {
               </>
             )}
 
-            <label style={s.label}>Quantidade a adicionar</label>
+            <label style={s.label}>Quantidade final em estoque</label>
             <div style={s.qtyRow}>
               <button style={s.qtyBtn} onClick={() => setStockQty((q) => Math.max(0, q - 1))}>-</button>
               <span style={s.qtyVal}>{stockQty}</span>

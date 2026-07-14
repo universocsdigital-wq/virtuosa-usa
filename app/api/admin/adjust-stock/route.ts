@@ -42,8 +42,12 @@ export async function POST(req: NextRequest) {
       );
     }
     const numericQuantity = Number(quantity);
-    if (!Number.isInteger(numericQuantity) || numericQuantity < 1) {
-      return NextResponse.json({ error: "A quantidade deve ser um numero inteiro maior que zero." }, { status: 400 });
+    const minimumQuantity = action === "set" ? 0 : 1;
+    if (!Number.isInteger(numericQuantity) || numericQuantity < minimumQuantity) {
+      return NextResponse.json(
+        { error: action === "set" ? "A quantidade deve ser um numero inteiro igual ou maior que zero." : "A quantidade deve ser um numero inteiro maior que zero." },
+        { status: 400 }
+      );
     }
 
     const variationId = await getSquareVariationId(productId, size);

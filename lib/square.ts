@@ -13,6 +13,10 @@ function getSquareToken(): string | null {
   return token || null;
 }
 
+function getSquareLocationId(): string | null {
+  return process.env.SQUARE_LOCATION_ID || process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID || null;
+}
+
 function toSlug(name: string): string {
   return name
     .toLowerCase()
@@ -319,6 +323,7 @@ async function getInventoryCounts(
   if (variationIds.length === 0) return inventoryMap;
 
   try {
+    const locationId = getSquareLocationId();
     const response = await fetch(
       `${SQUARE_BASE_URL}/inventory/counts/batch-retrieve`,
       {
@@ -331,8 +336,9 @@ async function getInventoryCounts(
         body: JSON.stringify({
           catalog_object_ids: variationIds,
           states: ["IN_STOCK"],
+          ...(locationId ? { location_ids: [locationId] } : {}),
         }),
-        next: { revalidate: 300 },
+        cache: "no-store",
       }
     );
 
