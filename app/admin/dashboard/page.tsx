@@ -12,6 +12,7 @@ interface ProductItem {
   image: string;
   images?: string[];
   category: string;
+  badge?: "best-seller" | "new" | "sale";
   sizes: string[];
   colors: string[];
   inventoryBySize: Record<string, number>;
@@ -30,7 +31,6 @@ const PAYMENT_METHODS = [
 
 const SIZE_OPTIONS = ["PP", "P", "M", "G", "GG", "XG", "XGG", "U"];
 const STORE_CATEGORIES = [
-  "Lançamentos",
   "Vestidos",
   "Blusas",
   "Camisas",
@@ -132,6 +132,7 @@ export default function AdminDashboardPage() {
   const [editDescription, setEditDescription] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editCategory, setEditCategory] = useState("Vestidos");
+  const [editIsLaunch, setEditIsLaunch] = useState(false);
   const [editColor, setEditColor] = useState("");
   const [editOriginalColor, setEditOriginalColor] = useState("");
   const [editLoading, setEditLoading] = useState(false);
@@ -153,6 +154,7 @@ export default function AdminDashboardPage() {
   const [createDescription, setCreateDescription] = useState("");
   const [createPrice, setCreatePrice] = useState("");
   const [createCategory, setCreateCategory] = useState("Vestidos");
+  const [createIsLaunch, setCreateIsLaunch] = useState(false);
   const [createColor, setCreateColor] = useState("");
   const [createSizes, setCreateSizes] = useState<{ size: string; quantity: number }[]>([
     { size: "P", quantity: 1 },
@@ -221,6 +223,7 @@ export default function AdminDashboardPage() {
     setEditDescription(product.description ?? "");
     setEditPrice(product.price.toFixed(2));
     setEditCategory(getCategoryLabel(product.category));
+    setEditIsLaunch(product.badge === "new");
     const currentColor = product.colors?.length === 1 ? product.colors[0] : "";
     setEditColor(currentColor);
     setEditOriginalColor(currentColor);
@@ -251,6 +254,7 @@ export default function AdminDashboardPage() {
     setCreateDescription("");
     setCreatePrice("");
     setCreateCategory("Vestidos");
+    setCreateIsLaunch(false);
     setCreateColor("");
     setCreateSizes([
       { size: "P", quantity: 1 },
@@ -441,6 +445,7 @@ export default function AdminDashboardPage() {
           description: editDescription || undefined,
           price: parsedPrice,
           category: editCategory,
+          isLaunch: editIsLaunch,
           color: colorChanged ? editColor : undefined,
         }),
       });
@@ -456,6 +461,7 @@ export default function AdminDashboardPage() {
                   description: editDescription,
                   price: parsedPrice,
                   category: editCategory,
+                  badge: editIsLaunch ? "new" : undefined,
                   colors: colorChanged ? (editColor ? [editColor.trim()] : []) : p.colors,
                   image: uploadedImageUrls[0] || p.image,
                   images: uploadedImageUrls.length > 0
@@ -558,6 +564,7 @@ export default function AdminDashboardPage() {
           description: createDescription,
           price: parsedPrice,
           category: createCategory,
+          isLaunch: createIsLaunch,
           color: createColor,
           sizes: createSizes,
         }),
@@ -789,6 +796,11 @@ export default function AdminDashboardPage() {
     imagePreview: {
       width: "100%", height: 120, objectFit: "cover" as const,
       borderRadius: 8, display: "block",
+    } as React.CSSProperties,
+    launchToggle: {
+      display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 14px",
+      marginTop: 12, border: "1px solid #d9c99f", borderRadius: 8,
+      background: "#fffaf0", color: "#2C1810", cursor: "pointer",
     } as React.CSSProperties,
     imageGrid: {
       display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
@@ -1068,6 +1080,21 @@ export default function AdminDashboardPage() {
               ))}
             </select>
 
+            <label style={s.launchToggle}>
+              <input
+                type="checkbox"
+                checked={editIsLaunch}
+                onChange={(e) => setEditIsLaunch(e.target.checked)}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                <strong style={{ display: "block", fontSize: 14 }}>Mostrar também em Lançamentos</strong>
+                <small style={{ display: "block", marginTop: 3, color: "#777", lineHeight: 1.4 }}>
+                  A peça continua na categoria acima e usa o mesmo produto e estoque do Square.
+                </small>
+              </span>
+            </label>
+
             <label style={s.label}>Cor do produto</label>
             <input list="virtuosa-colors-edit" style={s.input} value={editColor} onChange={(e) => setEditColor(e.target.value)} placeholder="Ex: Verde, Rose, Off White" />
             <datalist id="virtuosa-colors-edit">
@@ -1190,6 +1217,21 @@ export default function AdminDashboardPage() {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
+
+            <label style={s.launchToggle}>
+              <input
+                type="checkbox"
+                checked={createIsLaunch}
+                onChange={(e) => setCreateIsLaunch(e.target.checked)}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                <strong style={{ display: "block", fontSize: 14 }}>Mostrar também em Lançamentos</strong>
+                <small style={{ display: "block", marginTop: 3, color: "#777", lineHeight: 1.4 }}>
+                  A peça será exibida nos dois lugares, com um único estoque no Square.
+                </small>
+              </span>
+            </label>
 
             <label style={s.label}>Cor do produto</label>
             <input list="virtuosa-colors-create" style={s.input} value={createColor} onChange={(e) => setCreateColor(e.target.value)} placeholder="Ex: Verde, Rose, Off White" />

@@ -25,6 +25,7 @@ export async function GET() {
         image: p.image,
         images: p.images ?? [p.image],
         category: p.category,
+        badge: p.badge,
         sizes: p.sizes ?? [],
         colors: p.colors ?? [],
         inventoryBySize: p.inventoryBySize ?? {},

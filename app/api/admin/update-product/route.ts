@@ -30,8 +30,7 @@ async function resolveSquareCategoryId(categoryName: string, token: string): Pro
   });
 
   if (!response.ok) {
-    console.warn("[admin/update-product] Categoria nao localizada no Square", await response.text().catch(() => ""));
-    return undefined;
+    throw new Error(`Nao foi possivel consultar as categorias do Square: ${response.status}`);
   }
 
   const data = await response.json();
@@ -40,7 +39,32 @@ async function resolveSquareCategoryId(categoryName: string, token: string): Pro
     normalizeCategoryName(object.category_data?.name ?? "") === target
   );
 
-  return match?.id;
+  if (match?.id) return match.id;
+
+  const categoryResponse = await fetch(`${SQUARE_BASE_URL}/catalog/object`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Square-Version": SQUARE_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      idempotency_key: `admin-category-${target}-${Date.now()}`,
+      object: {
+        type: "CATEGORY",
+        id: "#new-category",
+        category_data: { name: categoryName.trim() },
+      },
+    }),
+    cache: "no-store",
+  });
+
+  if (!categoryResponse.ok) {
+    throw new Error(`Nao foi possivel criar a categoria "${categoryName}" no Square.`);
+  }
+
+  const categoryData = await categoryResponse.json();
+  return categoryData.catalog_object?.id;
 }
 
 export async function POST(req: NextRequest) {
@@ -56,7 +80,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { productId, name, description, price, category, color: requestedColor } = body;
+    const { productId, name, description, price, category, isLaunch, color: requestedColor } = body;
     let color = requestedColor;
 
     if (!productId) {
@@ -126,8 +150,14 @@ export async function POST(req: NextRequest) {
     if (category) {
       const categoryId = await resolveSquareCategoryId(category, token);
       if (categoryId) {
+        const launchCategoryId = isLaunch
+          ? await resolveSquareCategoryId("Lançamentos", token)
+          : undefined;
+        const categoryIds = Array.from(
+          new Set([categoryId, launchCategoryId].filter((id): id is string => Boolean(id)))
+        );
         updatedItemData.category_id = categoryId;
-        updatedItemData.categories = [{ id: categoryId }];
+        updatedItemData.categories = categoryIds.map((id) => ({ id }));
         updatedItemData.reporting_category = { id: categoryId };
       }
     }

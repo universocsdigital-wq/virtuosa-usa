@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, description, price, category, color, sizes } = body;
+    const { name, description, price, category, color, sizes, isLaunch } = body;
     // sizes: Array<{ size: string; quantity: number }>
 
     const numericPrice = Number(price);
@@ -109,6 +109,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tamanhos duplicados ou quantidades invalidas." }, { status: 400 });
     }
     const categoryId = await resolveSquareCategoryId(category, token);
+    const launchCategoryId = isLaunch
+      ? await resolveSquareCategoryId("Lançamentos", token)
+      : undefined;
+    const categoryIds = Array.from(
+      new Set([categoryId, launchCategoryId].filter((id): id is string => Boolean(id)))
+    );
 
     // Criar variações para cada tamanho somente depois de validar toda a entrada.
     const variations = normalizedSizes.map((s: { size: string; quantity: number }, i: number) => ({
@@ -148,8 +154,10 @@ export async function POST(req: NextRequest) {
             description: description || "",
             ...(categoryId ? {
               category_id: categoryId,
-              categories: [{ id: categoryId }],
               reporting_category: { id: categoryId },
+            } : {}),
+            ...(categoryIds.length > 0 ? {
+              categories: categoryIds.map((id) => ({ id })),
             } : {}),
             variations,
           },
