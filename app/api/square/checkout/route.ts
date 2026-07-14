@@ -15,6 +15,7 @@ interface CheckoutItemInput {
 interface CheckoutRequest {
   items?: CheckoutItemInput[];
   fulfillmentType?: "shipping" | "pickup";
+  couponCode?: string;
 }
 
 export async function POST(request: Request) {
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
     calculation_phase: "TOTAL_PHASE";
     taxable: boolean;
   }> = [];
+  let testCouponEligible = body.items.length === 1;
 
   for (const item of body.items) {
     const product = allProducts.find(
@@ -111,6 +113,10 @@ export async function POST(request: Request) {
     const quantity = Math.floor(item.quantity);
     if (!Number.isFinite(quantity) || quantity < 1 || quantity > 20) {
       return NextResponse.json({ error: `Quantidade invÃ¡lida para ${product.name}.` }, { status: 400 });
+    }
+
+    if (product.name !== "TESTE PAGAMENTO 2026-07-14" || quantity !== 1) {
+      testCouponEligible = false;
     }
 
     if (product.sizes?.length && (!item.size || !product.sizes.includes(item.size))) {
@@ -152,7 +158,14 @@ export async function POST(request: Request) {
     });
   }
 
-  if (body.fulfillmentType === "shipping") {
+  const normalizedCoupon = body.couponCode?.trim().toUpperCase() ?? "";
+  const freeTestShipping = normalizedCoupon === "TESTEFRETE" && testCouponEligible;
+
+  if (normalizedCoupon && !freeTestShipping) {
+    return NextResponse.json({ error: "Cupom invalido para esta sacola." }, { status: 400 });
+  }
+
+  if (body.fulfillmentType === "shipping" && !freeTestShipping) {
     serviceCharges.push({
       name: "Frete USPS â€” envio com rastreamento",
       amount_money: { amount: SHIPPING_CENTS, currency: "USD" },
@@ -164,6 +177,7 @@ export async function POST(request: Request) {
   const idempotencyPayload = JSON.stringify({
     clientIp,
     fulfillmentType: body.fulfillmentType,
+    couponCode: freeTestShipping ? normalizedCoupon : "",
     items: body.items
       .map(({ productId, quantity, size, color }) => ({ productId, quantity, size: size ?? "", color: color ?? "" }))
       .sort((a, b) => `${a.productId}:${a.size}:${a.color}`.localeCompare(`${b.productId}:${b.size}:${b.color}`)),
@@ -201,7 +215,7 @@ export async function POST(request: Request) {
             afterpay_clearpay: false,
           },
         },
-        payment_note: `Virtuosa USA â€” ${body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"}`,
+        payment_note: `Virtuosa USA â€” ${body.fulfillmentType === "shipping" ? (freeTestShipping ? "Envio USPS com cupom de teste" : "Envio USPS") : "Retirada local"}`,
       }),
       cache: "no-store",
     });

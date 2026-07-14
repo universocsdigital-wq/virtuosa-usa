@@ -10,7 +10,27 @@ export function CartDrawer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fulfillmentType, setFulfillmentType] = useState<"shipping" | "pickup">("shipping");
-  const shippingPrice = fulfillmentType === "shipping" ? 12 : 0;
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const shippingPrice = fulfillmentType === "shipping" && !couponApplied ? 12 : 0;
+
+  function applyCoupon() {
+    const normalizedCode = couponCode.trim().toUpperCase();
+    const eligibleCart =
+      items.length === 1 &&
+      items[0].quantity === 1 &&
+      items[0].product.name === "TESTE PAGAMENTO 2026-07-14";
+
+    if (normalizedCode !== "TESTEFRETE" || !eligibleCart) {
+      setCouponApplied(false);
+      setError("Cupom invalido para esta sacola.");
+      return;
+    }
+
+    setCouponCode(normalizedCode);
+    setCouponApplied(true);
+    setError("");
+  }
 
   async function checkout() {
     setLoading(true);
@@ -21,6 +41,7 @@ export function CartDrawer() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fulfillmentType,
+          couponCode: couponApplied ? couponCode : undefined,
           items: items.map((item) => ({
             productId: item.product.id,
             quantity: item.quantity,
@@ -111,6 +132,26 @@ export function CartDrawer() {
                   </button>
                 </div>
               </fieldset>
+
+              <div className="mb-3">
+                <label htmlFor="coupon-code" className="mb-2 block font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Cupom</label>
+                <div className="flex gap-2">
+                  <input
+                    id="coupon-code"
+                    value={couponCode}
+                    onChange={(event) => {
+                      setCouponCode(event.target.value);
+                      setCouponApplied(false);
+                    }}
+                    placeholder="Digite o codigo"
+                    className="min-h-[42px] min-w-0 flex-1 border border-[#D9C8B5] bg-white/70 px-3 font-sans text-[12px] uppercase text-[#2A1712] outline-none focus:border-[#8A5A36]"
+                  />
+                  <button type="button" onClick={applyCoupon} className="min-h-[42px] border border-[#8A5A36] px-4 font-sans text-[10px] font-bold uppercase tracking-[0.12em] text-[#8A5A36]">
+                    Aplicar
+                  </button>
+                </div>
+                {couponApplied && <p className="mt-2 font-sans text-[11px] text-green-700">Cupom aplicado: frete gratis neste teste.</p>}
+              </div>
 
               <div className="mb-2 flex items-center justify-between font-sans text-[12px] text-[#6F5547]">
                 <span>Subtotal</span>
