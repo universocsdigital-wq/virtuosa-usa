@@ -137,6 +137,7 @@ export default function AdminDashboardPage() {
   const [editOriginalColor, setEditOriginalColor] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [editSuccess, setEditSuccess] = useState("");
   const [editError, setEditError] = useState("");
   const [editImageFiles, setEditImageFiles] = useState<File[]>([]);
@@ -485,7 +486,10 @@ export default function AdminDashboardPage() {
 
   async function handleDeleteProduct(product: ProductItem) {
     if (!product.squareId || deleteLoadingId) return;
-    if (!window.confirm(`Excluir "${product.name}"?\n\nEssa acao tambem exclui o produto e seus tamanhos no Square e nao pode ser desfeita.`)) return;
+    if (pendingDeleteId !== product.squareId) {
+      setPendingDeleteId(product.squareId);
+      return;
+    }
 
     setDeleteLoadingId(product.squareId);
     try {
@@ -496,15 +500,16 @@ export default function AdminDashboardPage() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        alert(data.error || "Nao foi possivel excluir o produto.");
+        setError(data.error || "Nao foi possivel excluir o produto.");
         return;
       }
+      setError("");
       setProducts((current) => current.filter((item) => item.squareId !== product.squareId));
-      alert("Produto excluido do Square e removido da loja.");
     } catch {
-      alert("Erro de conexao. Tente novamente.");
+      setError("Erro de conexao ao excluir. Tente novamente.");
     } finally {
       setDeleteLoadingId(null);
+      setPendingDeleteId(null);
     }
   }
 
@@ -960,12 +965,15 @@ export default function AdminDashboardPage() {
                       Editar
                     </button>
                     <button
-                      style={s.deleteBtn(hasSquare && deleteLoadingId !== product.squareId)}
+                      style={{
+                        ...s.deleteBtn(hasSquare && deleteLoadingId !== product.squareId),
+                        ...(pendingDeleteId === product.squareId ? { background: "#b42318", color: "#fff", borderColor: "#b42318" } : {}),
+                      }}
                       onClick={() => handleDeleteProduct(product)}
                       disabled={!hasSquare || deleteLoadingId === product.squareId}
-                      title={hasSquare ? "Excluir do Square e da loja" : "Produto local"}
+                      title={pendingDeleteId === product.squareId ? "Clique novamente para confirmar" : hasSquare ? "Excluir do Square e da loja" : "Produto local"}
                     >
-                      {deleteLoadingId === product.squareId ? "..." : "Excluir"}
+                      {deleteLoadingId === product.squareId ? "Excluindo..." : pendingDeleteId === product.squareId ? "Confirmar exclusao" : "Excluir"}
                     </button>
                   </div>
                 </div>
