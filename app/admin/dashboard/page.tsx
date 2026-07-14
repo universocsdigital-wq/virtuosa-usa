@@ -94,6 +94,16 @@ function getTotalStock(product: ProductItem): number {
   return vals.reduce((a, b) => a + b, 0);
 }
 
+function moveArrayItem<T>(items: T[], fromIndex: number, toIndex: number): T[] {
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= items.length || toIndex >= items.length) {
+    return items;
+  }
+  const next = [...items];
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
+}
+
 function normalizeColor(value: string): string {
   return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR");
 }
@@ -302,6 +312,16 @@ export default function AdminDashboardPage() {
     URL.revokeObjectURL(createImagePreviews[index]);
     setCreateImageFiles((files) => files.filter((_, currentIndex) => currentIndex !== index));
     setCreateImagePreviews((previews) => previews.filter((_, currentIndex) => currentIndex !== index));
+  }
+
+  function moveEditImage(fromIndex: number, toIndex: number) {
+    setEditImageFiles((files) => moveArrayItem(files, fromIndex, toIndex));
+    setEditImagePreviews((previews) => moveArrayItem(previews, fromIndex, toIndex));
+  }
+
+  function moveCreateImage(fromIndex: number, toIndex: number) {
+    setCreateImageFiles((files) => moveArrayItem(files, fromIndex, toIndex));
+    setCreateImagePreviews((previews) => moveArrayItem(previews, fromIndex, toIndex));
   }
 
   async function prepareImageForUpload(file: File): Promise<File> {
@@ -829,6 +849,12 @@ export default function AdminDashboardPage() {
       padding: "3px 7px", borderRadius: 10,
       background: "rgba(139, 105, 20, 0.94)", color: "#fff", fontSize: 10,
     } as React.CSSProperties,
+    coverActionBtn: {
+      position: "absolute" as const, left: 5, bottom: 5,
+      padding: "4px 7px", border: "none", borderRadius: 10,
+      background: "rgba(44, 24, 16, 0.88)", color: "#fff", fontSize: 9,
+      cursor: "pointer",
+    } as React.CSSProperties,
     imageHint: {
       marginTop: 6, marginBottom: 4, fontSize: 11, color: "#777", lineHeight: 1.4,
     } as React.CSSProperties,
@@ -1056,13 +1082,27 @@ export default function AdminDashboardPage() {
                 ? editImagePreviews
                 : (selectedProduct.images?.length ? selectedProduct.images : [selectedProduct.image])
               ).map((preview, index) => (
-                <div key={`${preview}-${index}`} style={s.imageTile}>
+                <div
+                  key={`${preview}-${index}`}
+                  style={{ ...s.imageTile, cursor: editImagePreviews.length > 0 ? "grab" : "default" }}
+                  draggable={editImagePreviews.length > 0}
+                  onDragStart={(event) => event.dataTransfer.setData("text/plain", String(index))}
+                  onDragOver={(event) => editImagePreviews.length > 0 && event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const fromIndex = Number(event.dataTransfer.getData("text/plain"));
+                    if (Number.isInteger(fromIndex)) moveEditImage(fromIndex, index);
+                  }}
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={preview} alt={`Foto ${index + 1}`} style={s.imagePreview} />
                   {editImagePreviews.length > 0 && (
                     <button type="button" style={s.removeImageBtn} onClick={() => removeEditImage(index)}>x</button>
                   )}
                   {index === 0 && <span style={s.coverBadge}>Capa</span>}
+                  {editImagePreviews.length > 0 && index > 0 && (
+                    <button type="button" style={s.coverActionBtn} onClick={() => moveEditImage(index, 0)}>Tornar capa</button>
+                  )}
                 </div>
               ))}
             </div>
@@ -1078,7 +1118,7 @@ export default function AdminDashboardPage() {
               {editImageFiles.length > 0 ? `${editImageFiles.length} foto(s) selecionada(s) - clique para trocar` : "Selecionar varias fotos para a galeria"}
             </button>
 
-            <div style={s.imageHint}>Escolha todas de uma vez. A primeira foto sera a capa do produto.</div>
+            <div style={s.imageHint}>Escolha todas de uma vez. Arraste para mudar a ordem ou use Tornar capa. A primeira foto sera a capa.</div>
 
             <label style={s.label}>Nome</label>
             <input style={s.input} value={editName} onChange={(e) => setEditName(e.target.value)} />
@@ -1195,11 +1235,25 @@ export default function AdminDashboardPage() {
             {createImagePreviews.length > 0 && (
               <div style={s.imageGrid}>
                 {createImagePreviews.map((preview, index) => (
-                  <div key={`${preview}-${index}`} style={s.imageTile}>
+                  <div
+                    key={`${preview}-${index}`}
+                    style={{ ...s.imageTile, cursor: "grab" }}
+                    draggable
+                    onDragStart={(event) => event.dataTransfer.setData("text/plain", String(index))}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const fromIndex = Number(event.dataTransfer.getData("text/plain"));
+                      if (Number.isInteger(fromIndex)) moveCreateImage(fromIndex, index);
+                    }}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={preview} alt={`Foto ${index + 1}`} style={s.imagePreview} />
                     <button type="button" style={s.removeImageBtn} onClick={() => removeCreateImage(index)}>x</button>
                     {index === 0 && <span style={s.coverBadge}>Capa</span>}
+                    {index > 0 && (
+                      <button type="button" style={s.coverActionBtn} onClick={() => moveCreateImage(index, 0)}>Tornar capa</button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1216,7 +1270,7 @@ export default function AdminDashboardPage() {
               {createImageFiles.length > 0 ? `${createImageFiles.length} foto(s) selecionada(s) - clique para trocar` : "Adicionar varias fotos do produto"}
             </button>
 
-            <div style={s.imageHint}>Escolha todas de uma vez. A primeira foto sera a capa do produto.</div>
+            <div style={s.imageHint}>Escolha todas de uma vez. Arraste para mudar a ordem ou use Tornar capa. A primeira foto sera a capa.</div>
 
             <label style={s.label}>Nome da peca *</label>
             <input style={s.input} value={createName} onChange={(e) => setCreateName(e.target.value)} placeholder="Ex: Vestido Midi Floral" />
