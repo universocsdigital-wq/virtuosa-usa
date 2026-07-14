@@ -270,7 +270,28 @@ function expandProductColorCards(products: Product[]): Product[] {
   });
 }
 
-function getCategory(name: string): ProductCategory {
+function getCategory(name: string, squareCategoryName?: string): ProductCategory {
+  const squareCategory = normalizeProductName(squareCategoryName || "");
+  const squareCategoryMap: Record<string, ProductCategory> = {
+    vestido: "vestidos",
+    vestidos: "vestidos",
+    blusa: "blusas",
+    blusas: "blusas",
+    camisa: "camisas",
+    camisas: "camisas",
+    conjunto: "conjuntos",
+    conjuntos: "conjuntos",
+    saia: "saias",
+    saias: "saias",
+    casaco: "casacos",
+    casacos: "casacos",
+    macacao: "macacao",
+    macacoes: "macacao",
+    calca: "calcas",
+    calcas: "calcas",
+  };
+  if (squareCategoryMap[squareCategory]) return squareCategoryMap[squareCategory];
+
   const n = normalizeProductName(name);
 
   if (n.includes("macacao") || n.includes("jumpsuit")) return "macacao";
@@ -380,6 +401,8 @@ interface SquareCatalogObject {
     description?: string;
     image_ids?: string[];
     variations?: SquareCatalogObject[];
+    category_id?: string;
+    categories?: Array<{ id: string }>;
   };
   item_variation_data?: {
     name: string;
@@ -391,6 +414,9 @@ interface SquareCatalogObject {
     url: string;
     name?: string;
   };
+  category_data?: {
+    name?: string;
+  };
 }
 
 async function fetchSquareCatalogObjects(token: string): Promise<SquareCatalogObject[]> {
@@ -398,7 +424,7 @@ async function fetchSquareCatalogObjects(token: string): Promise<SquareCatalogOb
   let cursor: string | undefined;
 
   do {
-    const params = new URLSearchParams({ types: "ITEM,IMAGE" });
+    const params = new URLSearchParams({ types: "ITEM,IMAGE,CATEGORY" });
     if (cursor) params.set("cursor", cursor);
 
     const response = await fetch(`${SQUARE_BASE_URL}/catalog/list?${params.toString()}`, {
@@ -407,7 +433,7 @@ async function fetchSquareCatalogObjects(token: string): Promise<SquareCatalogOb
         "Square-Version": SQUARE_VERSION,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -457,6 +483,11 @@ export async function getSquareProducts(): Promise<Product[]> {
   const imageMap = new Map(
     objects.filter((o) => o.type === "IMAGE").map((o) => [o.id, o])
   );
+  const categoryMap = new Map(
+    objects
+      .filter((o) => o.type === "CATEGORY")
+      .map((o) => [o.id, o.category_data?.name || ""])
+  );
 
   // Coletar todos os IDs de variações para consultar estoque em lote
   const allVariationIds: string[] = [];
@@ -474,6 +505,13 @@ export async function getSquareProducts(): Promise<Product[]> {
     const idata = item.item_data!;
     const name = idata.name;
     const variations = idata.variations || [];
+    const categoryIds = [
+      idata.category_id,
+      ...(idata.categories || []).map((category) => category.id),
+    ].filter((id): id is string => Boolean(id));
+    const squareCategories = categoryIds.map((id) => categoryMap.get(id) || "").filter(Boolean);
+    const isLaunch = squareCategories.some((category) => normalizeProductName(category) === "lancamentos");
+    const merchandiseCategory = squareCategories.find((category) => normalizeProductName(category) !== "lancamentos");
 
     // Obter URLs de todas as imagens do produto e das variacoes.
     const imageIds: string[] = [];
@@ -568,7 +606,8 @@ export async function getSquareProducts(): Promise<Product[]> {
       reviewCount: 0,
       image: imageUrl,
       images: allImages.length > 0 ? allImages : undefined,
-      category: getCategory(name),
+      category: getCategory(name, merchandiseCategory),
+      badge: isLaunch ? "new" : undefined,
       description: idata.description || "",
       sizes: sizes.length > 0 ? sizes : undefined,
       colors: colors.length > 0 ? colors : undefined,

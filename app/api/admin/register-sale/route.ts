@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { getSquareVariationId, decrementSquareInventory } from "@/lib/square";
+import { revalidateStorefront } from "@/lib/store-cache";
 
 export async function POST(request: Request) {
   const isAdmin = await getAdminSession();
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
 
     console.log(`[admin] Venda registrada: produto=${productId} tamanho=${size} qtd=${quantity} pagamento=${paymentMethod}`);
 
+    revalidateStorefront();
     return NextResponse.json({
       ok: true,
       message: `Venda registrada. Estoque atualizado no Square.`,

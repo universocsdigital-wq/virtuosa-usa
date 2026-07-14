@@ -58,7 +58,7 @@ export function HeroSection() {
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 52vw"
-            className="object-cover object-[50%_14%] lg:object-[50%_24%]"
+            className="object-cover object-[50%_18%] lg:object-[50%_30%]"
             quality={92}
           />
           <div className="absolute inset-0 texture-linen opacity-20" aria-hidden />

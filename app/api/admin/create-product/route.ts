@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
+import { revalidateStorefront } from "@/lib/store-cache";
 
 const SQUARE_BASE_URL = "https://connect.squareup.com/v2";
 const SQUARE_VERSION = "2024-01-18";
@@ -33,8 +34,7 @@ async function resolveSquareCategoryId(categoryName: string, token: string): Pro
   });
 
   if (!response.ok) {
-    console.warn("[admin/create-product] Categoria nao localizada no Square", await response.text().catch(() => ""));
-    return undefined;
+    throw new Error(`Nao foi possivel consultar as categorias do Square: ${response.status}`);
   }
 
   const data = await response.json();
@@ -43,7 +43,32 @@ async function resolveSquareCategoryId(categoryName: string, token: string): Pro
     normalizeCategoryName(object.category_data?.name ?? "") === target
   );
 
-  return match?.id;
+  if (match?.id) return match.id;
+
+  const categoryResponse = await fetch(`${SQUARE_BASE_URL}/catalog/object`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Square-Version": SQUARE_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      idempotency_key: `admin-category-${target}-${Date.now()}`,
+      object: {
+        type: "CATEGORY",
+        id: "#new-category",
+        category_data: { name: categoryName.trim() },
+      },
+    }),
+    cache: "no-store",
+  });
+
+  if (!categoryResponse.ok) {
+    throw new Error(`Nao foi possivel criar a categoria "${categoryName}" no Square.`);
+  }
+
+  const categoryData = await categoryResponse.json();
+  return categoryData.catalog_object?.id;
 }
 
 export async function POST(req: NextRequest) {
@@ -138,6 +163,24 @@ export async function POST(req: NextRequest) {
     const createdItem = upsertData.catalog_object;
     const createdVariations = createdItem?.item_data?.variations || [];
 
+    if (!createdItem?.id || createdVariations.length !== normalizedSizes.length) {
+      if (createdItem?.id) {
+        await fetch(`${SQUARE_BASE_URL}/catalog/object/${encodeURIComponent(createdItem.id)}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Square-Version": SQUARE_VERSION,
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        }).catch(() => undefined);
+      }
+      return NextResponse.json(
+        { error: "O Square nao confirmou todos os tamanhos. O cadastro foi cancelado para evitar inconsistencia." },
+        { status: 400 }
+      );
+    }
+
     // Definir estoque inicial para cada variação
     const inventoryChanges = createdVariations
       .map((v: { id: string }, i: number) => {
@@ -157,7 +200,7 @@ export async function POST(req: NextRequest) {
       .filter(Boolean);
 
     if (inventoryChanges.length > 0) {
-      await fetch(`${SQUARE_BASE_URL}/inventory/changes/batch-create`, {
+      const inventoryResponse = await fetch(`${SQUARE_BASE_URL}/inventory/changes/batch-create`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -170,7 +213,28 @@ export async function POST(req: NextRequest) {
         }),
         cache: "no-store",
       });
+
+      if (!inventoryResponse.ok) {
+        const inventoryError = await inventoryResponse.json().catch(() => ({}));
+        if (createdItem?.id) {
+          await fetch(`${SQUARE_BASE_URL}/catalog/object/${encodeURIComponent(createdItem.id)}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Square-Version": SQUARE_VERSION,
+              "Content-Type": "application/json",
+            },
+            cache: "no-store",
+          }).catch(() => undefined);
+        }
+        return NextResponse.json(
+          { error: `O Square nao confirmou o estoque inicial. O cadastro foi cancelado para evitar inconsistencia. ${JSON.stringify(inventoryError)}` },
+          { status: 400 }
+        );
+      }
     }
+
+    revalidateStorefront();
 
     return NextResponse.json({
       ok: true,

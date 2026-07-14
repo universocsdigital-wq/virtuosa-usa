@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
+import { revalidateStorefront } from "@/lib/store-cache";
 
 const SQUARE_BASE_URL = "https://connect.squareup.com/v2";
 const SQUARE_VERSION = "2024-01-18";
@@ -181,6 +182,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: JSON.stringify(err) }, { status: 400 });
     }
 
+    revalidateStorefront();
     return NextResponse.json({ ok: true, message: "Produto atualizado com sucesso." });
   } catch (err) {
     console.error("[admin/update-product]", err);
