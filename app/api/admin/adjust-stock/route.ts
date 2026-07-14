@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     // adjustments: Array<{ variationId: string; quantity: number; action: "add" | "set" }>
     // action "add" = adiciona ao estoque atual, "set" = define quantidade absoluta
-    const { productId, size, quantity, action } = body;
+    const { productId, size, color, quantity, action } = body;
 
     if (!productId || !size || quantity === undefined) {
       return NextResponse.json(
@@ -51,10 +51,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const variationId = await getSquareVariationId(productId, size);
+    const variationId = await getSquareVariationId(productId, size, color);
     if (!variationId) {
       return NextResponse.json(
-        { error: `Variacao "${size}" nao encontrada para este produto.` },
+        { error: `Variacao "${[color, size].filter(Boolean).join(" ")}" nao encontrada para este produto.` },
         { status: 404 }
       );
     }

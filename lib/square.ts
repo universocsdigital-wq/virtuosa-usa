@@ -647,7 +647,8 @@ export async function getSquareProductBySlug(slug: string): Promise<Product | nu
  */
 export async function getSquareVariationId(
   productId: string,
-  size: string
+  size: string,
+  color?: string
 ): Promise<string | null> {
   const token = getSquareToken();
   if (!token) return null;
@@ -664,14 +665,23 @@ export async function getSquareVariationId(
     if (!response.ok) return null;
     const data = await response.json();
     const variations: SquareCatalogObject[] = data.object?.item_data?.variations || [];
-    const sizeUpper = size.toUpperCase();
-    for (const v of variations) {
-      const vname = (v.item_variation_data?.name || "").toUpperCase();
-      if (vname.includes(sizeUpper)) {
-        return v.id;
-      }
+    const sizeUpper = size.trim().toUpperCase();
+    const normalizedColor = color ? normalizeProductName(color) : "";
+    const sizeMatches = variations.filter((variation) =>
+      getVariationSize(variation.item_variation_data?.name || "") === sizeUpper
+    );
+    const exactMatches = normalizedColor
+      ? sizeMatches.filter((variation) =>
+          normalizeProductName(getVariationColor(variation.item_variation_data?.name || "") || "") === normalizedColor
+        )
+      : sizeMatches;
+
+    // Nunca escolhe uma variacao ambigua: tamanho e cor precisam apontar para um unico ID.
+    if (exactMatches.length === 1) return exactMatches[0].id;
+    if (!normalizedColor && sizeMatches.length === 1) return sizeMatches[0].id;
+    if (variations.length === 1 && (sizeUpper === "U" || getVariationSize(variations[0].item_variation_data?.name || "") === sizeUpper)) {
+      return variations[0].id;
     }
-    if (variations.length === 1) return variations[0].id;
     return null;
   } catch {
     return null;

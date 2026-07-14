@@ -378,17 +378,19 @@ export default function AdminDashboardPage() {
     try {
       // Usa squareId quando disponivel, senao tenta sourceProductId, senao id
       const productId = selectedProduct.squareId ?? selectedProduct.sourceProductId ?? selectedProduct.id;
+      const displayProductId = selectedProduct.id;
+      const selectedColor = selectedProduct.colors?.length === 1 ? selectedProduct.colors[0] : undefined;
       const res = await fetch("/api/admin/register-sale", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, size: selectedSize, quantity, paymentMethod }),
+        body: JSON.stringify({ productId, size: selectedSize, color: selectedColor, quantity, paymentMethod }),
       });
       const data = await res.json();
       if (res.ok) {
         setSaleSuccess("Venda registrada! Estoque atualizado no Square.");
         setProducts((prev) =>
           prev.map((p) => {
-            if ((p.squareId ?? p.sourceProductId ?? p.id) !== productId) return p;
+            if (p.id !== displayProductId) return p;
             const updated = { ...p, inventoryBySize: { ...p.inventoryBySize } };
             if (selectedSize && updated.inventoryBySize[selectedSize] !== undefined) {
               updated.inventoryBySize[selectedSize] = Math.max(
@@ -513,16 +515,18 @@ export default function AdminDashboardPage() {
     setStockSuccess("");
     try {
       const squareId = selectedProduct.squareId;
+      const displayProductId = selectedProduct.id;
+      const selectedColor = selectedProduct.colors?.length === 1 ? selectedProduct.colors[0] : undefined;
       const res = await fetch("/api/admin/adjust-stock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: squareId, size: stockSize, quantity: stockQty, action: "set" }),
+        body: JSON.stringify({ productId: squareId, size: stockSize, color: selectedColor, quantity: stockQty, action: "set" }),
       });
       const data = await res.json();
       if (res.ok) {
         setStockSuccess(data.message || "Estoque atualizado no Square!");
         const applyStockAdjustment = (product: ProductItem): ProductItem => {
-          if (product.squareId !== squareId || !stockSize) return product;
+          if (product.id !== displayProductId || !stockSize) return product;
           const inventoryBySize = {
             ...product.inventoryBySize,
             [stockSize]: stockQty,
@@ -1003,7 +1007,11 @@ export default function AdminDashboardPage() {
             <div style={s.qtyRow}>
               <button style={s.qtyBtn} onClick={() => setQuantity((q) => Math.max(1, q - 1))}>-</button>
               <span style={s.qtyVal}>{quantity}</span>
-              <button style={s.qtyBtn} onClick={() => setQuantity((q) => q + 1)}>+</button>
+              <button
+                style={s.qtyBtn}
+                onClick={() => setQuantity((q) => Math.min(getStockForSize(selectedProduct, selectedSize), q + 1))}
+                disabled={!selectedSize || quantity >= getStockForSize(selectedProduct, selectedSize)}
+              >+</button>
             </div>
 
             <label style={s.label}>Forma de pagamento</label>

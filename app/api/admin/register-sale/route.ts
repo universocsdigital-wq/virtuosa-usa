@@ -10,9 +10,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { productId, size, quantity, paymentMethod } = await request.json();
+    const { productId, size, color, quantity, paymentMethod } = await request.json();
+    const numericQuantity = Number(quantity);
 
-    if (!productId || !quantity || quantity < 1) {
+    if (!productId || !Number.isInteger(numericQuantity) || numericQuantity < 1) {
       return NextResponse.json({ error: "Produto e quantidade sao obrigatorios." }, { status: 400 });
     }
 
@@ -26,16 +27,16 @@ export async function POST(request: Request) {
     }
 
     // Buscar o ID da variacao no Square
-    const variationId = await getSquareVariationId(productId, size || "U");
+    const variationId = await getSquareVariationId(productId, size || "U", color);
     if (!variationId) {
       return NextResponse.json(
-        { error: `Variacao '${size || "unica"}' nao encontrada para este produto.` },
+        { error: `Variacao '${[color, size || "unica"].filter(Boolean).join(" ")}' nao encontrada para este produto.` },
         { status: 404 }
       );
     }
 
     // Decrementar o estoque no Square
-    const result = await decrementSquareInventory(variationId, quantity, locationId);
+    const result = await decrementSquareInventory(variationId, numericQuantity, locationId);
     if (!result.ok) {
       console.error("[admin/register-sale] Erro ao decrementar estoque:", result.error);
       return NextResponse.json(
