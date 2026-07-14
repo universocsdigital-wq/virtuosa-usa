@@ -1,7 +1,7 @@
 ﻿import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { durableRateLimit, getClientIp } from "@/lib/rate-limit";
-import { getSquareProducts } from "@/lib/square";
+import { getSquareProducts, getSquareVariationId } from "@/lib/square";
 
 const SHIPPING_CENTS = 1200;
 
@@ -84,10 +84,9 @@ export async function POST(request: Request) {
   }
 
   const lineItems: Array<{
-    name: string;
     quantity: string;
+    catalog_object_id: string;
     note?: string;
-    base_price_money: { amount: number; currency: "USD" };
   }> = [];
   const serviceCharges: Array<{
     name: string;
@@ -142,12 +141,23 @@ export async function POST(request: Request) {
     }
 
     const variation = [item.size && `Tamanho ${item.size}`, item.color].filter(Boolean).join(" Â· ");
+    const variationId = await getSquareVariationId(
+      product.sourceProductId ?? product.id,
+      item.size ?? "U",
+      item.color,
+    );
+
+    if (!variationId) {
+      return NextResponse.json(
+        { error: `A variacao de ${product.name} nao foi encontrada no Square. Atualize a pagina e tente novamente.` },
+        { status: 400 },
+      );
+    }
 
     lineItems.push({
-      name: product.name,
       quantity: String(quantity),
+      catalog_object_id: variationId,
       note: variation || undefined,
-      base_price_money: { amount: Math.round(product.price * 100), currency: "USD" },
     });
   }
 
@@ -161,6 +171,7 @@ export async function POST(request: Request) {
   }
 
   const idempotencyPayload = JSON.stringify({
+    checkoutVersion: "catalog-v1",
     clientIp,
     fulfillmentType: body.fulfillmentType,
     items: body.items
