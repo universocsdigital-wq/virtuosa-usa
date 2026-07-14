@@ -152,6 +152,7 @@ export default function AdminDashboardPage() {
   const [editError, setEditError] = useState("");
   const [editImageFiles, setEditImageFiles] = useState<File[]>([]);
   const [editImagePreviews, setEditImagePreviews] = useState<string[]>([]);
+  const [deletingImageUrl, setDeletingImageUrl] = useState<string | null>(null);
 
   // Modal de ajuste de estoque
   const [stockSize, setStockSize] = useState("");
@@ -242,6 +243,7 @@ export default function AdminDashboardPage() {
     setEditError("");
     setEditImageFiles([]);
     setEditImagePreviews([]);
+    setDeletingImageUrl(null);
     setActiveModal("edit");
   }
 
@@ -322,6 +324,42 @@ export default function AdminDashboardPage() {
   function moveCreateImage(fromIndex: number, toIndex: number) {
     setCreateImageFiles((files) => moveArrayItem(files, fromIndex, toIndex));
     setCreateImagePreviews((previews) => moveArrayItem(previews, fromIndex, toIndex));
+  }
+
+  async function deleteExistingImage(imageUrl: string) {
+    if (!selectedProduct?.squareId || deletingImageUrl) return;
+    setDeletingImageUrl(imageUrl);
+    setEditError("");
+    setEditSuccess("");
+    try {
+      const response = await fetch("/api/admin/delete-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: selectedProduct.squareId, imageUrl }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setEditError(data.error || "Nao foi possivel excluir a foto.");
+        return;
+      }
+
+      const applyImageRemoval = (product: ProductItem): ProductItem => {
+        if (product.squareId !== selectedProduct.squareId) return product;
+        const remainingImages = (product.images ?? [product.image]).filter((image) => image !== imageUrl);
+        return {
+          ...product,
+          image: remainingImages[0] ?? "/images/placeholder.jpg",
+          images: remainingImages,
+        };
+      };
+      setProducts((current) => current.map(applyImageRemoval));
+      setSelectedProduct((current) => (current ? applyImageRemoval(current) : current));
+      setEditSuccess("Foto excluida do Square e do catalogo.");
+    } catch {
+      setEditError("Erro de conexao ao excluir a foto.");
+    } finally {
+      setDeletingImageUrl(null);
+    }
   }
 
   async function prepareImageForUpload(file: File): Promise<File> {
@@ -1096,8 +1134,18 @@ export default function AdminDashboardPage() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={preview} alt={`Foto ${index + 1}`} style={s.imagePreview} />
-                  {editImagePreviews.length > 0 && (
+                  {editImagePreviews.length > 0 ? (
                     <button type="button" style={s.removeImageBtn} onClick={() => removeEditImage(index)}>x</button>
+                  ) : (
+                    <button
+                      type="button"
+                      style={{ ...s.removeImageBtn, opacity: deletingImageUrl === preview ? 0.55 : 1 }}
+                      onClick={() => deleteExistingImage(preview)}
+                      disabled={Boolean(deletingImageUrl)}
+                      aria-label={`Excluir foto ${index + 1}`}
+                    >
+                      {deletingImageUrl === preview ? "..." : "x"}
+                    </button>
                   )}
                   {index === 0 && <span style={s.coverBadge}>Capa</span>}
                   {editImagePreviews.length > 0 && index > 0 && (
