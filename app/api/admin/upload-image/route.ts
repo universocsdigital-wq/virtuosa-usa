@@ -4,6 +4,8 @@ import { revalidateStorefront } from "@/lib/store-cache";
 
 const SQUARE_BASE_URL = "https://connect.squareup.com/v2";
 const SQUARE_VERSION = "2024-01-18";
+const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/pjpeg", "image/png", "image/gif"]);
 
 function getSquareToken(): string | null {
   return process.env.SQUARE_ACCESS_TOKEN || null;
@@ -24,9 +26,16 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("image") as File | null;
     const productId = formData.get("productId") as string | null;
+    const isPrimary = formData.get("isPrimary") !== "false";
 
     if (!file || !productId) {
       return NextResponse.json({ error: "image e productId sao obrigatorios." }, { status: 400 });
+    }
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      return NextResponse.json({ error: "Formato nao aceito pelo Square. Use JPG, PNG ou GIF." }, { status: 400 });
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      return NextResponse.json({ error: "A foto deve ter no maximo 15 MB." }, { status: 400 });
     }
 
     const idempotencyKey = `admin-img-${productId}-${Date.now()}`;
@@ -37,7 +46,7 @@ export async function POST(req: NextRequest) {
     const requestJson = JSON.stringify({
       idempotency_key: idempotencyKey,
       object_id: productId,
-      is_primary: true,
+      is_primary: isPrimary,
       image: {
         type: "IMAGE",
         id: "#new-image",

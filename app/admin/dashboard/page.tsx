@@ -10,6 +10,7 @@ interface ProductItem {
   slug?: string;
   price: number;
   image: string;
+  images?: string[];
   category: string;
   sizes: string[];
   colors: string[];
@@ -137,8 +138,8 @@ export default function AdminDashboardPage() {
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [editSuccess, setEditSuccess] = useState("");
   const [editError, setEditError] = useState("");
-  const [editImageFile, setEditImageFile] = useState<File | null>(null);
-  const [editImagePreview, setEditImagePreview] = useState("");
+  const [editImageFiles, setEditImageFiles] = useState<File[]>([]);
+  const [editImagePreviews, setEditImagePreviews] = useState<string[]>([]);
 
   // Modal de ajuste de estoque
   const [stockSize, setStockSize] = useState("");
@@ -158,8 +159,8 @@ export default function AdminDashboardPage() {
     { size: "M", quantity: 1 },
     { size: "G", quantity: 1 },
   ]);
-  const [createImageFile, setCreateImageFile] = useState<File | null>(null);
-  const [createImagePreview, setCreateImagePreview] = useState("");
+  const [createImageFiles, setCreateImageFiles] = useState<File[]>([]);
+  const [createImagePreviews, setCreateImagePreviews] = useState<string[]>([]);
   const [createLoading, setCreateLoading] = useState(false);
   const [createSuccess, setCreateSuccess] = useState("");
   const [createError, setCreateError] = useState("");
@@ -225,8 +226,8 @@ export default function AdminDashboardPage() {
     setEditOriginalColor(currentColor);
     setEditSuccess("");
     setEditError("");
-    setEditImageFile(null);
-    setEditImagePreview(product.image);
+    setEditImageFiles([]);
+    setEditImagePreviews([]);
     setActiveModal("edit");
   }
 
@@ -256,16 +257,65 @@ export default function AdminDashboardPage() {
       { size: "M", quantity: 1 },
       { size: "G", quantity: 1 },
     ]);
-    setCreateImageFile(null);
-    setCreateImagePreview("");
+    setCreateImageFiles([]);
+    setCreateImagePreviews([]);
     setCreateSuccess("");
     setCreateError("");
     setActiveModal("create");
   }
 
   function closeModal() {
+    editImagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    createImagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
     setActiveModal(null);
     setSelectedProduct(null);
+  }
+
+  function selectEditImages(fileList: FileList | null) {
+    if (!fileList) return;
+    editImagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    const files = Array.from(fileList);
+    setEditImageFiles(files);
+    setEditImagePreviews(files.map((file) => URL.createObjectURL(file)));
+  }
+
+  function selectCreateImages(fileList: FileList | null) {
+    if (!fileList) return;
+    createImagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    const files = Array.from(fileList);
+    setCreateImageFiles(files);
+    setCreateImagePreviews(files.map((file) => URL.createObjectURL(file)));
+  }
+
+  function removeEditImage(index: number) {
+    URL.revokeObjectURL(editImagePreviews[index]);
+    setEditImageFiles((files) => files.filter((_, currentIndex) => currentIndex !== index));
+    setEditImagePreviews((previews) => previews.filter((_, currentIndex) => currentIndex !== index));
+  }
+
+  function removeCreateImage(index: number) {
+    URL.revokeObjectURL(createImagePreviews[index]);
+    setCreateImageFiles((files) => files.filter((_, currentIndex) => currentIndex !== index));
+    setCreateImagePreviews((previews) => previews.filter((_, currentIndex) => currentIndex !== index));
+  }
+
+  async function uploadProductImages(files: File[], productId: string): Promise<string[]> {
+    const uploadedUrls: string[] = [];
+
+    for (let index = 0; index < files.length; index += 1) {
+      const fd = new FormData();
+      fd.append("image", files[index]);
+      fd.append("productId", productId);
+      fd.append("isPrimary", String(index === 0));
+      const response = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(`Foto ${index + 1}: ${data.error || response.status}`);
+      }
+      if (data.imageUrl) uploadedUrls.push(data.imageUrl);
+    }
+
+    return uploadedUrls;
   }
 
   async function handleRegisterSale() {
@@ -321,20 +371,16 @@ export default function AdminDashboardPage() {
     try {
       const squareId = selectedProduct.squareId;
 
-      // Upload de imagem PRIMEIRO se houver
-      let uploadedImageUrl = "";
-      if (editImageFile) {
-        const fd = new FormData();
-        fd.append("image", editImageFile);
-        fd.append("productId", squareId);
-        const imgRes = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
-        const imgData = await imgRes.json().catch(() => ({}));
-        if (!imgRes.ok) {
-          setEditError("Erro ao enviar foto: " + (imgData.error || imgRes.status));
+      // Enviar a galeria na ordem selecionada; a primeira foto sera a capa.
+      let uploadedImageUrls: string[] = [];
+      if (editImageFiles.length > 0) {
+        try {
+          uploadedImageUrls = await uploadProductImages(editImageFiles, squareId);
+        } catch (error) {
+          setEditError("Erro ao enviar fotos: " + (error instanceof Error ? error.message : String(error)));
           setEditLoading(false);
           return;
         }
-        uploadedImageUrl = imgData.imageUrl || "";
       }
 
       // Atualizar dados do produto
@@ -356,7 +402,18 @@ export default function AdminDashboardPage() {
         setProducts((prev) =>
           prev.map((p) =>
             p.squareId === squareId
-              ? { ...p, name: editName, description: editDescription, price: parsedPrice, category: editCategory, colors: colorChanged ? (editColor ? [editColor.trim()] : []) : p.colors, image: uploadedImageUrl || p.image }
+              ? {
+                  ...p,
+                  name: editName,
+                  description: editDescription,
+                  price: parsedPrice,
+                  category: editCategory,
+                  colors: colorChanged ? (editColor ? [editColor.trim()] : []) : p.colors,
+                  image: uploadedImageUrls[0] || p.image,
+                  images: uploadedImageUrls.length > 0
+                    ? Array.from(new Set([...uploadedImageUrls, ...(p.images ?? [p.image])]))
+                    : p.images,
+                }
               : p
           )
         );
@@ -460,18 +517,21 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       if (res.ok) {
         // Upload de imagem usando o ID real retornado pelo Square
-        if (createImageFile && data.productId) {
-          const fd = new FormData();
-          fd.append("image", createImageFile);
-          fd.append("productId", data.productId);
-          const imgRes = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
-          if (!imgRes.ok) {
-            setCreateSuccess("Produto cadastrado! Mas a foto nao foi enviada — use o botao Editar depois.");
+        if (createImageFiles.length > 0 && data.productId) {
+          try {
+            await uploadProductImages(createImageFiles, data.productId);
+          } catch (error) {
+            const detail = error instanceof Error ? error.message : String(error);
+            setCreateSuccess(`Produto cadastrado, mas nem todas as fotos foram enviadas (${detail}). Use o botao Editar para completar a galeria.`);
             setTimeout(() => loadProducts(), 2000);
             return;
           }
         }
-        setCreateSuccess("Produto cadastrado com sucesso! Aparecera na loja em instantes.");
+        setCreateSuccess(
+          createImageFiles.length > 1
+            ? `Produto cadastrado com ${createImageFiles.length} fotos! Aparecera na loja em instantes.`
+            : "Produto cadastrado com sucesso! Aparecera na loja em instantes."
+        );
         setTimeout(() => loadProducts(), 2000);
       } else {
         setCreateError(data.error || "Erro ao cadastrar produto.");
@@ -679,8 +739,29 @@ export default function AdminDashboardPage() {
       padding: "12px 14px", fontSize: 14, color: "#dc2626", marginTop: 16,
     } as React.CSSProperties,
     imagePreview: {
-      width: "100%", height: 180, objectFit: "cover" as const,
-      borderRadius: 8, marginBottom: 8, display: "block",
+      width: "100%", height: 120, objectFit: "cover" as const,
+      borderRadius: 8, display: "block",
+    } as React.CSSProperties,
+    imageGrid: {
+      display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+      gap: 8, marginBottom: 8,
+    } as React.CSSProperties,
+    imageTile: {
+      position: "relative" as const, minWidth: 0,
+    } as React.CSSProperties,
+    removeImageBtn: {
+      position: "absolute" as const, top: 5, right: 5,
+      width: 25, height: 25, padding: 0, border: "none", borderRadius: "50%",
+      background: "rgba(220, 38, 38, 0.92)", color: "#fff", cursor: "pointer",
+      fontSize: 13, lineHeight: "25px",
+    } as React.CSSProperties,
+    coverBadge: {
+      position: "absolute" as const, left: 5, bottom: 5,
+      padding: "3px 7px", borderRadius: 10,
+      background: "rgba(139, 105, 20, 0.94)", color: "#fff", fontSize: 10,
+    } as React.CSSProperties,
+    imageHint: {
+      marginTop: 6, marginBottom: 4, fontSize: 11, color: "#777", lineHeight: 1.4,
     } as React.CSSProperties,
     uploadBtn: {
       width: "100%", padding: "10px", background: "#f5f0eb",
@@ -894,28 +975,34 @@ export default function AdminDashboardPage() {
             <div style={s.modalTitle}>Editar produto</div>
             <div style={s.modalSubtitle}>{selectedProduct.name}</div>
 
-            {editImagePreview && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={editImagePreview}
-                alt="preview"
-                style={s.imagePreview}
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-              />
-            )}
+            <div style={s.imageGrid}>
+              {(editImagePreviews.length > 0
+                ? editImagePreviews
+                : (selectedProduct.images?.length ? selectedProduct.images : [selectedProduct.image])
+              ).map((preview, index) => (
+                <div key={`${preview}-${index}`} style={s.imageTile}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={preview} alt={`Foto ${index + 1}`} style={s.imagePreview} />
+                  {editImagePreviews.length > 0 && (
+                    <button type="button" style={s.removeImageBtn} onClick={() => removeEditImage(index)}>x</button>
+                  )}
+                  {index === 0 && <span style={s.coverBadge}>Capa</span>}
+                </div>
+              ))}
+            </div>
             <input
               ref={editFileRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif"
+              multiple
               style={{ display: "none" }}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) { setEditImageFile(f); setEditImagePreview(URL.createObjectURL(f)); }
-              }}
+              onChange={(e) => selectEditImages(e.target.files)}
             />
             <button style={s.uploadBtn} onClick={() => editFileRef.current?.click()}>
-              {editImageFile ? "Foto selecionada — clique para trocar" : "Clique para trocar a foto"}
+              {editImageFiles.length > 0 ? `${editImageFiles.length} foto(s) selecionada(s) - clique para trocar` : "Selecionar varias fotos para a galeria"}
             </button>
+
+            <div style={s.imageHint}>Escolha todas de uma vez. A primeira foto sera a capa do produto.</div>
 
             <label style={s.label}>Nome</label>
             <input style={s.input} value={editName} onChange={(e) => setEditName(e.target.value)} />
@@ -1014,23 +1101,31 @@ export default function AdminDashboardPage() {
             <div style={s.modalTitle}>Cadastrar nova peca no Square</div>
             <div style={s.modalSubtitle}>Preencha os dados abaixo. O produto sera criado diretamente no Square e ja aparecera na loja.</div>
 
-            {createImagePreview && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={createImagePreview} alt="preview" style={s.imagePreview} />
+            {createImagePreviews.length > 0 && (
+              <div style={s.imageGrid}>
+                {createImagePreviews.map((preview, index) => (
+                  <div key={`${preview}-${index}`} style={s.imageTile}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={preview} alt={`Foto ${index + 1}`} style={s.imagePreview} />
+                    <button type="button" style={s.removeImageBtn} onClick={() => removeCreateImage(index)}>x</button>
+                    {index === 0 && <span style={s.coverBadge}>Capa</span>}
+                  </div>
+                ))}
+              </div>
             )}
             <input
               ref={createFileRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif"
+              multiple
               style={{ display: "none" }}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) { setCreateImageFile(f); setCreateImagePreview(URL.createObjectURL(f)); }
-              }}
+              onChange={(e) => selectCreateImages(e.target.files)}
             />
             <button style={s.uploadBtn} onClick={() => createFileRef.current?.click()}>
-              {createImageFile ? "Foto selecionada — clique para trocar" : "Adicionar foto do produto"}
+              {createImageFiles.length > 0 ? `${createImageFiles.length} foto(s) selecionada(s) - clique para trocar` : "Adicionar varias fotos do produto"}
             </button>
+
+            <div style={s.imageHint}>Escolha todas de uma vez. A primeira foto sera a capa do produto.</div>
 
             <label style={s.label}>Nome da peca *</label>
             <input style={s.input} value={createName} onChange={(e) => setCreateName(e.target.value)} placeholder="Ex: Vestido Midi Floral" />

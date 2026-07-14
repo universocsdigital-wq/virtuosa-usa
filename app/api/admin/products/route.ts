@@ -23,6 +23,7 @@ export async function GET() {
         slug: p.slug,
         price: p.price,
         image: p.image,
+        images: p.images ?? [p.image],
         category: p.category,
         sizes: p.sizes ?? [],
         colors: p.colors ?? [],
