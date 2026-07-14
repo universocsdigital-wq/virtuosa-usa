@@ -409,16 +409,20 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       if (res.ok) {
         setStockSuccess(data.message || "Estoque atualizado no Square!");
-        setProducts((prev) =>
-          prev.map((p) => {
-            if (p.squareId !== squareId) return p;
-            const updated = { ...p, inventoryBySize: { ...p.inventoryBySize } };
-            if (stockSize) {
-              updated.inventoryBySize[stockSize] = (updated.inventoryBySize[stockSize] ?? 0) + stockQty;
-            }
-            return updated;
-          })
-        );
+        const applyStockAdjustment = (product: ProductItem): ProductItem => {
+          if (product.squareId !== squareId || !stockSize) return product;
+          return {
+            ...product,
+            inStock: true,
+            inventoryBySize: {
+              ...product.inventoryBySize,
+              [stockSize]: (product.inventoryBySize[stockSize] ?? 0) + stockQty,
+            },
+          };
+        };
+
+        setProducts((prev) => prev.map(applyStockAdjustment));
+        setSelectedProduct((current) => (current ? applyStockAdjustment(current) : current));
       } else {
         setStockError(data.error || "Erro ao ajustar estoque.");
       }
