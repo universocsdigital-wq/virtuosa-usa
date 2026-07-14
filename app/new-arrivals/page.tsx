@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "New Arrivals",
@@ -8,13 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function NewArrivalsPage() {
-  return (
-    <>
-      <Navbar />
-      <main id="main-content" className="min-h-screen">
-        {/* TODO: New arrivals grid */}
-      </main>
-      <Footer />
-    </>
-  );
+  redirect("/shop#lancamentos");
 }

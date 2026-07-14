@@ -5,7 +5,7 @@ import { ShopClient } from "@/components/shop/ShopClient";
 import { getSquareProducts } from "@/lib/square";
 
 export const metadata: Metadata = {
-  title: "Peças Selecionadas para Você | Virtuosa USA",
+  title: "Peças Selecionadas para Você",
   description: "Explore vestidos, blusas, saias, conjuntos e calças da Virtuosa USA.",
 };
 

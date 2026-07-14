@@ -15,7 +15,7 @@ import type { Product } from "@/types";
 import { reviews, aggregateRating } from "@/lib/data/reviews";
 
 export const metadata: Metadata = {
-  title: "Virtuosa USA — Elegance with Purpose",
+  title: { absolute: "Virtuosa USA — Elegância com Propósito" },
   description:
     "Timeless pieces for women who value femininity, sophistication, and presence. Shop premium dresses, skirts, and sets crafted with artisanal care.",
   alternates: {

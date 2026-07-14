@@ -23,8 +23,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getSquareProductBySlug(slug);
-  if (!product) return { title: "Peça não encontrada | Virtuosa USA" };
-  return { title: `${product.name} | Virtuosa USA`, description: product.description };
+  if (!product) return { title: "Peça não encontrada" };
+  return { title: product.name, description: product.description };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {

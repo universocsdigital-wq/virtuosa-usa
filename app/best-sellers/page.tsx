@@ -6,7 +6,7 @@ import { getSquareProducts } from "@/lib/square";
 import type { Product } from "@/types";
 
 export const metadata: Metadata = {
-  title: "Mais Amadas | Virtuosa USA",
+  title: "Mais Amadas",
   description: "As peças mais exclusivas da Virtuosa USA — selecionadas com cuidado para mulheres que valorizam sofisticação e presença.",
 };
 

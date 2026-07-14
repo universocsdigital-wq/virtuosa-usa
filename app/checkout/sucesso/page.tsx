@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CheckoutSuccess } from "@/components/cart/CheckoutSuccess";
 
 export const metadata: Metadata = {
-  title: "Pedido recebido | Virtuosa USA",
+  title: "Pedido recebido",
   robots: { index: false, follow: false },
 };
 

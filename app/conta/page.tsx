@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { AccountClient } from "@/components/account/AccountClient";
 
 export const metadata: Metadata = {
-  title: "Minha Conta | Virtuosa USA",
+  title: "Minha Conta",
   description: "Consulte seus pedidos e acompanhe seus envios da Virtuosa USA.",
   robots: { index: false, follow: false },
 };

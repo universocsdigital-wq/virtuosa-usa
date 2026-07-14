@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: "Entregas e Trocas | Virtuosa USA",
+  title: "Entregas e Trocas",
   description: "Política de envio e trocas da Virtuosa USA.",
 };
 
@@ -15,6 +15,9 @@ export default function ShippingAndReturnsPage() {
       <main className="bg-[#F7F1E8]">
         <section className="container-virtuosa py-14 lg:py-20">
           <div className="mx-auto max-w-3xl">
+            <h1 className="mb-8 text-center font-serif text-[#2A1712]" style={{ fontSize: "clamp(2.1rem, 4vw, 3rem)", lineHeight: 1.08 }}>
+              Entregas e Trocas
+            </h1>
             <div className="space-y-12 rounded-[2px] border border-[#D9C8B5] bg-white/45 p-7 shadow-[0_24px_70px_rgba(42,23,18,0.07)] lg:p-10">
               <PolicySection title="Política de Envio">
                 <p>A Virtuosa USA realiza envios para clientes localizados nos Estados Unidos.</p>
