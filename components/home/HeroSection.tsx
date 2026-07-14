@@ -5,7 +5,7 @@ export function HeroSection() {
   return (
     <section id="hero" aria-label="Virtuosa USA" className="relative w-full overflow-hidden" style={{ backgroundColor: "#170B07" }}>
       <div className="grid lg:min-h-[610px] lg:grid-cols-[43%_57%]">
-        <div className="relative flex items-center px-6 py-10 sm:px-10 sm:py-12 lg:px-16 lg:py-14 xl:px-20">
+        <div className="relative flex items-center px-5 py-6 sm:px-10 sm:py-10 lg:px-16 lg:py-14 xl:px-20">
           <div
             className="pointer-events-none absolute inset-0"
             style={{
@@ -40,7 +40,7 @@ export function HeroSection() {
               que vestem com intenção.
             </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row lg:mt-8 lg:gap-3.5">
+            <div className="mt-5 flex flex-col gap-3 sm:mt-7 sm:flex-row lg:mt-8 lg:gap-3.5">
               <Link href="/shop" className="btn-hero-primary min-w-[246px] whitespace-nowrap px-7 text-[12px]">
                 CONHEÇA A COLEÇÃO {"\u2192"}
               </Link>
@@ -51,14 +51,14 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="relative min-h-[420px] overflow-hidden bg-[#170B07] sm:min-h-[480px] lg:min-h-full">
+        <div className="relative min-h-[350px] overflow-hidden bg-[#170B07] sm:min-h-[440px] lg:min-h-full">
           <Image
             src="/images/hero/elaine-hero.webp"
             alt="Elaine Soares vestindo uma composição elegante da Virtuosa USA"
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 52vw"
-            className="object-cover object-[50%_18%] lg:object-[50%_30%]"
+            className="object-cover object-[50%_34%] sm:object-[50%_27%] lg:object-[50%_30%]"
             quality={92}
           />
           <div className="absolute inset-0 texture-linen opacity-20" aria-hidden />
