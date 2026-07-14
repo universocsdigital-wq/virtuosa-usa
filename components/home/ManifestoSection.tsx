@@ -14,11 +14,11 @@ export function ManifestoSection() {
             <div className="absolute -left-5 -top-5 bottom-5 right-5 border border-virtuosa-antique-gold/22" aria-hidden />
             <div className="relative aspect-[4/5] overflow-hidden bg-[#2A1712] shadow-[0_28px_80px_rgba(42,23,18,0.18)]">
               <Image
-                src="/images/manifesto/mulher-virtuosa.jpg"
-                alt="Mulher elegante em tons neutros representando a essência Virtuosa"
+                src="/images/manifesto/mulher-virtuosa-vestido.jpeg"
+                alt="Mulher usando vestido midi em tom terroso representando a essência Virtuosa"
                 fill
                 sizes="(max-width: 1024px) 100vw, 44vw"
-                className="object-cover object-[center_18%]"
+                className="object-cover object-[50%_42%] sm:object-[50%_40%] lg:object-[50%_42%]"
                 quality={92}
               />
               <div
