@@ -171,7 +171,7 @@ export async function POST(request: Request) {
   }
 
   const idempotencyPayload = JSON.stringify({
-    checkoutVersion: "catalog-v1",
+    checkoutVersion: "catalog-v2-taxes",
     clientIp,
     fulfillmentType: body.fulfillmentType,
     items: body.items
@@ -200,9 +200,14 @@ export async function POST(request: Request) {
           location_id: locationId,
           line_items: lineItems,
           ...(serviceCharges.length > 0 ? { service_charges: serviceCharges } : {}),
+          pricing_options: {
+            auto_apply_discounts: false,
+            auto_apply_taxes: true,
+          },
         },
         checkout_options: {
           ask_for_shipping_address: body.fulfillmentType === "shipping",
+          enable_coupon: false,
           redirect_url: `${siteUrl}/checkout/sucesso`,
           accepted_payment_methods: {
             apple_pay: true,
