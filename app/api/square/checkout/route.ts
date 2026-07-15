@@ -185,7 +185,7 @@ export async function POST(request: Request) {
 
   if (body.fulfillmentType === "shipping" && !freeShipping) {
     serviceCharges.push({
-      name: "Frete USPS â€” envio com rastreamento",
+      name: "Envio",
       amount_money: { amount: SHIPPING_CENTS, currency: "USD" },
       calculation_phase: "TOTAL_PHASE",
       taxable: false,
@@ -240,7 +240,7 @@ export async function POST(request: Request) {
             afterpay_clearpay: false,
           },
         },
-        payment_note: `Virtuosa USA â€” ${body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"}${activeCoupon ? ` â€” Cupom ${activeCoupon.code}` : ""}`,
+        payment_note: `Virtuosa USA - ${body.fulfillmentType === "shipping" ? "Envio" : "Retirada local"}${activeCoupon ? ` - Cupom ${activeCoupon.code}` : ""}`,
       }),
       cache: "no-store",
     });

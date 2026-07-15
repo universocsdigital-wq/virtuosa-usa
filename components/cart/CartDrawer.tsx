@@ -161,7 +161,7 @@ export function CartDrawer() {
                 <span>{formatPrice(totalPrice)}</span>
               </div>
               <div className="mb-3 flex items-center justify-between font-sans text-[12px] text-[#6F5547]">
-                <span>{fulfillmentType === "shipping" ? "Frete USPS" : "Retirada local"}</span>
+                <span>{fulfillmentType === "shipping" ? "Envio" : "Retirada local"}</span>
                 <span>{shippingPrice ? formatPrice(shippingPrice) : "Grátis"}</span>
               </div>
               {discountAmount > 0 && (
