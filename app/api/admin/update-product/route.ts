@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { productId, name, description, price, category, isLaunch, color: requestedColor } = body;
+    const { productId, slug, name, description, price, category, isLaunch, color: requestedColor } = body;
     let color = requestedColor;
 
     if (!productId) {
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: JSON.stringify(err) }, { status: 400 });
     }
 
-    revalidateStorefront();
+    revalidateStorefront(typeof slug === "string" ? slug : undefined);
     return NextResponse.json({ ok: true, message: "Produto atualizado com sucesso." });
   } catch (err) {
     console.error("[admin/update-product]", err);

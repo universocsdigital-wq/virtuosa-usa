@@ -502,6 +502,7 @@ export default function AdminDashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: squareId,
+          slug: selectedProduct.slug,
           name: editName,
           description: editDescription || undefined,
           price: parsedPrice,
