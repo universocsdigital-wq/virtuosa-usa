@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { normalizeCouponCode, validateCoupon } from "@/lib/coupons";
 import { useCart } from "@/components/cart/CartProvider";
 
 export function CartDrawer() {
@@ -10,7 +11,29 @@ export function CartDrawer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fulfillmentType, setFulfillmentType] = useState<"shipping" | "pickup">("shipping");
-  const shippingPrice = fulfillmentType === "shipping" ? 12 : 0;
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCouponCode, setAppliedCouponCode] = useState("");
+  const subtotalCents = Math.round(totalPrice * 100);
+  const couponValidation = appliedCouponCode
+    ? validateCoupon(appliedCouponCode, subtotalCents, fulfillmentType)
+    : null;
+  const activeCoupon = couponValidation?.valid ? couponValidation.coupon : undefined;
+  const shippingPrice = fulfillmentType === "shipping" && activeCoupon?.kind !== "free_shipping" ? 12 : 0;
+  const discountAmount = activeCoupon?.kind === "fixed_amount" ? activeCoupon.amountCents / 100 : 0;
+  const orderTotal = Math.max(0, totalPrice - discountAmount + shippingPrice);
+
+  function applyCoupon() {
+    const normalizedCode = normalizeCouponCode(couponCode);
+    const validation = validateCoupon(normalizedCode, subtotalCents, fulfillmentType);
+    if (!validation.valid) {
+      setAppliedCouponCode("");
+      setError(validation.error || "Cupom invalido.");
+      return;
+    }
+    setCouponCode(normalizedCode);
+    setAppliedCouponCode(normalizedCode);
+    setError("");
+  }
 
   async function checkout() {
     setLoading(true);
@@ -21,6 +44,7 @@ export function CartDrawer() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fulfillmentType,
+          couponCode: activeCoupon?.code,
           items: items.map((item) => ({
             productId: item.product.id,
             quantity: item.quantity,
@@ -112,6 +136,26 @@ export function CartDrawer() {
                 </div>
               </fieldset>
 
+              <div className="mb-3">
+                <label htmlFor="coupon-code" className="mb-2 block font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Cupom</label>
+                <div className="flex gap-2">
+                  <input
+                    id="coupon-code"
+                    value={couponCode}
+                    onChange={(event) => {
+                      setCouponCode(event.target.value);
+                      setAppliedCouponCode("");
+                    }}
+                    placeholder="Digite o codigo"
+                    className="min-h-[42px] min-w-0 flex-1 border border-[#D9C8B5] bg-white/70 px-3 font-sans text-[12px] uppercase text-[#2A1712] outline-none focus:border-[#8A5A36]"
+                  />
+                  <button type="button" onClick={applyCoupon} className="min-h-[42px] border border-[#8A5A36] px-4 font-sans text-[10px] font-bold uppercase tracking-[0.12em] text-[#8A5A36]">
+                    Aplicar
+                  </button>
+                </div>
+                {activeCoupon && <p className="mt-2 font-sans text-[11px] text-green-700">Cupom aplicado: {activeCoupon.label}.</p>}
+              </div>
+
               <div className="mb-2 flex items-center justify-between font-sans text-[12px] text-[#6F5547]">
                 <span>Subtotal</span>
                 <span>{formatPrice(totalPrice)}</span>
@@ -120,9 +164,15 @@ export function CartDrawer() {
                 <span>{fulfillmentType === "shipping" ? "Frete USPS" : "Retirada local"}</span>
                 <span>{shippingPrice ? formatPrice(shippingPrice) : "Grátis"}</span>
               </div>
+              {discountAmount > 0 && (
+                <div className="mb-3 flex items-center justify-between font-sans text-[12px] font-semibold text-green-700">
+                  <span>Desconto {activeCoupon?.code}</span>
+                  <span>-{formatPrice(discountAmount)}</span>
+                </div>
+              )}
               <div className="mb-3 flex items-end justify-between border-t border-[#D9C8B5] pt-3">
                 <span className="font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-[#4F3527]">Total</span>
-                <span className="font-serif text-2xl text-[#2A1712]">{formatPrice(totalPrice + shippingPrice)}</span>
+                <span className="font-serif text-2xl text-[#2A1712]">{formatPrice(orderTotal)}</span>
               </div>
               <p className="mb-3 font-sans text-[10px] leading-relaxed text-[#6F5547]">
                 O checkout abre em uma página segura da Square. Depois do pagamento, você retorna para a Virtuosa.

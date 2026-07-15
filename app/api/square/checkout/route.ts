@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { durableRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getSquareProducts, getSquareVariationId } from "@/lib/square";
+import { normalizeCouponCode, validateCoupon } from "@/lib/coupons";
 
 const SHIPPING_CENTS = 1200;
 
@@ -15,6 +16,7 @@ interface CheckoutItemInput {
 interface CheckoutRequest {
   items?: CheckoutItemInput[];
   fulfillmentType?: "shipping" | "pickup";
+  couponCode?: string;
 }
 
 export async function POST(request: Request) {
@@ -94,6 +96,7 @@ export async function POST(request: Request) {
     calculation_phase: "TOTAL_PHASE";
     taxable: boolean;
   }> = [];
+  let subtotalCents = 0;
   for (const item of body.items) {
     const product = allProducts.find(
       (candidate) => candidate.id === item.productId || candidate.sourceProductId === item.productId
@@ -159,9 +162,28 @@ export async function POST(request: Request) {
       catalog_object_id: variationId,
       note: variation || undefined,
     });
+    subtotalCents += Math.round(product.price * 100) * quantity;
   }
 
-  if (body.fulfillmentType === "shipping") {
+  const normalizedCoupon = normalizeCouponCode(body.couponCode ?? "");
+  const couponValidation = normalizedCoupon
+    ? validateCoupon(normalizedCoupon, subtotalCents, body.fulfillmentType)
+    : null;
+  if (couponValidation && !couponValidation.valid) {
+    return NextResponse.json({ error: couponValidation.error || "Cupom invalido." }, { status: 400 });
+  }
+  const activeCoupon = couponValidation?.coupon;
+  const freeShipping = activeCoupon?.kind === "free_shipping";
+  const discounts = activeCoupon?.kind === "fixed_amount"
+    ? [{
+        uid: "coupon-discount",
+        name: `Cupom ${activeCoupon.code}`,
+        amount_money: { amount: activeCoupon.amountCents, currency: "USD" as const },
+        scope: "ORDER" as const,
+      }]
+    : [];
+
+  if (body.fulfillmentType === "shipping" && !freeShipping) {
     serviceCharges.push({
       name: "Frete USPS â€” envio com rastreamento",
       amount_money: { amount: SHIPPING_CENTS, currency: "USD" },
@@ -171,9 +193,10 @@ export async function POST(request: Request) {
   }
 
   const idempotencyPayload = JSON.stringify({
-    checkoutVersion: "catalog-v2-taxes",
+    checkoutVersion: "catalog-v3-coupons",
     clientIp,
     fulfillmentType: body.fulfillmentType,
+    couponCode: activeCoupon?.code ?? "",
     items: body.items
       .map(({ productId, quantity, size, color }) => ({ productId, quantity, size: size ?? "", color: color ?? "" }))
       .sort((a, b) => `${a.productId}:${a.size}:${a.color}`.localeCompare(`${b.productId}:${b.size}:${b.color}`)),
@@ -200,6 +223,7 @@ export async function POST(request: Request) {
           location_id: locationId,
           line_items: lineItems,
           ...(serviceCharges.length > 0 ? { service_charges: serviceCharges } : {}),
+          ...(discounts.length > 0 ? { discounts } : {}),
           pricing_options: {
             auto_apply_discounts: false,
             auto_apply_taxes: true,
@@ -216,7 +240,7 @@ export async function POST(request: Request) {
             afterpay_clearpay: false,
           },
         },
-        payment_note: `Virtuosa USA â€” ${body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"}`,
+        payment_note: `Virtuosa USA â€” ${body.fulfillmentType === "shipping" ? "Envio USPS" : "Retirada local"}${activeCoupon ? ` â€” Cupom ${activeCoupon.code}` : ""}`,
       }),
       cache: "no-store",
     });
