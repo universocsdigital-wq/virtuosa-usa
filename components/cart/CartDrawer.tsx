@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { ArrowRight, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { normalizeCouponCode, validateCoupon } from "@/lib/coupons";
 import { useCart } from "@/components/cart/CartProvider";
@@ -181,8 +181,9 @@ export function CartDrawer() {
               <button type="button" onClick={checkout} disabled={loading} className="flex min-h-[48px] w-full items-center justify-center bg-[#8A5A36] px-6 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_8px_20px_rgba(42,23,18,0.16)] transition-colors hover:bg-[#6F452C] disabled:cursor-wait disabled:opacity-60">
                 {loading ? "Preparando checkout..." : "Finalizar compra \u2192"}
               </button>
-              <button type="button" onClick={closeCart} className="mt-3 flex min-h-[42px] w-full items-center justify-center border border-[#D9C8B5] bg-white/45 px-6 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-[#4F3527] transition-colors hover:border-[#B88A62] hover:bg-white/70">
-                Continuar vendo peças \u2192
+              <button type="button" onClick={closeCart} className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 border border-[#D9C8B5] bg-white/60 px-5 font-sans text-[10px] font-bold uppercase tracking-[0.12em] text-[#4F3527] transition-colors hover:border-[#B88A62] hover:bg-white">
+                <span>Continuar comprando</span>
+                <ArrowRight size={14} strokeWidth={1.7} aria-hidden="true" />
               </button>
             </footer>
           </>
