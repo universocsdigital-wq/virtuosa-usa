@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   try {
-    const products = await getSquareProducts();
+    const products = await getSquareProducts({ includeLive: true });
     // Retorna apenas os campos necessarios para o painel
     const simplified = products.map((p) => {
       // squareId é o ID real do Square (sem sufixo de cor e sem prefixo manual-)

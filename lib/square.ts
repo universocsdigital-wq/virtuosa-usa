@@ -289,6 +289,8 @@ function getCategory(name: string, squareCategoryName?: string): ProductCategory
     macacoes: "macacao",
     calca: "calcas",
     calcas: "calcas",
+    live: "live",
+    "ao vivo": "live",
   };
   if (squareCategoryMap[squareCategory]) return squareCategoryMap[squareCategory];
 
@@ -473,7 +475,7 @@ function getImageUrlsFromIds(
   return urls;
 }
 
-export async function getSquareProducts(): Promise<Product[]> {
+export async function getSquareProducts(options: { includeLive?: boolean } = {}): Promise<Product[]> {
   const token = getSquareToken();
   if (!token) return staticProducts;
 
@@ -619,7 +621,12 @@ export async function getSquareProducts(): Promise<Product[]> {
     } satisfies Product);
   });
 
-  const displayProducts = expandProductColorCards(products);
+  // Produtos na categoria Live ficam reservados no Square e no dashboard
+  // ate a categoria ser alterada para uma categoria publica.
+  const storefrontProducts = options.includeLive
+    ? products
+    : products.filter((product) => product.category !== "live");
+  const displayProducts = expandProductColorCards(storefrontProducts);
 
   const categoryOrder: ProductCategory[] = [
     "vestidos",
@@ -630,6 +637,7 @@ export async function getSquareProducts(): Promise<Product[]> {
     "casacos",
     "macacao",
     "calcas",
+    "live",
   ];
   return displayProducts.sort(
     (a, b) => categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category)

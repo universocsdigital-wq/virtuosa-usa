@@ -29,7 +29,8 @@ export type ProductCategory =
   | "camisas"
   | "casacos"
   | "macacao"
-  | "calcas";
+  | "calcas"
+  | "live";
 
 export interface Review {
   id: string;
