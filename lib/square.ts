@@ -274,6 +274,37 @@ function expandProductColorCards(products: Product[]): Product[] {
   });
 }
 
+function disambiguateProductSlugs(products: Product[]): Product[] {
+  const slugCounts = products.reduce<Map<string, number>>((counts, product) => {
+    counts.set(product.slug, (counts.get(product.slug) ?? 0) + 1);
+    return counts;
+  }, new Map());
+  const reservedSlugs = new Set(
+    products.filter((product) => slugCounts.get(product.slug) === 1).map((product) => product.slug)
+  );
+  const assignedSlugs = new Set<string>();
+
+  return products.map((product) => {
+    if (slugCounts.get(product.slug) === 1) return product;
+
+    const colorSuffix = product.colors?.length === 1 ? colorToSlug(product.colors[0]) : "";
+    const idSuffix = toSlug(product.sourceProductId ?? product.id).slice(-8) || "item";
+    let uniqueSlug = `${product.slug}-${colorSuffix || idSuffix}`;
+
+    if (reservedSlugs.has(uniqueSlug) || assignedSlugs.has(uniqueSlug)) {
+      uniqueSlug = `${product.slug}-${colorSuffix ? `${colorSuffix}-` : ""}${idSuffix}`;
+    }
+    let collisionIndex = 2;
+    while (reservedSlugs.has(uniqueSlug) || assignedSlugs.has(uniqueSlug)) {
+      uniqueSlug = `${product.slug}-${colorSuffix || idSuffix}-${collisionIndex}`;
+      collisionIndex += 1;
+    }
+
+    assignedSlugs.add(uniqueSlug);
+    return { ...product, slug: uniqueSlug };
+  });
+}
+
 function getCategory(name: string, squareCategoryName?: string): ProductCategory {
   const squareCategory = normalizeProductName(squareCategoryName || "");
   const squareCategoryMap: Record<string, ProductCategory> = {
@@ -625,10 +656,10 @@ export async function getSquareProducts(options: { includeLive?: boolean } = {})
 
   // Produtos na categoria Live ficam reservados no Square e no dashboard
   // ate a categoria ser alterada para uma categoria publica.
-  const storefrontProducts = options.includeLive
-    ? products
-    : products.filter((product) => product.category !== "live");
-  const displayProducts = expandProductColorCards(storefrontProducts);
+  const productsWithUniqueSlugs = disambiguateProductSlugs(expandProductColorCards(products));
+  const displayProducts = options.includeLive
+    ? productsWithUniqueSlugs
+    : productsWithUniqueSlugs.filter((product) => product.category !== "live");
 
   const categoryOrder: ProductCategory[] = [
     "vestidos",
