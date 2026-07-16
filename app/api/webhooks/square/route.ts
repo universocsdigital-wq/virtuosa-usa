@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { ensureSupabaseUser, upsertSupabaseOrder } from "@/lib/supabase.server";
+import { revalidateStorefront } from "@/lib/store-cache";
 
 export const runtime = "nodejs";
 
@@ -81,6 +82,7 @@ export async function POST(request: Request) {
           updated_at: new Date().toISOString(),
         });
       }
+      revalidateStorefront();
     }
 
     if (

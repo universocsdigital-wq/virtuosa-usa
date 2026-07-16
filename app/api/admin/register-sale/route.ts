@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { productId, size, color, quantity, paymentMethod } = await request.json();
+    const { productId, slug, size, color, quantity, paymentMethod } = await request.json();
     const numericQuantity = Number(quantity);
 
     if (!productId || !Number.isInteger(numericQuantity) || numericQuantity < 1) {
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
     console.log(`[admin] Venda registrada: produto=${productId} tamanho=${size} qtd=${quantity} pagamento=${paymentMethod}`);
 
-    revalidateStorefront();
+    revalidateStorefront(typeof slug === "string" ? slug : undefined);
     return NextResponse.json({
       ok: true,
       message: `Venda registrada. Estoque atualizado no Square.`,

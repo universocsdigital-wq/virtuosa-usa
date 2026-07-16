@@ -659,7 +659,7 @@ export async function getSquareProducts(options: { includeLive?: boolean } = {})
   const productsWithUniqueSlugs = disambiguateProductSlugs(expandProductColorCards(products));
   const displayProducts = options.includeLive
     ? productsWithUniqueSlugs
-    : productsWithUniqueSlugs.filter((product) => product.category !== "live");
+    : productsWithUniqueSlugs.filter((product) => product.category !== "live" && product.inStock);
 
   const categoryOrder: ProductCategory[] = [
     "vestidos",

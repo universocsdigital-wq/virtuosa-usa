@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     // adjustments: Array<{ variationId: string; quantity: number; action: "add" | "set" }>
     // action "add" = adiciona ao estoque atual, "set" = define quantidade absoluta
-    const { productId, size, color, quantity, action } = body;
+    const { productId, slug, size, color, quantity, action } = body;
     const effectiveSize = typeof size === "string" && size.trim() ? size.trim().toUpperCase() : "U";
 
     if (!productId || quantity === undefined) {
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: JSON.stringify(err) }, { status: 400 });
     }
 
-    revalidateStorefront();
+    revalidateStorefront(typeof slug === "string" ? slug : undefined);
     return NextResponse.json({
       ok: true,
       message: action === "set"

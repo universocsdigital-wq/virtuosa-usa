@@ -442,7 +442,7 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/admin/register-sale", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, size: selectedSize, color: selectedColor, quantity, paymentMethod }),
+        body: JSON.stringify({ productId, slug: selectedProduct.slug, size: selectedSize, color: selectedColor, quantity, paymentMethod }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -584,7 +584,7 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/admin/adjust-stock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: squareId, size: stockSize, color: selectedColor, quantity: stockQty, action: "set" }),
+        body: JSON.stringify({ productId: squareId, slug: selectedProduct.slug, size: stockSize, color: selectedColor, quantity: stockQty, action: "set" }),
       });
       const data = await res.json();
       if (res.ok) {
