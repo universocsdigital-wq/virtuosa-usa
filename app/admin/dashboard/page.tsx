@@ -254,9 +254,9 @@ export default function AdminDashboardPage() {
     }
     setSelectedProduct(product);
     const sizes = sortSizes(product.sizes ?? []);
-    const initialSize = sizes[0] ?? "";
+    const initialSize = sizes[0] ?? "U";
     setStockSize(initialSize);
-    setStockQty(initialSize ? getStockForSize(product, initialSize) : 0);
+    setStockQty(getStockForSize(product, initialSize));
     setStockSuccess("");
     setStockError("");
     setActiveModal("stock");

@@ -56,6 +56,10 @@ function getVariationSize(name: string): string | null {
   return sizeMatch ? sizeMatch[1].toUpperCase() : null;
 }
 
+function getInventorySize(name: string): string {
+  return getVariationSize(name) ?? "U";
+}
+
 function getVariationColor(name: string): string | null {
   const color = cleanVariationLabel(name.replace(SIZE_PATTERN, ""));
   return color || null;
@@ -534,7 +538,7 @@ export async function getSquareProducts(options: { includeLive?: boolean } = {})
           .map((v) => {
             const vname = v.item_variation_data?.name || "";
             // Extrair tamanho do nome da variação (ex: "Branca P" → "P", "Caramelo M" → "M")
-            return getVariationSize(vname);
+            return getInventorySize(vname);
           })
           .filter(Boolean) as string[]
       )
@@ -556,16 +560,14 @@ export async function getSquareProducts(options: { includeLive?: boolean } = {})
     // Preço da primeira variação
     const inventoryBySize = variations.reduce<Record<string, number>>((acc, variation) => {
       const vname = variation.item_variation_data?.name || "";
-      const size = getVariationSize(vname);
-      if (!size) return acc;
+      const size = getInventorySize(vname);
       acc[size] = (acc[size] || 0) + (inventoryMap.get(variation.id) || 0);
       return acc;
     }, {});
 
     const inventoryByColorSize = variations.reduce<Record<string, Record<string, number>>>((acc, variation) => {
       const vname = variation.item_variation_data?.name || "";
-      const size = getVariationSize(vname);
-      if (!size) return acc;
+      const size = getInventorySize(vname);
 
       const color = getVariationColor(vname);
 
@@ -676,7 +678,7 @@ export async function getSquareVariationId(
     const sizeUpper = size.trim().toUpperCase();
     const normalizedColor = color ? normalizeProductName(color) : "";
     const sizeMatches = variations.filter((variation) =>
-      getVariationSize(variation.item_variation_data?.name || "") === sizeUpper
+      getInventorySize(variation.item_variation_data?.name || "") === sizeUpper
     );
     const exactMatches = normalizedColor
       ? sizeMatches.filter((variation) =>
@@ -687,7 +689,7 @@ export async function getSquareVariationId(
     // Nunca escolhe uma variacao ambigua: tamanho e cor precisam apontar para um unico ID.
     if (exactMatches.length === 1) return exactMatches[0].id;
     if (!normalizedColor && sizeMatches.length === 1) return sizeMatches[0].id;
-    if (variations.length === 1 && (sizeUpper === "U" || getVariationSize(variations[0].item_variation_data?.name || "") === sizeUpper)) {
+    if (variations.length === 1 && getInventorySize(variations[0].item_variation_data?.name || "") === sizeUpper) {
       return variations[0].id;
     }
     return null;

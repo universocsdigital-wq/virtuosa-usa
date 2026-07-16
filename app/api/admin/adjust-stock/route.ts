@@ -35,10 +35,11 @@ export async function POST(req: NextRequest) {
     // adjustments: Array<{ variationId: string; quantity: number; action: "add" | "set" }>
     // action "add" = adiciona ao estoque atual, "set" = define quantidade absoluta
     const { productId, size, color, quantity, action } = body;
+    const effectiveSize = typeof size === "string" && size.trim() ? size.trim().toUpperCase() : "U";
 
-    if (!productId || !size || quantity === undefined) {
+    if (!productId || quantity === undefined) {
       return NextResponse.json(
-        { error: "productId, size e quantity sao obrigatorios." },
+        { error: "productId e quantity sao obrigatorios." },
         { status: 400 }
       );
     }
@@ -51,10 +52,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const variationId = await getSquareVariationId(productId, size, color);
+    const variationId = await getSquareVariationId(productId, effectiveSize, color);
     if (!variationId) {
       return NextResponse.json(
-        { error: `Variacao "${[color, size].filter(Boolean).join(" ")}" nao encontrada para este produto.` },
+        { error: `Variacao "${[color, effectiveSize].filter(Boolean).join(" ")}" nao encontrada para este produto.` },
         { status: 404 }
       );
     }
@@ -113,8 +114,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       message: action === "set"
-        ? `Estoque definido para ${quantity} unidade(s) no tamanho ${size}.`
-        : `${quantity} unidade(s) adicionada(s) ao estoque no tamanho ${size}.`,
+        ? `Estoque definido para ${quantity} unidade(s) no tamanho ${effectiveSize}.`
+        : `${quantity} unidade(s) adicionada(s) ao estoque no tamanho ${effectiveSize}.`,
     });
   } catch (err) {
     console.error("[admin/adjust-stock]", err);
