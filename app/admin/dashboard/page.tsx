@@ -160,6 +160,10 @@ export default function AdminDashboardPage() {
   const [stockLoading, setStockLoading] = useState(false);
   const [stockSuccess, setStockSuccess] = useState("");
   const [stockError, setStockError] = useState("");
+  const [addSizeOpen, setAddSizeOpen] = useState(false);
+  const [newStockSize, setNewStockSize] = useState("");
+  const [newStockQty, setNewStockQty] = useState(1);
+  const [addSizeLoading, setAddSizeLoading] = useState(false);
 
   // Modal de cadastro
   const [createName, setCreateName] = useState("");
@@ -259,6 +263,10 @@ export default function AdminDashboardPage() {
     setStockQty(getStockForSize(product, initialSize));
     setStockSuccess("");
     setStockError("");
+    setAddSizeOpen(false);
+    setNewStockSize(SIZE_OPTIONS.find((size) => !sizes.includes(size)) ?? "");
+    setNewStockQty(1);
+    setAddSizeLoading(false);
     setActiveModal("stock");
   }
 
@@ -611,6 +619,57 @@ export default function AdminDashboardPage() {
       setStockError("Erro de conexao. Tente novamente.");
     } finally {
       setStockLoading(false);
+    }
+  }
+
+  async function handleAddStockSize() {
+    if (!selectedProduct?.squareId || !newStockSize) return;
+    setAddSizeLoading(true);
+    setStockError("");
+    setStockSuccess("");
+    try {
+      const squareId = selectedProduct.squareId;
+      const displayProductId = selectedProduct.id;
+      const selectedColor = selectedProduct.colors?.length === 1 ? selectedProduct.colors[0] : undefined;
+      const response = await fetch("/api/admin/add-size", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: squareId,
+          slug: selectedProduct.slug,
+          size: newStockSize,
+          color: selectedColor,
+          quantity: newStockQty,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setStockError(data.error || "Nao foi possivel adicionar o tamanho.");
+        return;
+      }
+
+      const applyAddedSize = (product: ProductItem): ProductItem => {
+        if (product.id !== displayProductId) return product;
+        const sizes = sortSizes(Array.from(new Set([...(product.sizes ?? []), newStockSize])));
+        const inventoryBySize = { ...product.inventoryBySize, [newStockSize]: newStockQty };
+        return {
+          ...product,
+          sizes,
+          inventoryBySize,
+          inStock: Object.values(inventoryBySize).some((stock) => stock > 0),
+        };
+      };
+
+      setProducts((current) => current.map(applyAddedSize));
+      setSelectedProduct((current) => (current ? applyAddedSize(current) : current));
+      setStockSize(newStockSize);
+      setStockQty(newStockQty);
+      setAddSizeOpen(false);
+      setStockSuccess(data.message || `Tamanho ${newStockSize} adicionado com sucesso.`);
+    } catch {
+      setStockError("Erro de conexao ao adicionar o tamanho.");
+    } finally {
+      setAddSizeLoading(false);
     }
   }
 
@@ -1252,6 +1311,48 @@ export default function AdminDashboardPage() {
                   })}
                 </div>
               </>
+            )}
+
+            {!stockSuccess && (
+              <div style={{ marginTop: 14 }}>
+                <button
+                  type="button"
+                  style={{ ...s.cancelBtn, marginTop: 0, borderStyle: "dashed", color: "#8B6914" }}
+                  onClick={() => setAddSizeOpen((current) => !current)}
+                  disabled={SIZE_OPTIONS.every((size) => selectedProduct.sizes?.includes(size))}
+                >
+                  {SIZE_OPTIONS.every((size) => selectedProduct.sizes?.includes(size))
+                    ? "Todos os tamanhos cadastrados"
+                    : addSizeOpen ? "Fechar novo tamanho" : "+ Adicionar tamanho"}
+                </button>
+
+                {addSizeOpen && (
+                  <div style={{ marginTop: 10, padding: 12, border: "1px solid #E1D3BF", borderRadius: 8, background: "#FBF7F0" }}>
+                    <label style={{ ...s.label, marginTop: 0 }}>Novo tamanho</label>
+                    <select style={s.select} value={newStockSize} onChange={(event) => setNewStockSize(event.target.value)}>
+                      {SIZE_OPTIONS.filter((size) => !selectedProduct.sizes?.includes(size)).map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+
+                    <label style={s.label}>Quantidade inicial</label>
+                    <div style={s.qtyRow}>
+                      <button type="button" style={s.qtyBtn} onClick={() => setNewStockQty((quantity) => Math.max(0, quantity - 1))}>-</button>
+                      <span style={s.qtyVal}>{newStockQty}</span>
+                      <button type="button" style={s.qtyBtn} onClick={() => setNewStockQty((quantity) => quantity + 1)}>+</button>
+                    </div>
+
+                    <button
+                      type="button"
+                      style={{ ...s.confirmBtn, marginTop: 12, opacity: addSizeLoading ? 0.7 : 1 }}
+                      onClick={handleAddStockSize}
+                      disabled={addSizeLoading || !newStockSize}
+                    >
+                      {addSizeLoading ? "Criando tamanho..." : "Criar tamanho no Square"}
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             <label style={s.label}>Quantidade final em estoque</label>
