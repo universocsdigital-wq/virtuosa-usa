@@ -1317,13 +1317,28 @@ export default function AdminDashboardPage() {
               <div style={{ marginTop: 14 }}>
                 <button
                   type="button"
-                  style={{ ...s.cancelBtn, marginTop: 0, borderStyle: "dashed", color: "#8B6914" }}
+                  style={{
+                    ...s.addSizeBtn,
+                    width: "100%",
+                    minHeight: 44,
+                    marginTop: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    fontWeight: 600,
+                  }}
                   onClick={() => setAddSizeOpen((current) => !current)}
                   disabled={SIZE_OPTIONS.every((size) => selectedProduct.sizes?.includes(size))}
                 >
                   {SIZE_OPTIONS.every((size) => selectedProduct.sizes?.includes(size))
                     ? "Todos os tamanhos cadastrados"
-                    : addSizeOpen ? "Fechar novo tamanho" : "+ Adicionar tamanho"}
+                    : addSizeOpen ? "Fechar inclusão de tamanho" : (
+                      <>
+                        <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>+</span>
+                        <span>Adicionar novo tamanho</span>
+                      </>
+                    )}
                 </button>
 
                 {addSizeOpen && (
