@@ -237,7 +237,7 @@ export async function POST(request: Request) {
             apple_pay: true,
             google_pay: true,
             cash_app_pay: true,
-            afterpay_clearpay: false,
+            afterpay_clearpay: true,
           },
         },
         payment_note: `Virtuosa USA - ${body.fulfillmentType === "shipping" ? "Envio" : "Retirada local"}${activeCoupon ? ` - Cupom ${activeCoupon.code}` : ""}`,
