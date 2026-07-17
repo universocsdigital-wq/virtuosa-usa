@@ -4,7 +4,7 @@
 
 - Executar `supabase/migrations/002_api_rate_limits.sql` no SQL Editor do Supabase.
 - Confirmar na Vercel que `SUPABASE_SERVICE_ROLE_KEY`, `SQUARE_ACCESS_TOKEN` e `SQUARE_WEBHOOK_SIGNATURE_KEY` estão marcadas como confidenciais e somente em Produção/Preview quando necessário.
-- Confirmar que `SQUARE_WEBHOOK_NOTIFICATION_URL` usa `https://www.virtuosausa.com/api/webhooks/square` exatamente.
+- Confirmar que `SQUARE_WEBHOOK_NOTIFICATION_URL` usa `https://virtuosausa.com/api/webhooks/square` exatamente.
 
 ## Concluído no código
 

@@ -13,13 +13,14 @@ import { getSquareProducts } from "@/lib/square";
 import { getCollectionProducts, getHighestTicketProducts } from "@/lib/product-selection";
 import type { Product } from "@/types";
 import { reviews, aggregateRating } from "@/lib/data/reviews";
+import { SITE_URL } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: { absolute: "Virtuosa USA — Elegância com Propósito" },
   description:
     "Timeless pieces for women who value femininity, sophistication, and presence. Shop premium dresses, skirts, and sets crafted with artisanal care.",
   alternates: {
-    canonical: "https://virtuosausa.com",
+    canonical: SITE_URL,
   },
 };
 
@@ -28,7 +29,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "ClothingStore",
   name: "Virtuosa USA",
-  url: "https://virtuosausa.com",
+  url: SITE_URL,
   description:
     "Premium feminine boutique for women who value femininity, sophistication, and presence.",
   address: {

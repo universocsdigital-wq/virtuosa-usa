@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { ensureSupabaseUser, upsertSupabaseOrder } from "@/lib/supabase.server";
 import { revalidateStorefront } from "@/lib/store-cache";
+import { SQUARE_WEBHOOK_URL } from "@/lib/site-url";
 
 export const runtime = "nodejs";
 
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
 
   const rawBody = await request.text();
   const signature = request.headers.get("x-square-hmacsha256-signature") ?? "";
-  const notificationUrl = process.env.SQUARE_WEBHOOK_NOTIFICATION_URL ?? "https://www.virtuosausa.com/api/webhooks/square";
+  const notificationUrl = process.env.SQUARE_WEBHOOK_NOTIFICATION_URL ?? SQUARE_WEBHOOK_URL;
   if (!signature || !verifySignature(rawBody, signature, signatureKey, notificationUrl)) {
     return NextResponse.json({ error: "Assinatura inválida." }, { status: 401 });
   }

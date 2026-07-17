@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { getSiteUrl } from "@/lib/site-url";
 
 interface ProductItem {
   id: string;
@@ -745,7 +746,7 @@ export default function AdminDashboardPage() {
       return;
     }
 
-    const url = `${window.location.origin}/shop/${product.slug}`;
+    const url = getSiteUrl(`/shop/${product.slug}`);
     try {
       await navigator.clipboard.writeText(url);
       alert("Link da peça copiado para enviar na live.");

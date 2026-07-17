@@ -3,6 +3,7 @@ import { Playfair_Display, Montserrat } from "next/font/google";
 import "./globals.css";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { CartProvider } from "@/components/cart/CartProvider";
+import { SITE_URL } from "@/lib/site-url";
 
 // ─── FONTES ───────────────────────────────────────────────────────────
 const playfair = Playfair_Display({
@@ -24,7 +25,7 @@ const montserrat = Montserrat({
 
 // ─── SEO METADATA ─────────────────────────────────────────────────────
 export const metadata: Metadata = {
-  metadataBase: new URL("https://virtuosausa.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Virtuosa USA — Elegant Women's Boutique",
     template: "%s | Virtuosa USA",
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://virtuosausa.com",
+    url: SITE_URL,
     siteName: "Virtuosa USA",
     title: "Virtuosa USA — Elegance with Purpose",
     description:

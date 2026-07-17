@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { durableRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getSquareProducts, getSquareVariationId } from "@/lib/square";
 import { normalizeCouponCode, validateCoupon } from "@/lib/coupons";
+import { getSiteUrl } from "@/lib/site-url";
 
 const SHIPPING_CENTS = 1200;
 
@@ -204,11 +205,6 @@ export async function POST(request: Request) {
   });
   const idempotencyKey = createHash("sha256").update(idempotencyPayload).digest("hex");
   const squareBaseUrl = environment === "sandbox" ? "https://connect.squareupsandbox.com" : "https://connect.squareup.com";
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env["URL_SUPABASE"]?.replace("supabase", "virtuosausa") ||
-    "https://virtuosausa.com";
-
   try {
     const squareResponse = await fetch(`${squareBaseUrl}/v2/online-checkout/payment-links`, {
       method: "POST",
@@ -232,7 +228,7 @@ export async function POST(request: Request) {
         checkout_options: {
           ask_for_shipping_address: body.fulfillmentType === "shipping",
           enable_coupon: false,
-          redirect_url: `${siteUrl}/checkout/sucesso`,
+          redirect_url: getSiteUrl("/checkout/sucesso"),
           accepted_payment_methods: {
             apple_pay: true,
             google_pay: true,
