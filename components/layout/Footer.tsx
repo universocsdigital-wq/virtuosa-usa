@@ -66,7 +66,7 @@ export function Footer() {
       </footer>
 
       <Link
-        href="https://wa.me/17743513494"
+        href="https://api.whatsapp.com/send/?phone=17743513494&text&type=phone_number&app_absent=0"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chamar a Virtuosa no WhatsApp"

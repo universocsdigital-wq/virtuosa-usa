@@ -52,7 +52,7 @@ export default function ShippingAndReturnsPage() {
                 <h2>Como Solicitar uma Troca</h2>
                 <p>Para iniciar o processo, entre em contato com nossa equipe através do WhatsApp:</p>
                 <p>
-                  <Link href="https://wa.me/17743513494" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#4F2107] underline underline-offset-4">
+                  <Link href="https://api.whatsapp.com/send/?phone=17743513494&text&type=phone_number&app_absent=0" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#4F2107] underline underline-offset-4">
                     +1 (774) 351-3494
                   </Link>
                 </p>
