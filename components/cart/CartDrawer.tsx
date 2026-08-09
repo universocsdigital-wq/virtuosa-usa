@@ -19,7 +19,11 @@ export function CartDrawer() {
     : null;
   const activeCoupon = couponValidation?.valid ? couponValidation.coupon : undefined;
   const shippingPrice = fulfillmentType === "shipping" && activeCoupon?.kind !== "free_shipping" ? 12 : 0;
-  const discountAmount = activeCoupon?.kind === "fixed_amount" ? activeCoupon.amountCents / 100 : 0;
+  const discountAmount = activeCoupon?.kind === "fixed_amount"
+    ? activeCoupon.amountCents / 100
+    : activeCoupon?.kind === "percentage"
+      ? Math.round(totalPrice * (activeCoupon.percentage ?? 0)) / 100
+      : 0;
   const orderTotal = Math.max(0, totalPrice - discountAmount + shippingPrice);
 
   function applyCoupon() {

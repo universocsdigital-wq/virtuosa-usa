@@ -182,7 +182,15 @@ export async function POST(request: Request) {
         amount_money: { amount: activeCoupon.amountCents, currency: "USD" as const },
         scope: "ORDER" as const,
       }]
-    : [];
+    : activeCoupon?.kind === "percentage"
+      ? [{
+          uid: "coupon-discount",
+          name: `Cupom ${activeCoupon.code}`,
+          type: "FIXED_PERCENTAGE" as const,
+          percentage: String(activeCoupon.percentage ?? 0),
+          scope: "ORDER" as const,
+        }]
+      : [];
 
   if (body.fulfillmentType === "shipping" && !freeShipping) {
     serviceCharges.push({
