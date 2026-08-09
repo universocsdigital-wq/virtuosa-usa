@@ -26,26 +26,6 @@ const COUPONS: CouponDefinition[] = [
     validFrom: "2026-08-09T00:00:00-04:00",
     validUntil: "2026-09-08T23:59:59-04:00",
   },
-  {
-    code: "FRETEGRATIS",
-    kind: "free_shipping",
-    amountCents: 0,
-    label: "Frete gratis",
-    validFrom: "2026-07-15T00:00:00-04:00",
-    validUntil: "2026-07-15T23:59:59-04:00",
-  },
-  {
-    code: "VIRTUOSA20",
-    kind: "fixed_amount",
-    amountCents: 2000,
-    label: "US$ 20 de desconto",
-  },
-  {
-    code: "VIRTUOSA5",
-    kind: "fixed_amount",
-    amountCents: 500,
-    label: "US$ 5 de desconto",
-  },
 ];
 
 export function normalizeCouponCode(value: string): string {
